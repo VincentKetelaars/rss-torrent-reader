@@ -1,0 +1,1 @@
+Make sure that multiple http requests are done in parallel and that parsing is done right after
