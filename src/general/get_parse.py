@@ -14,7 +14,7 @@ class GetParse(Thread):
     '''
 
 
-    def __init__(self, input_, result_callback, error_callback=None):
+    def __init__(self, input_, result_callback=None, error_callback=None):
         Thread.__init__(self)
         self.setDaemon(True)
         self.input = input_
@@ -35,7 +35,8 @@ class GetParse(Thread):
             logger.exception("Could not use %s", self.input)
             self.error_callback(self.input)
         finally:
-            self.result_callback(result)
+            if self.result_callback is not None:
+                self.result_callback(result)
         
     def value(self):
         return self.result

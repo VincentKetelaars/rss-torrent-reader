@@ -18,7 +18,8 @@ class Channel(object):
         
 class Item(object):
 
-    def __init__(self, title, description, category, author, link, guid, pubdate, enclosure, torrent):
+    def __init__(self, item, title, description, category, author, link, guid, pubdate, enclosure, torrent):
+        self.item = item
         self.title = title
         self.description = description
         self.category = category

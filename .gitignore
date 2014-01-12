@@ -37,3 +37,7 @@ nosetests.xml
 
 # log file
 log.log
+
+# conf
+conf/movies.csv
+conf/series.csv

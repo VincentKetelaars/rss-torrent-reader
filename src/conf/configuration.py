@@ -7,6 +7,7 @@ import ConfigParser
 
 from src.content.imdb_csv import IMDBCsv
 from src.logger import get_logger
+from src.constants.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV
 logger = get_logger(__name__)
 
 class Configuration(object):
@@ -30,6 +31,16 @@ class Configuration(object):
         for i in l:
             d[i[0]] = i[1]
         return d
+    
+    def get_imdb_paths(self):
+        m = DEFAULT_MOVIES_CSV
+        s = DEFAULT_SERIES_CSV
+        try:
+            m = self.config.get("imdb", "movies")
+            s = self.config.get("imdb", "series")
+        except:
+            pass
+        return (m, s)
     
     def _get_list(self, section, options, start=0):
         l = []

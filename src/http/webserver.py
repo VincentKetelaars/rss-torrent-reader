@@ -11,6 +11,7 @@ from threading import Thread, Event
 from src.logger import get_logger
 import os
 from src.conf.configuration import Configuration
+from src.constants.constants import CONF_FILE
 logger = get_logger(__name__)
 
 class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -75,7 +76,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class WebServer(Thread):
     '''
-    classdocs
+    Web server.
     '''
 
     def __init__(self, handler, host="127.0.0.1", port=8080):
@@ -98,7 +99,7 @@ class WebServer(Thread):
         self.stop_event.set()
         
 if __name__ == "__main__":
-    cfg = Configuration("conf/configuration.cfg")
+    cfg = Configuration(CONF_FILE)
     params = cfg.get_webgui_params()
     ws = WebServer(WebHandler, params.get("host"), int(params.get("port")))
     ws.start()
