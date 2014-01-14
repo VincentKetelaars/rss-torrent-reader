@@ -66,6 +66,9 @@ class Request(object):
         except:
             logger.exception("Can't retrieve request %s", self.url)
         finally:
-            response.close()
+            try:
+                response.close()
+            except:
+                pass
             
         return content

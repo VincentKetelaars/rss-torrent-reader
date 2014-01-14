@@ -4,14 +4,19 @@
 </head>
 <body>
 	<h2>Movies</h2>
-	<table name=movies-table>
-		<tr>
-			<td>Download</td>
-			<td>Movie</td>
-			<td>Year</td>
-			<td>Added</td>
-		</tr>
-
-	</table>
+	<form method="POST" action=/set>
+		<button type=submit id="save-button" name=do value=movie-save>Save</button>
+		<table id="movies-table">
+			<tr>
+				<td><input type=checkbox id="check-all">Download</td>
+				<td>Movie</td>
+				<td>Year</td>
+				<td>Added</td>
+			</tr>
+		</table>
+		<button type=submit id="save-button" name=do value=movie-save>Save</button>
+	</form>
 </body>
+<script src="js/jquery2.js"></script>
+<script src="js/functions.js"></script>
 </html>

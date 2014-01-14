@@ -20,7 +20,7 @@ class IMDBMovie(object):
     def __init__(self, line, id_, created, modified, desc, title, type_, directors, rate, 
                  rating, runtime, year, genres, votes, release, url, download=True, 
                  latest_season=0, latest_episode=0):
-        self.line = line
+        self.line = line.strip() # No new line characters here..
         self.id = id_
         self.created = created
         self.modified = modified

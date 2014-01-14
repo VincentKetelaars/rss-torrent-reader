@@ -8,6 +8,8 @@ Created on Oct 20, 2013
 GUI
 """
 TITLE_MAIN = "Torrent RSS Reader"
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 8080
 
 """
 CONFIGURATION

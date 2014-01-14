@@ -21,13 +21,17 @@ class WriteIMDBToCsv(Thread):
         self.series_file = series_file
         
     def run(self):
+        if len(self.movies) == 0: # Something has probably gone wrong.. Not overwriting this
+            return
         try:
             mf = open(self.movies_file, "w")
             sf = open(self.series_file, "w")
             
             i = 0
             j = 0
-            for m in self.movies:
+            
+            sorted_movies = sorted(self.movies, key=lambda x: x.modified, reverse=True)
+            for m in sorted_movies:
                 if m.is_movie():
                     mf.write(m.to_line() + NEWLINE)
                     i += 1

@@ -28,6 +28,8 @@ class MovieParser(GetParse):
         Each line has komma separated values, but genres can have komma's as well.
         Each value should be encapsulated by quotes.
         """
+        if content is None:
+            return None
         logger.info("MovieParser starts parsing")
         
         def to_int(arg):
@@ -55,9 +57,9 @@ class MovieParser(GetParse):
 
         lines = content.split("\n")
         movies = {}
-        for line in lines[1:]: # First is column names
+        for line in lines:
             args = line.split('"')[1::2] # Get only the first of every pair
-            if len(args) != 16:
+            if len(args) != 16 or args[0] == "position": # First line of watchlist
                 break
             try:
                 created = datetime.strptime(args[2], created_format)
