@@ -69,7 +69,7 @@ class IMDBMovie(object):
             r = "1" if self.download else "0"
         elif self.is_series():
             r = str(self.latest_season) + "-" + str(self.latest_episode)
-        line = re.sub('"\w*"', '"' + r + '"', self.line, count=1)
+        line = re.sub('"[\w-]*"', '"' + r + '"', self.line, count=1)
         return line
     
     def __eq__(self, other):

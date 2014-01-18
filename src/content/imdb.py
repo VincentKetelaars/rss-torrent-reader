@@ -39,6 +39,9 @@ class IMDB(object):
         return len(self.threads) == self.returned
     
     def movies(self):
+        """
+        Return list of movies
+        """
         return Set([m for s in self.results for m in s.itervalues()])
     
     def wait(self, timeout):

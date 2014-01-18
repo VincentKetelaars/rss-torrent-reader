@@ -42,7 +42,9 @@ class MergeIMDBCsv(Thread):
         
         self.imdb.wait(60) # If already done this will return directly
         
-        self.result = self.imdb.movies()
+        logger.debug("We have a total of %d films", len(self.imdb.movies()))
+        
+        self.result = list(self.imdb.movies())
         for m in self.result:
             if m.is_movie():
                 m.merge(movies.get(m.id))

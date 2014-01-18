@@ -29,8 +29,9 @@ class MovieParser(GetParse):
         Each value should be encapsulated by quotes.
         """
         if content is None:
+            logger.debug("Getting nothing")
             return None
-        logger.info("MovieParser starts parsing")
+        logger.info("MovieParser starts parsing content of length %d", len(content))
         
         def to_int(arg):
             try:
@@ -59,8 +60,8 @@ class MovieParser(GetParse):
         movies = {}
         for line in lines:
             args = line.split('"')[1::2] # Get only the first of every pair
-            if len(args) != 16 or args[0] == "position": # First line of watchlist
-                break
+            if len(args) < 16 or args[0] == "position": # First line of watchlist
+                continue
             try:
                 created = datetime.strptime(args[2], created_format)
                 modified = datetime.strptime(args[3], created_format)
@@ -96,6 +97,7 @@ class MovieParser(GetParse):
                 movies[args[1]] = m
             except:
                 logger.exception("Tried parsing %s", line)
+        logger.debug("Returning %d movies", len(movies))
         return movies
         
     def get(self, csv):

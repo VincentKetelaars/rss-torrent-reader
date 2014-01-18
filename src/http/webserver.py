@@ -15,6 +15,7 @@ from src.constants.constants import CONF_FILE, DEFAULT_PORT, DEFAULT_HOST,\
     NEWLINE
 from src.content.movie_parser import MovieParser
 import cgi
+import json
 logger = get_logger(__name__)
 
 class HTMLCreator(object):
@@ -54,9 +55,9 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     DIRECTORIES = "src/http/html"
     MAIN_PAGE = "/index.html"
+    MOVIES_SERIES_TEMPLATE_PAGE = "/films.html"
     MOVIES_PAGE = "/movies.html"
     SERIES_PAGE = "/series.html"
-    SET_URL = "/set"
     SAVE_MOVIES = "movie-save"
     SAVE_SERIES = "series-save"
     INVALID_RESPONSE = "This is not the page you are looking for"
@@ -90,10 +91,8 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.lock.release()
             
     def do_POST(self):
-        
-        if self.path != self.SET_URL:
-            self.send_error(404)
-        
+        # TODO: Check path as well?
+                
         ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
         form = {}
         if ctype == 'multipart/form-data':
@@ -105,7 +104,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         logger.debug(form)
         do = form.get("do", None)
         if do is None:
-            self.send_error(404)
+            return self.send_error(404)
         do = do[0]
             
         if do == self.SAVE_MOVIES:
@@ -114,6 +113,8 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.save_series(form)
         else:
             logger.debug("Don't know what to do with %s", do)
+        
+        self.wfile.write(json.dumps({"message" : "Values were saved!"}))
             
     def save_movies(self, form):
         for m in self.movies.itervalues():
@@ -125,8 +126,22 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         self.write_to_file(self.movies, self.movies_file)
         
-    def save_series(self, series):
-        pass
+    def save_series(self, form):
+        for ser in self.series.itervalues():
+            s = 0 
+            e = 0
+            try:
+                s = int(form.get(ser.id + "_season", [0])[0])
+            except:
+                pass
+            try:
+                e = int(form.get(ser.id + "_episode", [0])[0])
+            except:
+                pass
+            ser.latest_season = s
+            ser.latest_episode = e
+            
+        self.write_to_file(self.series, self.series_file)
         
     def write_to_file(self, movies, file_):
         self.lock.acquire()
@@ -162,15 +177,18 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             page = query.get("page", None)
             if page is not None:
                 path = "/" + page + ".html"
-        body, success = self.content_from_file(path)
+                
+        if path == self.MOVIES_PAGE:
+            body, success = self.content_from_file(self.MOVIES_SERIES_TEMPLATE_PAGE)
+            body = self.fill_movies(body)
+        elif path == self.SERIES_PAGE:
+            body, success = self.content_from_file(self.MOVIES_SERIES_TEMPLATE_PAGE)
+            body = self.fill_series(body)
+        else:
+            body, success = self.content_from_file(path)
         
         if not success:
-            self.redirect_to_main()
-            
-        if path == self.MOVIES_PAGE:
-            body = self.fill_movies(body)
-        if path == self.SERIES_PAGE:
-            body = self.fill_series(body)
+            self.redirect_to_main()            
             
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -179,8 +197,10 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(body)
     
     def fill_movies(self, body):
+        explanation = "The selected movies will be downloaded"
         c = HTMLCreator()
-        trs = ""
+        trs = c.tr(c.td(c.input({"type" : "checkbox", "id" : '"check-all"'}) + "Download") + 
+                   c.td("Movie") + c.td("Year"), c.td("Added"))
         movies = sorted(self.movies.values(), key=lambda x: x.modified, reverse=True)
         for m in movies:
             added = m.modified.strftime("%Y-%m-%d %H:%M:%S")
@@ -189,12 +209,29 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 input_attr["checked"] = None
             tr = c.tr(c.td(c.input(input_attr)) + c.td(m.title) + c.td(str(m.year if m.year != -1 else "????")) + c.td(added))
             trs += tr + NEWLINE
+        return self.fill_films(body, "Movies", "movie", explanation, trs)
+        
+    def fill_series(self, body):        
+        explanation = "Episodes will be downloaded if they are later than the episode indicated in on this sheet"
+        c = HTMLCreator()
+        trs = c.tr(c.td("Season") + c.td("Episode") + c.td("Series") + c.td("Year") + c.td("Added"))
+        series = sorted(self.series.values(), key=lambda x: x.modified, reverse=True)
+        for s in series:
+            added = s.modified.strftime("%Y-%m-%d %H:%M:%S")
+            season_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_season", "value" : str(s.latest_season)}
+            episode_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_episode", "value" : str(s.latest_episode)}
+            tr = c.tr(c.td(c.input(season_attr)) + c.td(c.input(episode_attr)) + c.td(s.title) + 
+                      c.td(str(s.year if s.year != -1 else "????")) + c.td(added))
+            trs += tr + NEWLINE
+        return self.fill_films(body, "Series", "series", explanation, trs)
+    
+    def fill_films(self, body, Films, film, explanation, trs):
+        body = body.replace("Films", Films)
+        body = body.replace("film", film)
+        index = body.find("</p>")
+        body = body[0:index] + explanation + body[index:]
         index = body.find("</table>")
         body = body[0:index] + trs + body[index:]
-        return body
-        
-    def fill_series(self, body):
-        
         return body
     
     def content_from_file(self, path):
