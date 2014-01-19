@@ -43,7 +43,7 @@ class TorrentRetriever(GetParse):
                     for a in Torrent.ATTRIBUTES:
                         try:
                             te = i.find("torrent:" + a, namespaces=self.NAMESPACES)
-                            t_dic[te.tag] = te.text
+                            t_dic[a] = te.text
                         except:
                             logger.exception("")
                     item = Item(i, t.text, d.text, cat.text, author.text, l.text, g.text, p.text, en_dic, Torrent(t_dic))

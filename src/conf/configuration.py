@@ -27,11 +27,7 @@ class Configuration(object):
         return [IMDBCsv(*l) for l in self._get_list("imdb", ["url", "user", "pass"], 0)]
     
     def get_webgui_params(self):
-        l = self.config.items("webgui")
-        d = {}
-        for i in l:
-            d[i[0]] = i[1]
-        return d
+        return self._get_all_options_as_dictionary("webgui")
     
     def get_imdb_paths(self):
         m = self._get_option("storage", "movies_file", DEFAULT_MOVIES_CSV)
@@ -45,13 +41,16 @@ class Configuration(object):
         height = int(self._get_option("match", "min_width", 0))
         return Preference(not_list, pref_list, width, height)
     
+    def get_handler(self, handler):
+        return self._get_all_options_as_dictionary("handler_" + handler.lower())
+    
     def _get_list(self, section, options, start=0):
         l = []
         i = start
         while True:
             t = []
             for o in options:
-                v = self._get_option(section, o +  str(i).strip('"'))
+                v = self._get_option(section, o +  str(i))
                 if v is not None:
                     t.append(v)
                 else:
@@ -62,9 +61,16 @@ class Configuration(object):
             i+=1
         return l
     
+    def _get_all_options_as_dictionary(self, section):
+        l = self.config.items(section)
+        d = {}
+        for i in l:
+            d[i[0]] = i[1]
+        return d
+    
     def _get_option(self, section, option, default=None):
         try:
-            return self.config.get(section, option)
-        except ConfigParser.NoSectionError, ConfigParser.NoOptionError:
-            logger.debug("We do not have this option %s in section", option, section)
+            return self.config.get(section, option).strip('"')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            logger.debug("We do not have this option %s in section %s", option, section)
         return default

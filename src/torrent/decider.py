@@ -64,7 +64,10 @@ class Decider(object):
         ttitle = torrent.title.lower()
         mtitle = movie.title.replace(".", " ").lower()
         
-        if ttitle.find(mtitle) >= 0:
+        if ttitle.find(mtitle) == 0: # It should start with it
+            return True
+        
+        if torrent.description.find(movie.url) >= 0:
             return True
         return False
     

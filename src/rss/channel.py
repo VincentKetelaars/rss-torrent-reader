@@ -33,6 +33,15 @@ class Item(object):
         self.enclosure = enclosure # dictionary 
         self.torrent = torrent # Torrent
         
+    def url(self):
+        return self.enclosure.get("url", None)
+    
+    def filename(self):
+        f = self.torrent.get("fileName")
+        if f is None:
+            f = self.title + ".torrent"
+        return f
+        
     def resolution(self):
         """
         Parse description for resolution and return (width, height)

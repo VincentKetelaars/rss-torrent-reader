@@ -16,6 +16,7 @@ from src.content.merge_imdb_csv import MergeIMDBCsv
 
 from src.logger import get_logger
 from src.torrent.decider import Decider
+from src.torrent.downloader import Downloader
 logger = get_logger(__name__)
 
 def main():
@@ -29,16 +30,17 @@ def main():
     merge.start()
     feed = FeedHandler(conf.get_torrent_rss_feeds())
     decider = Decider(merge, feed, conf.get_torrent_preference())
-    results = decider.decide() # blocking
-    
+    matches = decider.decide() # blocking
+    downloader = Downloader(matches, **conf.get_handler("downloader"))
+    downloader.start()
     # Write the updated values (ensure that downloaded torrents are assimilated as well)
     writer = WriteIMDBToCsv(merge.movies(), *conf.get_imdb_paths())
     writer.start()
     logger.info("We have %d IMDB movies", len(imdb.movies()))
     logger.info("We have %d torrents from %d channels", len(feed.torrents()), len(feed.channels()))
-    logger.info("We have %d matches", len(results))
-    for r in results:
-        logger.info("Torrent %s for movie %s", r[1], r[0])
+    logger.info("We have %d matches", len(matches))
+    for m in matches:
+        logger.info("Match %s with %s", m.movie.title, m.torrent.title)
 
 if __name__ == '__main__':
     main()

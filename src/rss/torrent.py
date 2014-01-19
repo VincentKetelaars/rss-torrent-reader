@@ -10,12 +10,6 @@ class Torrent(object):
     
     def __init__(self, dictionary):
         self.dict = dictionary
-        
-    def _get(self, key):
-        try:
-            return self.dict[key]
-        except:
-            None
             
     def get(self, key):
-        return self._get(key)        
+        return self.dict.get(key, None)        
