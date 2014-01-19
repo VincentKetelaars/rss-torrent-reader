@@ -3,7 +3,10 @@ Created on Oct 20, 2013
 
 @author: Vincent Ketelaars
 '''
+import re
 
+from src.logger import get_logger
+logger = get_logger(__name__)
 
 class Channel(object):
     
@@ -29,3 +32,24 @@ class Item(object):
         self.pubdate = pubdate
         self.enclosure = enclosure # dictionary 
         self.torrent = torrent # Torrent
+        
+    def resolution(self):
+        """
+        Parse description for resolution and return (width, height)
+        """
+        resolution = re.findall("\d{3,4}x\d{3,4}", self.description)
+        width = 0
+        height = 0
+        if len(resolution) > 0:
+            r = resolution[0] # Use only the first, even if there are more
+            ints = r.split("x")
+            width = int(ints[0])
+            height = int(ints[1])
+        else: # Not explicitly mentioned, so look for 720p or 1080p, ratio, bitrate, size?
+            if self.description.lower().find("720p") > 0 or self.description.lower().find("1080p") > 0:
+                pass # Find some way to deal with this, because we shouldn't trust these values outright
+                    
+        return (width, height)
+        
+    def __str__(self):
+        return self.title

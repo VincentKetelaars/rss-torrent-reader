@@ -44,7 +44,7 @@ class MergeIMDBCsv(Thread):
         
         logger.debug("We have a total of %d films", len(self.imdb.movies()))
         
-        self.result = list(self.imdb.movies())
+        self.result = self.imdb.movies()
         for m in self.result:
             if m.is_movie():
                 m.merge(movies.get(m.id))

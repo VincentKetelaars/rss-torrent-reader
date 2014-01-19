@@ -72,13 +72,17 @@ class IMDBMovie(object):
         line = re.sub('"[\w-]*"', '"' + r + '"', self.line, count=1)
         return line
     
+    def __str__(self):
+        return "%s %s %s %d %s %d %d" % (self.id, self.title, self.url, self.year, self.download,
+                self.latest_season, self.latest_episode)
+    
     def __eq__(self, other):
         if not isinstance(other, IMDBMovie):
             return False
-        return self.url == other.url
+        return self.id == other.id
     
     def __neq__(self, other):
         return not self.__eq__(other)
     
     def __hash__(self):
-        return self.url.__hash__()
+        return self.id.__hash__()

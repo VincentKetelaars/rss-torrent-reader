@@ -72,23 +72,19 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *args)
         
     def read_files(self):
-        self.lock.acquire()
-        try:
-            mf = open(self.movies_file, "r")
-            sf = open(self.series_file, "r")
-            
-            self.movies = MovieParser(None).parse(mf.read())
-            self.series = MovieParser(None).parse(sf.read())
-            logger.debug("Read %s and %s", self.movies_file, self.series_file)
-        except:
-            logger.exception("Reading of %s and %s failed", self.movies_file, self.series_file)
-        finally:
+        def read_file(file_):
+            result = {}
             try:
-                mf.close()
-                sf.close()
-            except:
-                pass
-            self.lock.release()
+                with open(file_, "r") as f:
+                    result = MovieParser(None).parse(f.read())
+            except EnvironmentError:
+                logger.debug("Reading of %s failed", file_)
+            return result
+            
+        self.lock.acquire()
+        self.movies = read_file(self.movies_file)
+        self.series = read_file(self.series_file)
+        self.lock.release()
             
     def do_POST(self):
         # TODO: Check path as well?
@@ -101,20 +97,23 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             length = int(self.headers.getheader('content-length'))
             form = urlparse.parse_qs(self.rfile.read(length))
         
-        logger.debug(form)
         do = form.get("do", None)
         if do is None:
             return self.send_error(404)
         do = do[0]
-            
+        
+        saved = False 
         if do == self.SAVE_MOVIES:
-            self.save_movies(form)
+            saved = self.save_movies(form)
         elif do == self.SAVE_SERIES:
-            self.save_series(form)
+            saved = self.save_series(form)
         else:
             logger.debug("Don't know what to do with %s", do)
         
-        self.wfile.write(json.dumps({"message" : "Values were saved!"}))
+        message = "Something went wrong. Please consult the logs."
+        if saved:
+            message = "Values were saved!"
+        self.wfile.write(json.dumps({"message" : message}))
             
     def save_movies(self, form):
         for m in self.movies.itervalues():
@@ -124,41 +123,41 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 m.download = False
         
-        self.write_to_file(self.movies, self.movies_file)
+        return self.write_to_file(self.movies, self.movies_file)
         
     def save_series(self, form):
+        def to_int(s):
+            try:
+                return int(s)
+            except ValueError:
+                logger.debug("Could not cast %s to int", s)
+                return 0
+        
         for ser in self.series.itervalues():
-            s = 0 
-            e = 0
-            try:
-                s = int(form.get(ser.id + "_season", [0])[0])
-            except:
-                pass
-            try:
-                e = int(form.get(ser.id + "_episode", [0])[0])
-            except:
-                pass
-            ser.latest_season = s
-            ser.latest_episode = e
+            ser.latest_season = to_int(form.get(ser.id + "_season", [0])[0])
+            ser.latest_episode = to_int(form.get(ser.id + "_episode", [0])[0])
             
-        self.write_to_file(self.series, self.series_file)
+        return self.write_to_file(self.series, self.series_file)
         
     def write_to_file(self, movies, file_):
         self.lock.acquire()
+        sorted_movies = sorted(movies.values(), key=lambda x: x.modified, reverse=True)
+        text = ""
+        for m in sorted_movies:
+            text += m.to_line() + NEWLINE
+        success = False
+        tmp = file_ + ".tmp"
         try:
-            f = open(file_, "w")
-            
-            sorted_movies = sorted(movies.values(), key=lambda x: x.modified, reverse=True)
-            for m in sorted_movies:
-                f.write(m.to_line() + NEWLINE)
-        except:
-            logger.exception("Could not write to file")
-        finally:
-            try:
-                f.close()
-            except:
-                pass
-            self.lock.release()
+            with open(tmp, "w") as f:            
+                f.write(text)
+                f.flush()
+        except EnvironmentError:
+            logger.exception("Could not write to %s", file_)
+        else:
+            os.rename(tmp, file_)
+            success = True
+        self.lock.release()
+        return success
         
     def redirect_to_main(self):
         logger.debug("Redirect %s", self.MAIN_PAGE)

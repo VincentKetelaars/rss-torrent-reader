@@ -8,6 +8,7 @@ import ConfigParser
 from src.content.imdb_csv import IMDBCsv
 from src.logger import get_logger
 from src.constants.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV
+from src.torrent.preference import Preference
 logger = get_logger(__name__)
 
 class Configuration(object):
@@ -33,14 +34,16 @@ class Configuration(object):
         return d
     
     def get_imdb_paths(self):
-        m = DEFAULT_MOVIES_CSV
-        s = DEFAULT_SERIES_CSV
-        try:
-            m = self.config.get("imdb", "movies")
-            s = self.config.get("imdb", "series")
-        except:
-            pass
+        m = self._get_option("storage", "movies_file", DEFAULT_MOVIES_CSV)
+        s = self._get_option("storage", "series_file", DEFAULT_SERIES_CSV)        
         return (m, s)
+    
+    def get_torrent_preference(self):
+        not_list = self._get_option("match", "title_not", "").split(",")
+        pref_list = self._get_option("match", "title_pref", "").split(",")
+        width = int(self._get_option("match", "min_width", 0))
+        height = int(self._get_option("match", "min_width", 0))
+        return Preference(not_list, pref_list, width, height)
     
     def _get_list(self, section, options, start=0):
         l = []
@@ -48,13 +51,20 @@ class Configuration(object):
         while True:
             t = []
             for o in options:
-                try:
-                    t.append(self.config.get(section, o +  str(i)).strip('"'))
-                except: # Assume not more valid options
-                    logger.debug("We do not have this option %s number %d", o, i)
+                v = self._get_option(section, o +  str(i).strip('"'))
+                if v is not None:
+                    t.append(v)
+                else:
                     break
             if not t: # t == []
                 break
             l.append(t)
             i+=1
         return l
+    
+    def _get_option(self, section, option, default=None):
+        try:
+            return self.config.get(section, option)
+        except ConfigParser.NoSectionError, ConfigParser.NoOptionError:
+            logger.debug("We do not have this option %s in section", option, section)
+        return default

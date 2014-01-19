@@ -28,8 +28,10 @@ def main():
     merge = MergeIMDBCsv(imdb, *conf.get_imdb_paths())
     merge.start()
     feed = FeedHandler(conf.get_torrent_rss_feeds())
-    decider = Decider(merge, feed)
+    decider = Decider(merge, feed, conf.get_torrent_preference())
     results = decider.decide() # blocking
+    
+    # Write the updated values (ensure that downloaded torrents are assimilated as well)
     writer = WriteIMDBToCsv(merge.movies(), *conf.get_imdb_paths())
     writer.start()
     logger.info("We have %d IMDB movies", len(imdb.movies()))
