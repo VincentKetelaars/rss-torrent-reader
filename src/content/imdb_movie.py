@@ -46,6 +46,10 @@ class IMDBMovie(object):
     def is_movie(self):
         return self.type in MOVIE_TYPES
     
+    def set_episode(self, season, episode):
+        self.latest_season = season
+        self.latest_episode = episode
+    
     def should_download(self, season=0, episode=0):
         if self.is_movie():
             return self.download

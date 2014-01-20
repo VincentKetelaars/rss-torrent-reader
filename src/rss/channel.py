@@ -41,6 +41,16 @@ class Item(object):
         if f is None:
             f = self.title + ".torrent"
         return f
+    
+    def episode(self):
+        """
+        @return: (season, episode) or (0, 0)
+        """
+        episode = re.findall("S\d{2}E\d{2}", self.title)
+        if len(episode) > 0:
+            v = episode[0] # Use the first, even if there are more
+            return (int(v[1:2]), int(v[4:5]))
+        return (0, 0)
         
     def resolution(self):
         """

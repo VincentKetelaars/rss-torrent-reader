@@ -34,7 +34,7 @@ def main():
     downloader = Downloader(matches, **conf.get_handler("downloader"))
     downloader.start()
     # Write the updated values (ensure that downloaded torrents are assimilated as well)
-    writer = WriteIMDBToCsv(merge.movies(), *conf.get_imdb_paths())
+    writer = WriteIMDBToCsv(merge.movies(), downloader, *conf.get_imdb_paths())
     writer.start()
     logger.info("We have %d IMDB movies", len(imdb.movies()))
     logger.info("We have %d torrents from %d channels", len(feed.torrents()), len(feed.channels()))

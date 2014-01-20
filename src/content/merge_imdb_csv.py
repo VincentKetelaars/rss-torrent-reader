@@ -8,6 +8,7 @@ from sets import Set
 
 from src.content.movie_parser import MovieParser
 from src.logger import get_logger
+from src.constants.constants import IMDB_WAIT
 logger = get_logger(__name__)
 
 
@@ -22,30 +23,23 @@ class MergeIMDBCsv(Thread):
         self.event = Event()
         
     def run(self):
-        movies = {}
-        series = {}
-        try:
-            mf = open(self.movies_file, "r")
-            sf = open(self.series_file, "r")
-            
-            movies = MovieParser(None).parse(mf.read())
-            series = MovieParser(None).parse(sf.read())
-            logger.debug("Read %s and %s", self.movies_file, self.series_file)
-        except:
-            logger.exception("Reading of %s and %s failed", self.movies_file, self.series_file)
-        finally:
-            try:
-                mf.close()
-                sf.close()
-            except:
-                pass
         
-        self.imdb.wait(60) # If already done this will return directly
+        def read(path):
+            try:
+                with open(path, "r") as f:
+                    return MovieParser(None).parse(f.read())
+            except IOError:
+                logger.debug("Reading of %s failed", path)
+        
+        movies = read(self.movies_file)
+        series = read(self.series_file)
+        
+        self.imdb.wait(IMDB_WAIT) # If already done this will return directly
         
         logger.debug("We have a total of %d films", len(self.imdb.movies()))
         
         self.result = self.imdb.movies()
-        for m in self.result:
+        for m in self.result.itervalues():
             if m.is_movie():
                 m.merge(movies.get(m.id))
             elif m.is_series():
@@ -58,6 +52,6 @@ class MergeIMDBCsv(Thread):
     
     def movies(self):
         """
-        Return set of IMDBMovie
+        Return dictionary of IMDBMovie with id as key
         """
         return self.result

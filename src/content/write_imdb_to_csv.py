@@ -6,7 +6,7 @@ Created on Jan 11, 2014
 from threading import Thread
 
 from src.logger import get_logger
-from src.constants.constants import NEWLINE
+from src.constants.constants import NEWLINE, HANDLER_WAIT
 logger = get_logger(__name__)
 
 class WriteIMDBToCsv(Thread):
@@ -14,41 +14,45 @@ class WriteIMDBToCsv(Thread):
     Write the list of movies and series to two separate files
     '''
 
-    def __init__(self, movies, movies_file, series_file):
+    def __init__(self, movies, handler, movies_file, series_file):
         Thread.__init__(self)
         self.movies = movies
+        self.handler = handler
         self.movies_file = movies_file
         self.series_file = series_file
         
     def run(self):
+        self.handler.wait(HANDLER_WAIT)
+        
         if len(self.movies) == 0: # Something has probably gone wrong.. Not overwriting this
             return
-        try:
-            mf = open(self.movies_file, "w")
-            sf = open(self.series_file, "w")
-            
-            i = 0
-            j = 0
-            
-            sorted_movies = sorted(self.movies, key=lambda x: x.modified, reverse=True)
-            for m in sorted_movies:
-                if m.is_movie():
-                    mf.write(m.to_line() + NEWLINE)
-                    i += 1
-                elif m.is_series():
-                    sf.write(m.to_line() + NEWLINE)
-                    j += 1
-                else:
-                    logger.debug("Neither movie or series..: %s", m.type)                                    
-            logger.debug("Wrote %d movies to %s and %d series to %s", i, self.movies_file, j, self.series_file)
-        except:
-            logger.exception("Failed to write to %s and %s", self.movies_file, self.series_file)
-        finally:
+        
+        for match in self.handler.handled():
+            if match.movie.is_movie():
+                self.movies[match.movie.id].download = False # Update value to False since we have downloaded it
+            elif match.movie.is_series():
+                s, e = match.torrent.episode()
+                self.movies[match.movie.id].set_episode(s, e) # Update episode number
+        
+        def write(content, path):
             try:
-                mf.close()
-                sf.close()
-            except:
-                pass              
+                with open(path, "wb") as f:
+                    return f.write(content)
+            except IOError:
+                logger.error("Could not write to %s", path)
+                
+        sorted_movies = sorted(self.movies.values(), key=lambda x: x.modified, reverse=True)
+        movies_content = ""
+        series_content = ""
+        for m in sorted_movies:
+            if m.is_movie():
+                movies_content += m.to_line() + NEWLINE
+            elif m.is_series():
+                series_content += m.to_line() + NEWLINE
+            else:
+                logger.warning("Neither movie or series..: %s", m.type)
         
-        
-        
+        write(movies_content, self.movies_file)
+        write(series_content, self.series_file)                                         
+        logger.info("Wrote %d movies to %s and %d series to %s", sum([m.is_movie() for m in sorted_movies]), 
+                     self.movies_file, sum([m.is_series() for m in sorted_movies]), self.series_file)

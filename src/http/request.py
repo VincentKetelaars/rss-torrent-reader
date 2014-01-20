@@ -3,6 +3,7 @@ Created on Dec 25, 2013
 
 @author: Vincent Ketelaars
 '''
+import zlib
 from urllib2 import HTTPHandler, HTTPSHandler, HTTPErrorProcessor, HTTPRedirectHandler, HTTPCookieProcessor, build_opener
 from urllib import urlencode
 from cookielib import CookieJar
@@ -59,8 +60,14 @@ class Request(object):
         try:
             opener = build_opener(HTTPHandler(), HTTPErrorProcessor(), HTTPRedirectHandler())
             response = opener.open(self.url)
+            logger.debug("Final url %s", response.geturl())
             if response.getcode() == 200:
                 content = response.read()
+                encoding = response.info().get("Content-Encoding")
+                if encoding is not None:
+                    logger.debug("We have an encoding of %s", encoding)
+                    if encoding == "gzip":
+                        content = zlib.decompress(content, 16+zlib.MAX_WBITS)
             else:
                 logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), self.url)
         except:

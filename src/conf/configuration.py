@@ -38,7 +38,7 @@ class Configuration(object):
         not_list = self._get_option("match", "title_not", "").split(",")
         pref_list = self._get_option("match", "title_pref", "").split(",")
         width = int(self._get_option("match", "min_width", 0))
-        height = int(self._get_option("match", "min_width", 0))
+        height = int(self._get_option("match", "min_height", 0))
         return Preference(not_list, pref_list, width, height)
     
     def get_handler(self, handler):

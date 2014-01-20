@@ -33,4 +33,15 @@ class MockMovie(IMDBMovie):
         
     def __init__(self, title, year, type_, **kwargs):
         IMDBMovie.__init__(self, "line", "id_", datetime.now(), datetime.now(), "description", title, type_, [], 0, 0, 0, year, [], 0, datetime.now(), "url", **kwargs)
+
+class MockTorrent(object):
     
+    def __init__(self, filename, url):
+        self._filename = filename
+        self._url = url
+    
+    def filename(self):
+        return self._filename
+    
+    def url(self):
+        return self._url

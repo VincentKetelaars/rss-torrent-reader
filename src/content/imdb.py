@@ -40,9 +40,9 @@ class IMDB(object):
     
     def movies(self):
         """
-        Return list of movies
+        Return dictionary of movies where id is the key
         """
-        return Set([m for s in self.results for m in s.itervalues()])
+        return dict([m for s in self.results for m in s.items()])
     
     def wait(self, timeout):
         self.event.wait(timeout)

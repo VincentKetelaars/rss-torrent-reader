@@ -7,6 +7,7 @@ import sys
 
 from src.logger import get_logger
 from src.torrent.match import Match
+from src.constants.constants import FEED_WAIT, MERGER_WAIT
 logger = get_logger(__name__)
 
 class Decider(object):
@@ -21,11 +22,11 @@ class Decider(object):
         self.preference = preference
         
     def decide(self):
-        self.feeds.wait(30)
-        self.merger.wait(60)
+        self.feeds.wait(FEED_WAIT)
+        self.merger.wait(MERGER_WAIT)
         logger.info("Start deciding")
         results = []
-        movies = [m for m in self.merger.movies() if m.should_download(sys.maxint, sys.maxint) ]
+        movies = [m for m in self.merger.movies().itervalues() if m.should_download(sys.maxint, sys.maxint) ]
         torrents = self.feeds.torrents()
         for t in torrents:
             if self.meets_requirements(t):
