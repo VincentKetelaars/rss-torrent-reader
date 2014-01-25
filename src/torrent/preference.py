@@ -9,8 +9,9 @@ class Preference(object):
     Container for torrent preferences
     '''
 
-    def __init__(self, not_list, pref_list, min_width, min_height):
+    def __init__(self, not_list, allowed_list, pref_list, min_width, min_height):
         self.not_list = not_list
+        self.allowed_list = allowed_list
         self.pref_list = pref_list
         self.min_width = min_width
         self.min_height = min_height       

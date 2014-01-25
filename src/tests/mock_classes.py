@@ -8,6 +8,7 @@ from datetime import datetime
 from src.content.imdb_movie import IMDBMovie
 from src.content.merge_imdb_csv import MergeIMDBCsv
 from src.rss.feed_handler import FeedHandler
+from src.rss.channel import Item
 
 class MockMerger(MergeIMDBCsv):
     

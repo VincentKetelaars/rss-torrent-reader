@@ -31,8 +31,7 @@ class WriteIMDBToCsv(Thread):
             if match.movie.is_movie():
                 self.movies[match.movie.id].download = False # Update value to False since we have downloaded it
             elif match.movie.is_series():
-                s, e = match.torrent.episode()
-                self.movies[match.movie.id].set_episode(s, e) # Update episode number
+                self.movies[match.movie.id].set_episode(*match.torrent.episode()) # Update episode number
         
         def write(content, path):
             try:
