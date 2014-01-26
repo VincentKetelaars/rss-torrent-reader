@@ -8,6 +8,10 @@ fi
 
 FILE="tmp_cron"
 
+# Set PATH in run_cron to absolute path to this directory
+CHANGE=ABSPATH
+sed -i "s+$CHANGE+$PWD+g" ./run_cron.sh
+
 crontab -l > $FILE
 python -m src.general.cron $FILE $HOURS
 crontab $FILE

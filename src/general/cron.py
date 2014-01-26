@@ -8,6 +8,8 @@ import sys
 import os
 import re
 
+RUNFILE = "run_cron.sh"
+
 def main(args):
     if len(args) > 2:
         return
@@ -27,16 +29,18 @@ def main(args):
     print "Writing cron job for every %d hours to file %s" % (hours, file_)
     
     PWD = os.getenv("PWD")
-    script = os.path.join(PWD, "run_once.sh")
+    script = os.path.join(PWD, RUNFILE)
     p = re.compile("0 \*/\d{1,2} \* \* \* " + script)
     command = "0 */" + str(hours) + " * * * " + script
     
     try:
         with open(file_, "w+b") as f:
             content = f.read()
-            (content, num) = p.subn(command, content)
+            (replaced, num) = p.subn(command, content)
             if num == 0:
-                content += command + "\r\n"
+                content += command + "\n"
+            else:
+                content = replaced
             f.write(content)
     except IOError:
         print "Could not open file", file_, sys.exc_info()
