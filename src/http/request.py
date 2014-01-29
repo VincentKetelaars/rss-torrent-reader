@@ -60,14 +60,14 @@ class Request(object):
         try:
             opener = build_opener(HTTPHandler(), HTTPErrorProcessor(), HTTPRedirectHandler())
             response = opener.open(self.url)
-            logger.debug("Final url %s", response.geturl())
             if response.getcode() == 200:
                 content = response.read()
                 encoding = response.info().get("Content-Encoding")
                 if encoding is not None:
-                    logger.debug("We have an encoding of %s", encoding)
                     if encoding == "gzip":
                         content = zlib.decompress(content, 16+zlib.MAX_WBITS)
+                    else:
+                        logger.warning("Don't know encoding %s", encoding)                        
             else:
                 logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), self.url)
         except:

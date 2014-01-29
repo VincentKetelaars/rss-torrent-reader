@@ -8,7 +8,7 @@ from datetime import datetime
 from src.content.imdb_movie import IMDBMovie
 from src.content.merge_imdb_csv import MergeIMDBCsv
 from src.rss.feed_handler import FeedHandler
-from src.rss.channel import Item
+from src.rss.channel import Item, Channel
 
 class MockMerger(MergeIMDBCsv):
     
@@ -46,3 +46,14 @@ class MockTorrent(object):
     
     def url(self):
         return self._url
+    
+class MockItem(Item):
+    
+    def __init__(self, title, description):
+        Item.__init__(self, None, title, description, None, None, None, None, None, {}, None)
+        
+class MockChannel(Channel):
+    
+    def __init__(self, items):
+        Channel.__init__(self, None, None, None)
+        self.items = items

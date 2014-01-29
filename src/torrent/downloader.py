@@ -39,7 +39,7 @@ class Downloader(MatchHandler):
                 except IOError:
                     logger.error("Could not write to %s", path)
             else:
-                logger.debug(download[:100])
+                logger.warning("This content does not correspond to a torrent: %s", download[:100])
         return False
                 
             

@@ -4,7 +4,6 @@ Created on Jan 11, 2014
 @author: Vincent Ketelaars
 '''
 from threading import Thread, Event
-from sets import Set
 
 from src.content.movie_parser import MovieParser
 from src.logger import get_logger
@@ -19,7 +18,7 @@ class MergeIMDBCsv(Thread):
         self.imdb = imdb
         self.movies_file = movies_file
         self.series_file = series_file
-        self.result = Set()
+        self.result = {}
         self.event = Event()
         
     def run(self):

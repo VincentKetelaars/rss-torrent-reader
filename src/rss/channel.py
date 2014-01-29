@@ -56,6 +56,9 @@ class Item(object):
     
     def is_series(self):
         return self._series
+    
+    def is_movie(self):
+        return not self._series
         
     def episode(self):
         """
@@ -77,27 +80,41 @@ class Item(object):
         SERIES:
         Title Episode Episode_title Resolution ....
         """
-        movies = re.match("([\[a-zA-Z\]+\s+]+)(\d{4})", self.title.replace(".", " "))
-        series = re.match("([\[a-zA-Z\]+\s+]+)(S\d{2}[E\d{2}]*)", self.title.replace(".", " "))
+        ndtitle = self.title.replace(".", " ")
+        movies = re.match("([\\[a-zA-Z0-9\-\'\]+\s+]+)(\d{4})\s", ndtitle)
+        series = re.search("\s(S(\d{2})(E\d{2})?|(\d{1,2})(x\d{2})|season\s(\d{1,2}))\s", ndtitle, re.IGNORECASE)
         if movies:
             self._series = False
             self._film_title = movies.group(1).strip()
             self._film_year = int(movies.group(2))
         elif series:
             self._series = True
-            self._film_title = series.group(1).strip()
+            index = ndtitle.find(series.group(1).strip())
+            self._film_title = ndtitle[0:index].strip()
             # If it is only season, we set the episode to 0, because you can't know how much of the season is in there
-            self._episode = (int(series.group(2)[1:3]), int(series.group(2)[4:6] if len(series.group(2)) > 3 else 0))
+            season = 0
+            if series.group(2) is not None:
+                season = int(series.group(2))
+            elif series.group(4) is not None:
+                season = int(series.group(4))
+            elif series.group(6) is not None:
+                season = int(series.group(6))
+            episode = 0
+            if series.group(3) is not None: 
+                episode = int(series.group(3)[1:])
+            elif series.group(5) is not None:
+                episode = int(series.group(5)[1:])
+            self._episode = (season, episode)
         else:
-            logger.debug("Can't parse this title: %s", self.title)
+            logger.warning("Can't parse this title: %s", self.title)
         resolution = re.search("(\d{3,4})[pP]", self.title)
         if resolution:
             if resolution.group(1) == "720":
-                self._resolution = (1080, 720)
+                self._resolution = (1280, 720)
             elif resolution.group(1) == "1080":
                 self._resolution = (1920, 1080)
             else:
-                logger.debug("Don't know this resolution: %s", resolution.group(0))
+                logger.warning("Don't know this resolution: %s", resolution.group(0))
         
     def _parse_description(self):
         resolution = re.findall("\d{3,4}x\d{3,4}", self.description)

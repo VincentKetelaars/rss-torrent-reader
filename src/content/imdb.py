@@ -4,7 +4,6 @@ Created on Dec 25, 2013
 @author: Vincent Ketelaars
 '''
 from threading import Lock, Event
-from sets import Set
 
 from src.content.movie_parser import MovieParser
 from src.logger import get_logger

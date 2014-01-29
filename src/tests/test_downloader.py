@@ -18,7 +18,7 @@ class TestDownloader(unittest.TestCase):
     def setUp(self):
         self.filename = "test.torrent"
         self.filename2 = "test2.torrent"
-        self.url = "http://torcache.net/torrent/81BFBDC2935E5F71F50C71725A7136E72079C237.torrent?title=[kickass.to]the.hunger.games.catching.fire.2013.imax.edition.1080p.bluray.remux.dd5.1.publichd"
+        self.url = "http://torcache.net/torrent/4FE2612383DD486E369C73A3F571D5CD3341468E.torrent?title=[kickass.to]christmas.with.johann.sebastian.bach.2013.720p.mbluray.x264.liquid.publichd"
         self.url2 = "http://www.torrenthound.com/torrent/e256280cf0dcb27ee1a3dc49b7fdd33ebf0c0f6c"
         self.directory = TEST_DIRECTORY
         self.path = os.path.join(self.directory, self.filename)

@@ -40,6 +40,8 @@ class Decider(object):
                         elif m.is_series():
                             logger.info("Match %s %s, episode %s, quality %d", m.title, t.title, t.episode(), q)
                         break
+                    
+        # TODO: Go through results. If there are multiple matches of the same movie, pick the best one.
         return results
     
     def meets_requirements(self, torrent):
@@ -107,9 +109,13 @@ class Decider(object):
         m_nodots = m_removed.replace(".", " ").strip()
         if m_nodots == ttitle:
             return (True, 0)
-        partial = re.match(m_removed, ttitle)
+        m_removed = m_removed.replace("&", "(\&|and)")
+        partial = re.match(m_removed, ttitle, re.IGNORECASE)
         if partial:
-            return (True, 1)
+            if partial.group(0) == ttitle: # Complete match
+                return (True, 0)
+            else: # Partial
+                return (True, 1)
         return (False, -1) # No match whatsoever
         
     def quality(self, torrent):
