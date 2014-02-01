@@ -13,18 +13,26 @@ class MatchHandler(Thread):
 
     def __init__(self, matches, name="MatchHandler"):
         Thread.__init__(self, name=name)
+        self.setDaemon(True) # No matter what it is doing, when main is done, so is this (can be dangerous..)
         self.matches = matches
         self.event = Event()
         
     def run(self):
-        self.successes = []
-        for match in self.matches:
-            if self.handle(match):
-                self.successes.append(match)
+        self.successes = self.handle_matches(self.matches)        
         self.event.set()
+        
+    def handle_matches(self, matches):
+        successes = []
+        for match in matches:
+            if self.handle(match):
+                successes.append(match)
+        return successes
         
     def handle(self, match):
         raise NotImplementedError()
+    
+    def done(self):
+        return self.event.is_set()
     
     def wait(self, timeout=None):
         self.event.wait(timeout)

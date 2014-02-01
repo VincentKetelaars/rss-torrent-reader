@@ -30,20 +30,23 @@ class Configuration(object):
         return self._get_all_options_as_dictionary("webgui")
     
     def get_imdb_paths(self):
-        m = self._get_option("storage", "movies_file", DEFAULT_MOVIES_CSV)
-        s = self._get_option("storage", "series_file", DEFAULT_SERIES_CSV)        
+        m = self._get_option("storage", "movies_file", default=DEFAULT_MOVIES_CSV)
+        s = self._get_option("storage", "series_file", default=DEFAULT_SERIES_CSV)        
         return (m, s)
     
     def get_torrent_preference(self):
-        not_list = self._get_option("match", "title_not", "").split(",")
-        allowed_list = self._get_option("match", "title_allowed", "").split(",")
-        pref_list = self._get_option("match", "title_pref", "").split(",")
-        width = int(self._get_option("match", "min_width", 0))
-        height = int(self._get_option("match", "min_height", 0))
+        not_list = self._get_option("match", "title_not", default=[], is_list=True)
+        allowed_list = self._get_option("match", "title_allowed", default=[], is_list=True)
+        pref_list = self._get_option("match", "title_pref", default=[], is_list=True)
+        width = int(self._get_option("match", "min_width", default=0))
+        height = int(self._get_option("match", "min_height", default=0))
         return Preference(not_list, allowed_list, pref_list, width, height)
     
     def get_handler(self, handler):
         return self._get_all_options_as_dictionary("handler_" + handler.lower())
+    
+    def get_handlers(self):
+        return self._get_option("handlers", "handlers", default=[], is_list=True)
     
     def _get_list(self, section, options, start=0):
         l = []
@@ -69,9 +72,12 @@ class Configuration(object):
             d[i[0]] = i[1]
         return d
     
-    def _get_option(self, section, option, default=None):
+    def _get_option(self, section, option, default=None, is_list=False):
         try:
-            return self.config.get(section, option).strip('"')
+            result = self.config.get(section, option).strip('"')
+            if is_list:
+                result = [r.strip() for r in result.split(",")]
+            return result
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             logger.debug("We do not have this option %s in section %s", option, section)
         return default
