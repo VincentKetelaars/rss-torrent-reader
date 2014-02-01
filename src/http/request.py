@@ -71,6 +71,7 @@ class Request(object):
             else:
                 logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), self.url)
         except:
+            # TODO: Retry in some cases..
             logger.exception("Can't retrieve request %s", self.url)
         finally:
             try:

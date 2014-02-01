@@ -49,7 +49,7 @@ class TorrentRetriever(GetParse):
                     item = Item(i, t.text, d.text, cat.text, author.text, l.text, g.text, p.text, en_dic, Torrent(t_dic))
                     channel.add_item(item)
                 except:
-                    logger.exception("Couldn't parse this item %s", i)
+                    logger.exception("Couldn't parse this item %s", [str(x.tag) + " : " + str(x.text) for x in list(i)])
             return channel
         return None
     

@@ -26,23 +26,25 @@ class Decider(object):
         self.feeds.wait(FEED_WAIT)
         self.merger.wait(MERGER_WAIT)
         logger.info("Start deciding")
-        results = []
+        results = {}
         movies = [m for m in self.merger.movies().itervalues() if m.should_download(sys.maxint, sys.maxint) ]
         torrents = self.feeds.torrents()
         for t in torrents:
             if self.meets_requirements(t):
                 for m in movies:
                     if self.match(m, t):
-                        q = self.quality(t)
-                        results.append(Match(m, t, q))
                         if m.is_movie():
-                            logger.info("Match %s %s %d", m.title, t.title, q)
+                            logger.info("Match %s %s", m.title, t.title)
                         elif m.is_series():
-                            logger.info("Match %s %s, episode %s, quality %d", m.title, t.title, t.episode(), q)
+                            logger.info("Match %s %s, episode %s", m.title, t.title, t.episode())
+                            
+                        if m.id not in results:
+                            results[m.id] = t
+                        else:
+                            results[m.id] = self.compare_torrents(results[m.id], t)
                         break
                     
-        # TODO: Go through results. If there are multiple matches of the same movie, pick the best one.
-        return results
+        return [Match(self.merger.movies().get(k), v) for k, v in results.iteritems()]
     
     def meets_requirements(self, torrent):
         """
@@ -88,6 +90,9 @@ class Decider(object):
         for a in self.preference.allowed_list:
             if a in torrent.film_title().lower():
                 return True
+        
+        if str(movie.year) in torrent.film_title():
+            return True
         return False
     
     def _match_titles(self, mtitle, ttitle):
@@ -109,7 +114,9 @@ class Decider(object):
         m_nodots = m_removed.replace(".", " ").strip()
         if m_nodots == ttitle:
             return (True, 0)
-        m_removed = m_removed.replace("&", "(\&|and)")
+        m_removed = m_removed.replace("&", "(\&|and)") # Allow for '&' and 'and'
+        year = re.compile("d{4}")
+        m_removed = year.sub("(\\0)?", m_removed)
         partial = re.match(m_removed, ttitle, re.IGNORECASE)
         if partial:
             if partial.group(0) == ttitle: # Complete match
@@ -118,12 +125,24 @@ class Decider(object):
                 return (True, 1)
         return (False, -1) # No match whatsoever
         
-    def quality(self, torrent):
+    def compare_torrents(self, t1, t2):
         """
-        This function returns a number that represents the quality of the match according to the user
-        @return: -1 if no preference match, otherwise index of list
+        This function is intended to compare two torrents for the same movie/series,
+        and return the best. The comparision is first done on the preference list from the config file.
+        If that does not result in a choice, a comparison is made based on the resolution.
+        @return: the better of the two torrents, defaults to the first
         """
-        for i in range(0, len(self.preference.pref_list)):
-            if self.preference.pref_list[i].lower() in torrent.title.lower():
-                return i
-        return -1
+        t1_title = t1.title.lower()
+        t2_title = t2.title.lower()
+        for item in self.preference.pref_list:
+            if item.lower() in t1_title and item.lower() not in t2_title:
+                return t1
+            elif item.lower() not in t1_title and item.lower() in t2_title:
+                return t2
+            # Otherwise they both don't have the keyword or both have the keyword
+        # Resolution compare (x, y) with (a, b), the x and a comparison is done first, only when equal are y and b compared
+        if t1.resolution() < t2.resolution():
+            return t2
+        elif t1.resolution() > t2.resolution():
+            return t1
+        return t1 # We have to default to something

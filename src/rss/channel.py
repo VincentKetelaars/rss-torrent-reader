@@ -81,13 +81,9 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        movies = re.match("([\\[a-zA-Z0-9\-\'\]+\s+]+)(\d{4})\s", ndtitle)
         series = re.search("\s(S(\d{2})(E\d{2})?|(\d{1,2})(x\d{2})|season\s(\d{1,2}))\s", ndtitle, re.IGNORECASE)
-        if movies:
-            self._series = False
-            self._film_title = movies.group(1).strip()
-            self._film_year = int(movies.group(2))
-        elif series:
+        movies = re.match("([\\[a-zA-Z0-9\-\'\]+\s+]+)(\d{4})\s", ndtitle)
+        if series:
             self._series = True
             index = ndtitle.find(series.group(1).strip())
             self._film_title = ndtitle[0:index].strip()
@@ -105,6 +101,10 @@ class Item(object):
             elif series.group(5) is not None:
                 episode = int(series.group(5)[1:])
             self._episode = (season, episode)
+        elif movies:
+            self._series = False
+            self._film_title = movies.group(1).strip()
+            self._film_year = int(movies.group(2))
         else:
             logger.warning("Can't parse this title: %s", self.title)
         resolution = re.search("(\d{3,4})[pP]", self.title)

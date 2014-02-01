@@ -23,8 +23,8 @@ class TestDownloader(unittest.TestCase):
         self.directory = TEST_DIRECTORY
         self.path = os.path.join(self.directory, self.filename)
         self.path2 = os.path.join(self.directory, self.filename2)
-        match = Match(None, MockTorrent(self.filename, self.url), 0)
-        match2 = Match(None, MockTorrent(self.filename2, self.url2), 0)
+        match = Match(None, MockTorrent(self.filename, self.url))
+        match2 = Match(None, MockTorrent(self.filename2, self.url2))
         self.downloader = Downloader([match, match2], self.directory)
 
     def tearDown(self):

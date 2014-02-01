@@ -3,12 +3,9 @@ Created on Oct 20, 2013
 
 @author: Vincent Ketelaars
 '''
-
-import wx
-
 from src.conf.configuration import Configuration
 
-from src.constants.constants import TITLE_MAIN, CONF_FILE
+from src.constants.constants import CONF_FILE
 from src.content.imdb import IMDB
 from src.rss.feed_handler import FeedHandler
 from src.content.write_imdb_to_csv import WriteIMDBToCsv
