@@ -22,6 +22,9 @@ class MatchHandler(Thread):
         self.event.set()
         
     def handle_matches(self, matches):
+        """
+        Return the successfully handled matches
+        """
         successes = []
         for match in matches:
             if self.handle(match):
@@ -29,6 +32,9 @@ class MatchHandler(Thread):
         return successes
         
     def handle(self, match):
+        """
+        @return: True if match is successfully handled, False otherwise
+        """
         raise NotImplementedError()
     
     def done(self):

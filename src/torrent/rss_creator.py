@@ -36,8 +36,8 @@ class RSSCreator(MatchHandler):
         self.description = description if description != "" else title
         
     def handle_matches(self, matches):
-        if self.file is None:
-            return
+        if self.file is None or len(matches) == 0:
+            return []
         ET.register_namespace("torrent", "http://xmlns.ezrss.it/0.1/")
         try:
             tree = ElementTree(file=self.file)
