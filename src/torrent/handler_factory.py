@@ -24,6 +24,7 @@ class HandlerFactory(Thread):
         self.setDaemon(True)
         self.matches = matches
         handlers = cfg.get_handlers()
+        logger.info("Handlers %s", handlers)
         handlers_info = {}
         for h in handlers:
             handlers_info[h] = cfg.get_handler(h)
@@ -56,7 +57,7 @@ class HandlerFactory(Thread):
                 if handler.done():
                     # We collect the set of matches that are handled by at least one handler
                     self.handled_matches.update(handler.handled()) 
-                    self.handled_threads.remove(handler)
+                    self.handler_threads.remove(handler)
             if len(self.handler_threads) > 0:
                 self.event.wait(self.LOOP_WAIT)
             else:

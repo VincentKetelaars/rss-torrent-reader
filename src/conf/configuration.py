@@ -69,15 +69,19 @@ class Configuration(object):
         l = self.config.items(section)
         d = {}
         for i in l:
-            d[i[0]] = i[1]
+            d[i[0]] = self._parse_option(i[1])
         return d
+    
+    def _parse_option(self, option, is_list=False):
+        result = option.strip('"') # TODO: White spaces as well
+        if is_list:
+            result = [r.strip() for r in result.split(",")]
+        # TODO: Be smart about it.. If it is a quoted string, leave it be, if there are comma's in there split it
+        return result
     
     def _get_option(self, section, option, default=None, is_list=False):
         try:
-            result = self.config.get(section, option).strip('"')
-            if is_list:
-                result = [r.strip() for r in result.split(",")]
-            return result
+            return self._parse_option(self.config.get(section, option), is_list)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             logger.debug("We do not have this option %s in section %s", option, section)
         return default

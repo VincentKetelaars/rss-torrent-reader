@@ -29,6 +29,7 @@ def main():
     decider = Decider(merge, feed, conf.get_torrent_preference())
     matches = decider.decide() # blocking
     factory = HandlerFactory(matches, conf)
+    factory.start()
     # Write the updated values (ensure that downloaded torrents are assimilated as well)
     writer = WriteIMDBToCsv(merge.movies(), factory, *conf.get_imdb_paths())
     writer.start()
