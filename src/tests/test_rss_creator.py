@@ -16,7 +16,7 @@ from src.logger import get_logger
 import xml.etree.ElementTree as ET
 logger = get_logger(__name__)
 
-class Test(unittest.TestCase):
+class TestRSSCreator(unittest.TestCase):
 
     def setUp(self):
         self.file = "/tmp/test_torrent_rss.xml"

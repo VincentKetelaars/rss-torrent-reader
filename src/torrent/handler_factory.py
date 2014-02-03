@@ -10,6 +10,7 @@ from src.torrent.rss_creator import RSSCreator
 
 from src.logger import get_logger
 from src.constants.constants import HANDLER_WAIT
+from src.torrent.email_handler import EmailHandler
 logger = get_logger(__name__)
 
 class HandlerFactory(Thread):
@@ -45,6 +46,8 @@ class HandlerFactory(Thread):
             return Downloader(self.matches, **params)
         elif handler == "rsscreator":
             return RSSCreator(self.matches, **params)
+        elif handler == "email":
+            return EmailHandler(self.matches, **params)
         else:
             logger.error("This %s handler is unknown", handler)
         return None

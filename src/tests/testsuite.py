@@ -9,6 +9,7 @@ import test_decider
 import test_downloader
 import test_item
 import test_rss_creator
+import test_configuration
 
 def suite():
     suite = unittest.TestSuite()
@@ -16,6 +17,7 @@ def suite():
     suite.addTest(unittest.TestLoader().loadTestsFromModule(test_downloader))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(test_item))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(test_rss_creator))
+    suite.addTest(unittest.TestLoader().loadTestsFromModule(test_configuration))
     return suite
 
 if __name__ == '__main__':

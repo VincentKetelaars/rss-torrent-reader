@@ -73,9 +73,15 @@ class Configuration(object):
         return d
     
     def _parse_option(self, option, is_list=False):
+        if option.find(",") > -1 and not (option.startswith('"') or option.endswith('"')):
+            is_list = True
         result = option.strip('"') # TODO: White spaces as well
+        if len(result) == 0:
+            return None
         if is_list:
             result = [r.strip() for r in result.split(",")]
+        if len(result) == 1 and len(result[0]) == 0:
+            return None
         # TODO: Be smart about it.. If it is a quoted string, leave it be, if there are comma's in there split it
         return result
     
