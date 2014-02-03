@@ -38,8 +38,8 @@ class Configuration(object):
         not_list = self._get_option("match", "title_not", default=[], is_list=True)
         allowed_list = self._get_option("match", "title_allowed", default=[], is_list=True)
         pref_list = self._get_option("match", "title_pref", default=[], is_list=True)
-        width = int(self._get_option("match", "min_width", default=0))
-        height = int(self._get_option("match", "min_height", default=0))
+        width = self._get_option("match", "min_width", default=0)
+        height = self._get_option("match", "min_height", default=0)
         return Preference(not_list, allowed_list, pref_list, width, height)
     
     def get_handler(self, handler):
@@ -75,14 +75,26 @@ class Configuration(object):
     def _parse_option(self, option, is_list=False):
         if option.find(",") > -1 and not (option.startswith('"') or option.endswith('"')):
             is_list = True
-        result = option.strip('"') # TODO: White spaces as well
+        result = option.strip(' ').strip('"')
         if len(result) == 0:
             return None
         if is_list:
-            result = [r.strip() for r in result.split(",")]
-        if len(result) == 1 and len(result[0]) == 0:
-            return None
-        # TODO: Be smart about it.. If it is a quoted string, leave it be, if there are comma's in there split it
+            temp = []
+            for r in result.split(","):
+                x = r.strip().strip('"')
+                if len(x) == 0:
+                    continue
+                try:
+                    x = int(x)
+                except ValueError:
+                    pass
+                temp.append(x)
+            result = temp
+        else:
+            try:
+                result = int(result)
+            except ValueError:
+                pass
         return result
     
     def _get_option(self, section, option, default=None, is_list=False):

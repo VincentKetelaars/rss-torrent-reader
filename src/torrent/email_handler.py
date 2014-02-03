@@ -44,7 +44,7 @@ class EmailHandler(MatchHandler):
         msg['From'] = self.email_from
         msg['To'] = ", ".join(self.email_to)
         
-        logger.info("Sending %d torrents from %s to %s", len(matches), self.email_from, self.email_to)
+        logger.info("Sending %d torrents from %s to %s with %s and port %d", len(matches), self.email_from, self.email_to, self.host, self.port)
         
         try:
             smtp = smtplib.SMTP(host=self.host, port=self.port, timeout=SMTP_TIMEOUT)
