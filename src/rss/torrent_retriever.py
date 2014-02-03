@@ -37,8 +37,9 @@ class TorrentRetriever(GetParse):
                     p = i.find("pubDate")
                     enclosure = i.find("enclosure")
                     en_dic = {}
-                    for e in enclosure.items():
-                        en_dic[e[0]] = e[1]
+                    if enclosure is not None:
+                        for e in enclosure.items():
+                            en_dic[e[0]] = e[1]
                     t_dic = {}
                     for a in Torrent.ATTRIBUTES:
                         try:
@@ -49,7 +50,7 @@ class TorrentRetriever(GetParse):
                     item = Item(i, t.text, d.text, cat.text, author.text, l.text, g.text, p.text, en_dic, Torrent(t_dic))
                     channel.add_item(item)
                 except:
-                    logger.exception("Couldn't parse this item %s", [str(x.tag) + " : " + str(x.text) for x in list(i)])
+                    logger.exception("Couldn't parse this item %s", [str(x.tag) + " : " + str(x.text) for x in list(i) if x is not None])
             return channel
         return None
     
