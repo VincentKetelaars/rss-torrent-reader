@@ -16,8 +16,8 @@ class Downloader(MatchHandler):
     This class will download torrents to a location
     '''
 
-    def __init__(self, matches, directory):
-        MatchHandler.__init__(self, matches, name="Downloader")
+    def __init__(self, matches, directory, **kwargs):
+        MatchHandler.__init__(self, matches, name="Downloader", **kwargs)
         self.directory = directory
         
     def handle(self, match):

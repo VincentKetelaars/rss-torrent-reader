@@ -11,11 +11,12 @@ class MatchHandler(Thread):
     Their implementations will take care of downloading torrents or otherwise use them
     '''
 
-    def __init__(self, matches, name="MatchHandler"):
+    def __init__(self, matches, name="MatchHandler", essential=False):
         Thread.__init__(self, name=name)
         self.setDaemon(True) # No matter what it is doing, when main is done, so is this (can be dangerous..)
         self.matches = matches
         self.event = Event()
+        self.essential = essential
         
     def run(self):
         self.successes = self.handle_matches(self.matches)        

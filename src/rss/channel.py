@@ -106,6 +106,7 @@ class Item(object):
             self._film_title = movies.group(1).strip()
             self._film_year = int(movies.group(2))
         else:
+            # TODO: Try matching movies with 720p|1080p etc.
             logger.warning("Can't parse this title: %s", self.title)
         resolution = re.search("(\d{3,4})[pP]", self.title)
         if resolution:

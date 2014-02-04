@@ -17,8 +17,8 @@ class EmailHandler(MatchHandler):
     This class will notify by email
     '''
 
-    def __init__(self, matches, email_to=None, email_from=None, smtp_host=None, smtp_port=None, username=None, password=None):
-        MatchHandler.__init__(self, matches, name="EmailHandler")
+    def __init__(self, matches, email_to=None, email_from=None, smtp_host=None, smtp_port=None, username=None, password=None, **kwargs):
+        MatchHandler.__init__(self, matches, name="EmailHandler", **kwargs)
         if isinstance(email_to, list):
             self.email_to = email_to
         elif isinstance(email_to, str):

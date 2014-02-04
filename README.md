@@ -15,14 +15,13 @@ CURRENT WORKINGS
 --------------------
 
 Separate threads will retrieve and parse all provided rss links. Simultaneously all provided IMDB watchlists are retrieved and parsed as well in separate threads. Once the watchlists are parsed, the movies are updated with data from a movies and a series file locally stored. (Updating what movies and episodes of series should be downloaded.)
-Once all of this is finished torrents are matched with movies and series. If succesfull these matches will be handled by handlers (Currently only a torrent file downloader is available). Matches that are succesfully handled (Only one handler needs to be succesful) will change the status of the movies and series, which are subsequently written to file again.
+Once all of this is finished, torrents are matched with movies and series. If succesfull these matches will be handled by handlers. (Downloader, RSSCreator and Email are available now) Matches that are succesfully handled (All primary handlers need to be successfull) will change the status of the movies and series, which are subsequently written to file again.
 
 TODO
 ---------------------
 
 Handlers that directly interact with Bittorrent programs to start downloads.
-Handler that creates a new file that acts as a rss feed.
-Handler that notifies user via email or other communication method.
+Handlers for other communication methods than email.
 
 Current program only uses newly created torrents. Older movies and series will need active searches.
 

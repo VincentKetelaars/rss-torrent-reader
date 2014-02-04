@@ -27,8 +27,8 @@ class RSSCreator(MatchHandler):
     This class creates a XML file to be used for RSS
     '''
 
-    def __init__(self, matches, file=None, max_torrents=RSSCREATOR_MAX_TORRENTS, title="", link="", description=""):
-        MatchHandler.__init__(self, matches, "RSSCreator")
+    def __init__(self, matches, file=None, max_torrents=RSSCREATOR_MAX_TORRENTS, title="", link="", description="", **kwargs):
+        MatchHandler.__init__(self, matches, "RSSCreator", **kwargs)
         self.file = file
         self.max_torrents = max_torrents
         self.title = title

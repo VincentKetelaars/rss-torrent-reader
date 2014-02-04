@@ -24,30 +24,27 @@ class HandlerFactory(Thread):
         Thread.__init__(self, name="HandlerFactory")
         self.setDaemon(True)
         self.matches = matches
-        handlers = cfg.get_handlers()
-        logger.info("Handlers %s", handlers)
-        handlers_info = {}
-        for h in handlers:
-            handlers_info[h] = cfg.get_handler(h)
-        self.handler_threads = self.create_handlers(handlers_info)
-        self.event = Event()   
-        self.handled_matches = set()
-        
-    def create_handlers(self, info):
-        handlers = []
-        for k, v in info.iteritems():
-            handler = self._get_handler(k, v)
+        primary, secondary = cfg.get_handlers()
+        logger.info("Primary handlers %s and secondary handlers %s", primary, secondary)
+        self.handler_threads = []
+        for h in primary:
+            handler = self._get_handler(h, cfg.get_handler(h), primary=True)
             if handler is not None:
-                handlers.append(handler)
-        return handlers
+                self.handler_threads.append(handler)
+        for h in secondary:
+            handler = self._get_handler(h, cfg.get_handler(h), primary=False)
+            if handler is not None:
+                self.handler_threads.append(handler)
+        self.event = Event()   
+        self.handled_matches = set(self.matches) # Initially all are handled
     
-    def _get_handler(self, handler, params):
+    def _get_handler(self, handler, params, primary=False):
         if handler == "downloader":
-            return Downloader(self.matches, **params)
+            return Downloader(self.matches, essential=primary, **params)
         elif handler == "rsscreator":
-            return RSSCreator(self.matches, **params)
+            return RSSCreator(self.matches, essential=primary, **params)
         elif handler == "email":
-            return EmailHandler(self.matches, **params)
+            return EmailHandler(self.matches, essential=primary, **params)
         else:
             logger.error("This %s handler is unknown", handler)
         return None
@@ -58,9 +55,10 @@ class HandlerFactory(Thread):
         for _ in range(0, int(HANDLER_WAIT / self.LOOP_WAIT)):
             for handler in self.handler_threads:
                 if handler.done():
-                    # We collect the set of matches that are handled by at least one handler
-                    self.handled_matches.update(handler.handled()) 
                     self.handler_threads.remove(handler)
+                    # We collect the set of matches that are handled by all primary handlers
+                    if handler.essential:
+                        self.handled_matches.intersection_update(handler.handled())
             if len(self.handler_threads) > 0:
                 self.event.wait(self.LOOP_WAIT)
             else:
@@ -71,4 +69,6 @@ class HandlerFactory(Thread):
         self.event.wait(timeout)
         
     def handled(self):
-        return list(self.handled_matches)
+        if all([h.done() for h in self.handler_threads if h.essential]):
+            return list(self.handled_matches)
+        return []

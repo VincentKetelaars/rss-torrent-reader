@@ -46,7 +46,8 @@ class Configuration(object):
         return self._get_all_options_as_dictionary("handler_" + handler.lower())
     
     def get_handlers(self):
-        return self._get_option("handlers", "handlers", default=[], is_list=True)
+        return (self._get_option("handlers", "primary", default=[], is_list=True),
+                self._get_option("handlers", "secondary", default=[], is_list=True))
     
     def _get_list(self, section, options, start=0):
         l = []
