@@ -42,7 +42,11 @@ class MergeIMDBCsv(Thread):
             if m.is_movie():
                 m.merge(movies.get(m.id))
             elif m.is_series():
-                m.merge(series.get(m.id))    
+                m.merge(series.get(m.id))   
+                
+        if len(self.result) == 0: # No luck getting the newest version, lets just use the one we have
+            self.result = dict(movies.items() + series.items())
+            logger.debug("Since we have no newer version we use the stored one with %d films", len(self.result))
             
         self.event.set()
 
