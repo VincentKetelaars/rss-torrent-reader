@@ -13,7 +13,6 @@ from src.tests.mock_classes import MockMovie
 from src.torrent.rss_creator import RSSCreator
 from src.constants.constants import HANDLER_WAIT
 from src.logger import get_logger
-import xml.etree.ElementTree as ET
 logger = get_logger(__name__)
 
 class TestRSSCreator(unittest.TestCase):

@@ -6,7 +6,7 @@ Created on Oct 20, 2013
 
 class Torrent(object):
 
-    ATTRIBUTES = ["contentLength", "infoHash", "magnetURI", "seeds", "peers", "verified", "fileName"]
+    ATTRIBUTES = ["contentLength", "infoHash", "magnetURI", "seeds", "peers", "leechs", "verified", "fileName"]
     
     def __init__(self, dictionary):
         self.dict = dictionary

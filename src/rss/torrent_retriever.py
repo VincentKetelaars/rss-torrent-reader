@@ -17,6 +17,12 @@ class TorrentRetriever(GetParse):
        
     NAMESPACES = {"torrent" : "http://xmlns.ezrss.it/0.1/"}
     
+    def item_text(self, item, child):
+        x = item.find(child)
+        if x is not None:
+            return x.text
+        return ""
+    
     def parse(self, page):
         if page is not None:
             rss = ET.fromstring(page)
@@ -27,30 +33,24 @@ class TorrentRetriever(GetParse):
             channel = Channel(title.text, desc.text, link.text)
             items = c.findall("item")
             for i in items:
-                try: 
-                    t = i.find("title")
-                    d = i.find("description")
-                    cat = i.find("category")
-                    author = i.find("author")
-                    l = i.find("link")
-                    g = i.find("guid")
-                    p = i.find("pubDate")
-                    enclosure = i.find("enclosure")
-                    en_dic = {}
-                    if enclosure is not None:
-                        for e in enclosure.items():
-                            en_dic[e[0]] = e[1]
-                    t_dic = {}
-                    for a in Torrent.ATTRIBUTES:
-                        try:
-                            te = i.find("torrent:" + a, namespaces=self.NAMESPACES)
-                            t_dic[a] = te.text
-                        except:
-                            logger.exception("")
-                    item = Item(i, t.text, d.text, cat.text, author.text, l.text, g.text, p.text, en_dic, Torrent(t_dic))
-                    channel.add_item(item)
-                except:
-                    logger.exception("Couldn't parse this item %s", [str(x.tag) + " : " + str(x.text) for x in list(i) if x is not None])
+                t = self.item_text(i, "title")
+                d = self.item_text(i, "description")
+                cat = self.item_text(i, "category")
+                author = self.item_text(i, "author")
+                l = self.item_text(i, "link")
+                g = self.item_text(i, "guid")
+                p = self.item_text(i, "pubDate")
+                enclosure = i.find("enclosure")
+                en_dic = {}
+                if enclosure is not None:
+                    for e in enclosure.items():
+                        en_dic[e[0]] = e[1]
+                t_dic = {}
+                for a in Torrent.ATTRIBUTES:
+                    te = i.find("torrent:" + a, namespaces=self.NAMESPACES)
+                    if te is not None:
+                        t_dic[a] = te.text
+                channel.add_item(Item(i, t, d, cat, author, l, g, p, en_dic, Torrent(t_dic)))
             return channel
         return None
     

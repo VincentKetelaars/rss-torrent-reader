@@ -63,19 +63,43 @@ class TestItem(unittest.TestCase):
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "The Counselor")
         self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2013)
         self.assertEqual(item.resolution(), (1920, 1080))
         
         title = "Krrish 3 2013 1080p BluRay DTS x264 PublicHD"
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Krrish 3")
         self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2013)
         self.assertEqual(item.resolution(), (1920, 1080))
         
         title = "Ender's Game 2013 720p HDRip KORSUB 750MB Ganool"
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Ender's Game")
         self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2013)
         self.assertEqual(item.resolution(), (1280, 720))
+        
+        title = "All Things to All Men (2013)"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "All Things to All Men")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2013)
+        self.assertEqual(item.resolution(), (0, 0))
+        
+        title = "Jeff, Who Lives at Home (2011) 1080p"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Jeff, Who Lives at Home")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2011)
+        self.assertEqual(item.resolution(), (1920, 1080))
+        
+        title = "[TORRENT] Troy [2004] Dir Cut BRRip XviD-SaM[ETRG]"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Troy")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2004)
+        self.assertEqual(item.resolution(), (0, 0))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

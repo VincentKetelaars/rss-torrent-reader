@@ -59,6 +59,10 @@ class Item(object):
     
     def is_movie(self):
         return not self._series
+    
+    @property
+    def film_year(self):
+        return self._film_year
         
     def episode(self):
         """
@@ -82,7 +86,7 @@ class Item(object):
         """
         ndtitle = self.title.replace(".", " ")
         series = re.search("\s(S(\d{2})(E\d{2})?|(\d{1,2})(x\d{2})|season\s(\d{1,2}))\s", ndtitle, re.IGNORECASE)
-        movies = re.match("([\\[a-zA-Z0-9\-\'\]+\s+]+)(\d{4})\s", ndtitle)
+        movies = re.search("\s(\[?\(?(\d{4})\)?\]?|720p|1080p)\s?", ndtitle)
         if series:
             self._series = True
             index = ndtitle.find(series.group(1).strip())
@@ -103,26 +107,39 @@ class Item(object):
             self._episode = (season, episode)
         elif movies:
             self._series = False
-            self._film_title = movies.group(1).strip()
-            self._film_year = int(movies.group(2))
+            self._film_title = ndtitle[0:ndtitle.find(movies.group(1).strip())].strip()
+            if len(self._film_title) < 3:
+                pass # TODO: Try again?
+            torrent = re.search("\[?torrent\]?", self._film_title, re.IGNORECASE)
+            if torrent:
+                self._film_title = self._film_title.replace(torrent.group(0), "").strip()
+            if movies.group(2):
+                self._film_year = int(movies.group(2))
         else:
-            # TODO: Try matching movies with 720p|1080p etc.
             logger.warning("Can't parse this title: %s", self.title)
         resolution = re.search("(\d{3,4})[pP]", self.title)
         if resolution:
-            if resolution.group(1) == "720":
-                self._resolution = (1280, 720)
-            elif resolution.group(1) == "1080":
-                self._resolution = (1920, 1080)
-            else:
-                logger.warning("Don't know this resolution: %s", resolution.group(0))
+            self._set_resolution_from_string(resolution.group(1))
         
     def _parse_description(self):
-        resolution = re.findall("\d{3,4}x\d{3,4}", self.description)
+        resolution = re.findall("(\d{3,4}x\d{3,4}|720p|1080p)", self.description, re.IGNORECASE)
         if len(resolution) > 0:
-            r = resolution[0] # Use only the first, even if there are more
-            ints = r.split("x")
-            self._resolution = (int(ints[0]), int(ints[1]) )
-        
+            for r in resolution:
+                if r.find("x") > 0:
+                    ints = r.split("x")
+                    self._resolution = (int(ints[0]), int(ints[1]))
+            if self._resolution == (0, 0):
+                for r in resolution:
+                    self._set_resolution_from_string(r[:-1]) # We could break, but who cares
+            
+    def _set_resolution_from_string(self, s):
+        if s == "720":
+            self._resolution = (1280, 720)
+            return True
+        elif s == "1080":
+            self._resolution = (1920, 1080)
+            return True
+        return False
+            
     def __str__(self):
         return self.title

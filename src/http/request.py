@@ -59,6 +59,7 @@ class Request(object):
         content = None
         try:
             opener = build_opener(HTTPHandler(), HTTPErrorProcessor(), HTTPRedirectHandler())
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')] # Spoof User agent
             response = opener.open(self.url)
             if response.getcode() == 200:
                 content = response.read()
