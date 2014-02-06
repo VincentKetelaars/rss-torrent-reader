@@ -24,6 +24,7 @@ IMDB
 """
 MOVIE_TYPES = ["Feature Film", "Video", "TV Movie"]
 SERIES_TYPES = ["TV Series", "Mini-Series"]
+IMDB_TIMESTAMP_FORMAT = "%a %b %d %H:%M:%S %Y"
 
 """
 PORTABILITY

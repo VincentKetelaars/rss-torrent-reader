@@ -5,7 +5,7 @@ Created on Feb 3, 2014
 '''
 import unittest
 from src.conf.configuration import Configuration
-from src.constants.constants import CONF_FILE
+from src.general.constants import CONF_FILE
 
 
 class Test(unittest.TestCase):

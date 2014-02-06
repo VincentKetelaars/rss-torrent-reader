@@ -4,10 +4,14 @@ Created on Dec 31, 2013
 @author: Vincent Ketelaars
 '''
 import re
-from src.constants.constants import SERIES_TYPES, MOVIE_TYPES
+from datetime import datetime
+from src.general.constants import SERIES_TYPES, MOVIE_TYPES
 
 from src.logger import get_logger
+from src.general.constants import IMDB_TIMESTAMP_FORMAT
 logger = get_logger(__name__)
+
+FAKE_START_DATE = datetime(1901, 1, 1)
 
 class IMDBMovie(object):
     '''
@@ -39,6 +43,7 @@ class IMDBMovie(object):
         self.download = download
         self.latest_season = latest_season
         self.latest_episode = latest_episode
+        self.time_downloaded = FAKE_START_DATE
 
     def is_series(self):
         return self.type in SERIES_TYPES
@@ -58,6 +63,18 @@ class IMDBMovie(object):
         logger.debug("Dealing with unknown film of type %s", self.type)
         return False
     
+    def handled(self, season=0, episode=0):
+        if self.is_movie():
+            if self.download: # Already marked as downloaded
+                return
+            self.download = False
+        if self.is_series():
+            if season <= self.latest_season and episode <= self.latest_episode:
+                return
+            self.set_episode(season, episode)
+        # Should we check the current time?
+        self.time_downloaded = datetime.utcnow()
+    
     def merge(self, movie):
         if movie is None:
             return
@@ -74,6 +91,7 @@ class IMDBMovie(object):
         elif self.is_series():
             r = str(self.latest_season) + "-" + str(self.latest_episode)
         line = re.sub('"[\w-]*"', '"' + r + '"', self.line, count=1)
+        line += "," + self.time_downloaded.strftime(IMDB_TIMESTAMP_FORMAT)
         return line
     
     def __str__(self):

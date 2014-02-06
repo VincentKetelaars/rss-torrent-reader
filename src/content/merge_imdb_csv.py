@@ -7,7 +7,7 @@ from threading import Thread, Event
 
 from src.content.movie_parser import MovieParser
 from src.logger import get_logger
-from src.constants.constants import IMDB_WAIT
+from src.general.constants import IMDB_WAIT
 logger = get_logger(__name__)
 
 

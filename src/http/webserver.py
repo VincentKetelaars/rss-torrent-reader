@@ -11,7 +11,7 @@ from threading import Thread, Event, Lock
 from src.logger import get_logger
 import os
 from src.conf.configuration import Configuration
-from src.constants.constants import CONF_FILE, DEFAULT_PORT, DEFAULT_HOST,\
+from src.general.constants import CONF_FILE, DEFAULT_PORT, DEFAULT_HOST,\
     NEWLINE
 from src.content.movie_parser import MovieParser
 import cgi

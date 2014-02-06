@@ -12,6 +12,7 @@ from src.content.imdb_movie import IMDBMovie
 from src.http.request import Request
 
 from src.logger import get_logger
+from src.general.constants import IMDB_TIMESTAMP_FORMAT
 logger = get_logger(__name__)
 
 class MovieParser(GetParse):
@@ -53,7 +54,7 @@ class MovieParser(GetParse):
                 return i
                 
         
-        created_format = "%a %b %d %H:%M:%S %Y"
+        
         locale.setlocale(locale.LC_ALL, "en_US.UTF-8") # FIXME: Not windows compatible
 
         lines = content.split("\n")
@@ -63,8 +64,8 @@ class MovieParser(GetParse):
             if len(args) < 16 or args[0] == "position": # First line of watchlist
                 continue
             try:
-                created = datetime.strptime(args[2], created_format)
-                modified = datetime.strptime(args[3], created_format)
+                created = datetime.strptime(args[2], IMDB_TIMESTAMP_FORMAT)
+                modified = datetime.strptime(args[3], IMDB_TIMESTAMP_FORMAT)
                 directors = [g.strip() for g in args[12].split(",")]            
                 rated = to_int(args[8])
                 rating = to_int(args[9])
@@ -93,7 +94,9 @@ class MovieParser(GetParse):
                 except:
                     if f == 0 or f== 1:
                         m.download = f
-
+                if len(args) == 17:
+                    m.time_downloaded = datetime.strptime(args[16], IMDB_TIMESTAMP_FORMAT)
+                    
                 movies[args[1]] = m
             except:
                 logger.exception("Tried parsing %s", line)

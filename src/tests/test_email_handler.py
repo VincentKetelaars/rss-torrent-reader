@@ -6,7 +6,7 @@ Created on Feb 3, 2014
 import unittest
 from src.tests.mock_classes import MockTorrent
 from src.torrent.match import Match
-from src.constants.constants import CONF_FILE
+from src.general.constants import CONF_FILE
 from src.conf.configuration import Configuration
 from src.torrent.email_handler import EmailHandler
 

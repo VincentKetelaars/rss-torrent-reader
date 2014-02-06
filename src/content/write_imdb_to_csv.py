@@ -6,7 +6,7 @@ Created on Jan 11, 2014
 from threading import Thread
 
 from src.logger import get_logger
-from src.constants.constants import NEWLINE, HANDLER_WAIT
+from src.general.constants import NEWLINE, HANDLER_WAIT
 logger = get_logger(__name__)
 
 class WriteIMDBToCsv(Thread):
@@ -28,10 +28,7 @@ class WriteIMDBToCsv(Thread):
             return
         
         for match in self.handler.handled():
-            if match.movie.is_movie():
-                self.movies[match.movie.id].download = False # Update value to False since we have downloaded it
-            elif match.movie.is_series():
-                self.movies[match.movie.id].set_episode(*match.torrent.episode()) # Update episode number
+            self.movies[match.movie.id].handled(*match.torrent.episode()) # Update episode number
         
         def write(content, path):
             try:

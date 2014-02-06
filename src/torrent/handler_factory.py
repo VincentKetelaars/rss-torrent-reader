@@ -9,7 +9,7 @@ from src.torrent.downloader import Downloader
 from src.torrent.rss_creator import RSSCreator
 
 from src.logger import get_logger
-from src.constants.constants import HANDLER_WAIT
+from src.general.constants import HANDLER_WAIT
 from src.torrent.email_handler import EmailHandler
 logger = get_logger(__name__)
 

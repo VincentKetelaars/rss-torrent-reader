@@ -7,7 +7,7 @@ import ConfigParser
 
 from src.content.imdb_csv import IMDBCsv
 from src.logger import get_logger
-from src.constants.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV
+from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV
 from src.torrent.preference import Preference
 logger = get_logger(__name__)
 

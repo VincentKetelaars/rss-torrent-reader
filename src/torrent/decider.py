@@ -7,7 +7,7 @@ import sys
 
 from src.logger import get_logger
 from src.torrent.match import Match
-from src.constants.constants import FEED_WAIT, MERGER_WAIT
+from src.general.constants import FEED_WAIT, MERGER_WAIT
 import re
 logger = get_logger(__name__)
 
