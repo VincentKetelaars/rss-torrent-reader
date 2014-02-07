@@ -38,3 +38,12 @@ HANDLER_WAIT = 20.0 # Seconds
 FEED_WAIT = 20.0 # Seconds
 MERGER_WAIT = 60.0 # Seconds
 IMDB_WAIT = 60.0 # Seconds
+
+"""
+GENERAL CONSTANTS
+"""
+RESOLUTION_ZERO = (0, 0) # default / unknown
+RESOLUTION_720 = (1280, 720)
+RESOLUTION_1080 = (1920, 1080)
+RESOLUTION_HDTV = (720, 404) # EZTV HDTV Torrent example resolution
+RESOLUTION_BRRIP = RESOLUTION_720 # Use this as first measure and hope for more in the description
