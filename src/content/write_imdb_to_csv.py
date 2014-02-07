@@ -28,6 +28,7 @@ class WriteIMDBToCsv(Thread):
             return
         
         for match in self.handler.handled():
+            logger.info("%s %shas been handled", match.movie.film_title(), "%s " % (match.torrent.episode(),) if match.movie.is_series() else "")
             self.movies[match.movie.id].handled(*match.torrent.episode()) # Update episode number
         
         def write(content, path):

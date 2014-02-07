@@ -59,6 +59,8 @@ class HandlerFactory(Thread):
                     # We collect the set of matches that are handled by all primary handlers
                     if handler.essential:
                         self.handled_matches.intersection_update(handler.handled())
+                    if handler.handled():
+                        logger.info("%s handled %s correctly", handler.name, [m.torrent.film_title() for m in handler.handled()])
             if len(self.handler_threads) > 0:
                 self.event.wait(self.LOOP_WAIT)
             else:

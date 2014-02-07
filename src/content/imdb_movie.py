@@ -65,7 +65,7 @@ class IMDBMovie(object):
     
     def handled(self, season=0, episode=0):
         if self.is_movie():
-            if self.download: # Already marked as downloaded
+            if not self.download: # Already marked as downloaded
                 return
             self.download = False
         if self.is_series():

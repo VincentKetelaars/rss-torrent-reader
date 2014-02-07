@@ -100,6 +100,8 @@ class TestItem(unittest.TestCase):
         self.assertTrue(item.is_movie())
         self.assertEqual(item.film_year, 2004)
         self.assertEqual(item.resolution(), (0, 0))
+        
+        title = "[TORRENT] Opposite Worlds S01E05E06 HDTV x264-FUM[ettv]"
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

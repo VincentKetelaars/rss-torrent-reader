@@ -53,6 +53,7 @@ class Request(object):
             except:
                 pass
         
+        logger.info("Request for %s returns content of length %d", self.url, len(content))
         return content
     
     def request(self):
