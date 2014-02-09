@@ -40,6 +40,7 @@ class Item(object):
         self._episode = (0, 0)
         self._film_title = None
         self._film_year = 0
+        logger.debug(self.title)
         self._parse_title() # Determines resolution by claim
         self._parse_description() # Determines resolution by actual numbers
         logger.debug("%s %s %d %s %s %s", self.title, self._film_title, self._film_year, self._series, self._episode, self._resolution)        
@@ -87,7 +88,7 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        series = re.search("\s(S(\d{2})(E\d{2})*|(\d{1,2})(x\d{2})|season\s(\d{1,2}))\s", ndtitle, re.IGNORECASE)
+        series = re.search("\s(S(\d{2})(E\d{2})*|(\d{1,2})(x\d{2})|season\s((\d{1,2})\-?)+)\s", ndtitle, re.IGNORECASE)
         movies = re.search("\s(\[?\(?(\d{4})\)?\]?|720p|1080p|HDTV)\s?", ndtitle)
         if series:
             self._series = True
@@ -99,7 +100,7 @@ class Item(object):
                 season = int(series.group(2))
             elif series.group(4) is not None:
                 season = int(series.group(4))
-            elif series.group(6) is not None:
+            elif series.group(7) is not None:
                 season = int(series.group(6))
             episode = 0
             if series.group(3) is not None: 
@@ -116,9 +117,10 @@ class Item(object):
                 self._film_year = int(movies.group(2))
         else:
             logger.warning("Can't parse this title: %s", self.title)
-        torrent = re.search("\[?torrent\]?", self._film_title, re.IGNORECASE)
-        if torrent:
-            self._film_title = self._film_title.replace(torrent.group(0), "").strip()
+        if self._film_title is not None:
+            torrent = re.search("\[?torrent\]?", self._film_title, re.IGNORECASE)
+            if torrent:
+                self._film_title = self._film_title.replace(torrent.group(0), "").strip()
         self._update_resolution(self.title)
         
     def _parse_description(self):

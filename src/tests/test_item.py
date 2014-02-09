@@ -67,6 +67,12 @@ class TestItem(unittest.TestCase):
         self.assertEqual(item.episode(), (1,6))
         self.assertEqual(item.resolution(), RESOLUTION_HDTV)
         
+        title = "The Walking Dead Extras Season 1-4 _ALCOR_"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "The Walking Dead Extras")
+        self.assertTrue(item.is_series())
+        self.assertEqual(item.episode(), (4,0))
+        
     def test_parsing_title_movie(self):        
         title = "The Counselor 2013 UNRATED EXTENDED 1080p BluRay AVC DTS HD MA 5 1 PublicHD"
         item = MockItem(title, "")

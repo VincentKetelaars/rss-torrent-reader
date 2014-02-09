@@ -14,6 +14,8 @@ from src.content.merge_imdb_csv import MergeIMDBCsv
 from src.logger import get_logger
 from src.torrent.decider import Decider
 from src.torrent.handler_factory import HandlerFactory
+from src.content.imdb_read_from_file import IMDBReadFromFile
+from src.rss.active_search_feeds import ActiveSearchFeeds
 logger = get_logger(__name__)
 
 def main():
@@ -22,10 +24,14 @@ def main():
 #     frame.Show(True)     # Show the frame.
 #     app.MainLoop()
     conf = Configuration(CONF_FILE)
+    movie_file, series_file = conf.get_imdb_paths()
+    movies_from_file = IMDBReadFromFile(movie_file).read()
+    series_from_file = IMDBReadFromFile(series_file).read()
+    active_feeds = ActiveSearchFeeds(movies_from_file, series_from_file).get_feeds(conf.get_active_feeds())
     imdb = IMDB(conf.get_imdb_csv_urls())
-    merge = MergeIMDBCsv(imdb, *conf.get_imdb_paths())
+    merge = MergeIMDBCsv(imdb, movies_from_file, series_from_file)
     merge.start()
-    feed = FeedHandler(conf.get_torrent_rss_feeds())
+    feed = FeedHandler(conf.get_torrent_rss_feeds() + active_feeds)
     decider = Decider(merge, feed, conf.get_torrent_preference())
     matches = decider.decide() # blocking
     factory = HandlerFactory(matches, conf)

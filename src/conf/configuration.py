@@ -7,8 +7,10 @@ import ConfigParser
 
 from src.content.imdb_csv import IMDBCsv
 from src.logger import get_logger
-from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV
+from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
+    DEFAULT_MAX_MOVIES, DEFAULT_MAX_SERIES
 from src.torrent.preference import Preference
+from src.rss.active_search_params import ActiveSearchParameters
 logger = get_logger(__name__)
 
 class Configuration(object):
@@ -48,6 +50,12 @@ class Configuration(object):
     def get_handlers(self):
         return (self._get_option("handlers", "primary", default=[], is_list=True),
                 self._get_option("handlers", "secondary", default=[], is_list=True))
+        
+    def get_active_feeds(self):
+        feeds = [l[0] for l in self._get_list("active", ["url"], 0)]
+        max_movies = self._get_option("active", "max_movies", DEFAULT_MAX_MOVIES)
+        max_series = self._get_option("active", "max_series", DEFAULT_MAX_SERIES)
+        return ActiveSearchParameters(feeds, max_movies, max_series)
     
     def _get_list(self, section, options, start=0):
         l = []

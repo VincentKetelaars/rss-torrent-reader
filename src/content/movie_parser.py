@@ -12,7 +12,8 @@ from src.content.imdb_movie import IMDBMovie
 from src.http.request import Request
 
 from src.logger import get_logger
-from src.general.constants import IMDB_TIMESTAMP_FORMAT
+from src.general.constants import IMDB_TIMESTAMP_FORMAT, IMDB_DEFAULT_YEAR,\
+    IMDB_DEFAULT_DATE
 logger = get_logger(__name__)
 
 class MovieParser(GetParse):
@@ -34,27 +35,28 @@ class MovieParser(GetParse):
             return None
         logger.info("MovieParser starts parsing content of length %d", len(content))
         
+        def to_float(arg):
+            try:
+                return float(arg.strip())
+            except ValueError:
+                return -1.0
+            
         def to_int(arg):
             try:
                 return int(arg.strip())
-            except:
+            except ValueError:
                 return -1
             
         def first_arg(arg):
             i = to_int(arg)
             if i == -1: # Assume denoting season-episode
                 try:
-                    se = arg.split("-")
-                    s = to_int(se[0])
-                    e = to_int(se[1])
-                    return (s, e)
-                except:
+                    return [to_int(a) for a in arg.split("-")]
+                except TypeError:
                     logger.debug("Don't know what this is then: %s", arg)
             else:
                 return i
                 
-        
-        
         locale.setlocale(locale.LC_ALL, "en_US.UTF-8") # FIXME: Not windows compatible
 
         lines = content.split("\n")
@@ -67,13 +69,14 @@ class MovieParser(GetParse):
                 created = datetime.strptime(args[2], IMDB_TIMESTAMP_FORMAT)
                 modified = datetime.strptime(args[3], IMDB_TIMESTAMP_FORMAT)
                 directors = [g.strip() for g in args[12].split(",")]            
-                rated = to_int(args[8])
-                rating = to_int(args[9])
+                rated = to_float(args[8])
+                rating = to_float(args[9])
                 runtime = to_int(args[10])
                 year = to_int(args[11])
+                if year < IMDB_DEFAULT_YEAR: year = IMDB_DEFAULT_YEAR
                 genres = [g.strip() for g in args[12].split(",")]
                 numvotes = to_int(args[13])
-                release_date = datetime.min
+                release_date = datetime(*IMDB_DEFAULT_DATE)
                 try:
                     release_date = datetime.strptime(args[14], "%Y-%m-%d")
                 except:
@@ -81,19 +84,21 @@ class MovieParser(GetParse):
                         release_date = dateutil.parser.parse(args[14])
                     except:
                         pass
-                finally:                
-                    if release_date == datetime.min and year != -1:
-                        release_date = datetime(year, 1, 1)
                         
                 m = IMDBMovie(line, args[1], created, modified, args[4], args[5], args[6], directors,
                               rated, rating, runtime, year, genres, numvotes, release_date, args[15])
                 f = first_arg(args[0])
                 try:
-                    m.latest_season = f[0]
-                    m.latest_episode = f[1]
-                except:
-                    if f == 0 or f== 1:
+                    if len(f) == 2: # season - episode: Should be fased out
+                        m.latest_season = f[0]
+                        m.latest_episode = f[1]
+                    elif len(f) == 3:
                         m.download = f
+                        m.latest_season = f[1]
+                        m.latest_episode = f[2]
+                except TypeError:
+                    # Either 0 or 1 indicating download or positive number for index (from imdb.com)
+                    m.download = f # Only False when 0, which means True by default
                 if len(args) == 17:
                     m.time_downloaded = datetime.strptime(args[16], IMDB_TIMESTAMP_FORMAT)
                     

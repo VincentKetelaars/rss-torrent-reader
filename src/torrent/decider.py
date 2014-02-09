@@ -128,10 +128,17 @@ class Decider(object):
     def compare_torrents(self, t1, t2):
         """
         This function is intended to compare two torrents for the same movie/series,
-        and return the best. The comparision is first done on the preference list from the config file.
+        and return the best. For series this means, first establish if it is the same episode.
+        Older episodes have precedence obviously!
+        The comparison is first done on the preference list from the config file.
         If that does not result in a choice, a comparison is made based on the resolution.
         @return: the better of the two torrents, defaults to the first
         """
+        if t1.is_series() and t1.episode() != t2.episode():
+            if t1.episode() < t2.episode():
+                return t1
+            else:
+                return t2
         t1_title = t1.title.lower()
         t2_title = t2.title.lower()
         for item in self.preference.pref_list:

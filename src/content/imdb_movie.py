@@ -3,15 +3,12 @@ Created on Dec 31, 2013
 
 @author: Vincent Ketelaars
 '''
-import re
 from datetime import datetime
-from src.general.constants import SERIES_TYPES, MOVIE_TYPES
+from src.general.constants import SERIES_TYPES, MOVIE_TYPES, IMDB_DEFAULT_DATE
 
 from src.logger import get_logger
 from src.general.constants import IMDB_TIMESTAMP_FORMAT
 logger = get_logger(__name__)
-
-FAKE_START_DATE = datetime(1901, 1, 1)
 
 class IMDBMovie(object):
     '''
@@ -43,7 +40,7 @@ class IMDBMovie(object):
         self.download = download
         self.latest_season = latest_season
         self.latest_episode = latest_episode
-        self.time_downloaded = FAKE_START_DATE
+        self.time_downloaded = datetime(*IMDB_DEFAULT_DATE)
 
     def is_series(self):
         return self.type in SERIES_TYPES
@@ -59,14 +56,16 @@ class IMDBMovie(object):
         if self.is_movie():
             return self.download
         if self.is_series():
-            return season > self.latest_season or season == self.latest_season and episode > self.latest_episode
+            return self.download and season > self.latest_season or (season == self.latest_season and episode > self.latest_episode)
         logger.debug("Dealing with unknown film of type %s", self.type)
         return False
     
+    def is_downloaded(self):
+        return self.time_downloaded != IMDB_DEFAULT_DATE
+    
     def handled(self, season=0, episode=0):
-        if self.is_movie():
-            if not self.download: # Already marked as downloaded
-                return
+        if not self.download: # Already marked as downloaded
+            return
             self.download = False
         if self.is_series():
             if season <= self.latest_season and episode <= self.latest_episode:
@@ -84,14 +83,28 @@ class IMDBMovie(object):
         # Anything else that where the old value might be useful?
         
     def to_line(self):
+        """
+        The original line from imdb is slightly changed:
+        The line is extended by a timestamp indicating the last time it was downloaded
+        The first value is changed such that for movies it is either 0 or 1 indicating whether it should be downloaded
+        For series it is extended by the latest season and episode value that we're at (previously downloaded)
+        Movies = 0|1
+        Series = (0|1)-season-episode
+        """        
+        def quoted(text):
+            return '"' + str(text) + '"'
+        
+        def commalist(l):
+            return ",".join([quoted(i) for i in l])
+        
         # Only the part before the comma needs to be changed (every value is between quotes)
-        r = ""
-        if self.is_movie():
-            r = "1" if self.download else "0"
-        elif self.is_series():
-            r = str(self.latest_season) + "-" + str(self.latest_episode)
-        line = re.sub('"[\w-]*"', '"' + r + '"', self.line, count=1)
-        line += "," + self.time_downloaded.strftime(IMDB_TIMESTAMP_FORMAT)
+        r = "1" if self.download else "0"
+        if self.is_series():
+            r += "-" + str(self.latest_season) + "-" + str(self.latest_episode)
+        line = commalist([r, self.id, self.created.strftime(IMDB_TIMESTAMP_FORMAT), self.modified.strftime(IMDB_TIMESTAMP_FORMAT), 
+                         self.desc, self.title, self.type, ", ".join(self.directors), self.rate, self.rating, self.runtime, 
+                         self.year, ", ".join(self.genres), self.votes, self.release.strftime("%Y-%m-%d"), 
+                         self.url, self.time_downloaded.strftime(IMDB_TIMESTAMP_FORMAT)])
         return line
     
     def __str__(self):
