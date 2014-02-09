@@ -5,17 +5,14 @@ This python project uses rss torrent feeds to find torrents to download base on 
 
 ### CURRENT
 
-Separate threads will retrieve and parse all provided rss links. Simultaneously all provided IMDB watchlists are retrieved and parsed as well in separate threads. Once the watchlists are parsed, the movies are updated with data from a movies and a series file locally stored. (Updating what movies and episodes of series should be downloaded.)
+Separate threads will retrieve and parse all provided rss links. Additionally rss feeds can be created as well to actively search for movies and series. Simultaneously all provided IMDB watchlists are retrieved and parsed as well in separate threads. Once the watchlists are parsed, the movies are updated with data from a movies and a series file locally stored. (Updating what movies and episodes of series should be downloaded.)
 Once all of this is finished, torrents are matched with movies and series. If succesfull these matches will be handled by handlers. (Downloader, RSSCreator and Email are available now) Matches that are succesfully handled (All primary handlers need to be successfull) will change the status of the movies and series, which are subsequently written to their respective files again.
 
 ### TODO
 
 - Handlers that directly interact with Bittorrent programs to start downloads.
 - Handlers for other communication methods than email.
-
-### COMING UP
-
-- Current program only uses newly created torrents. Older movies and series will need active searches.
+- Filter torrents on language indicators
 
 ### INSTALL
 
