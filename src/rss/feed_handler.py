@@ -15,21 +15,24 @@ class FeedHandler(object):
     This class obtains a rss torrent feeds and reads in all torrents
     '''
 
-    def __init__(self, feeds):
-        self.url_feeds = feeds
+    def __init__(self, passive_feeds, active_feeds):
+        """
+        @type passive_feeds: List(str)
+        @type active_feeds: {str, IMDBMovie}
+        """
+        self.passive_feeds = passive_feeds
+        self.active_feeds = active_feeds
         self.event = Event()
-        self.threads = [TorrentRetriever(f, self.result_callback, self.error_callback) for f in feeds]
+        self.threads = [TorrentRetriever(f, self.result_callback, self.error_callback) for f in passive_feeds + active_feeds.keys()]
         for t in self.threads: 
             t.start()
-        self.results = []
-        self.returned = 0
+        self.results = {}
         self.lock = Lock()
 
-    def result_callback(self, result):
+    def result_callback(self, feed, result):
         with self.lock:
             if result is not None:
-                self.results.append(result)
-            self.returned += 1
+                self.results[feed] = result
             if self.ready():
                 self.event.set()
 
@@ -37,13 +40,19 @@ class FeedHandler(object):
         pass
     
     def ready(self):
-        return len(self.threads) == self.returned
+        return len(self.threads) == len(self.results)
     
     def channels(self):
-        return self.results
+        return self.results.values()
     
     def torrents(self):
-        return [t for c in self.results for t in c.items]
+        return [t for c in self.results.values() for t in c.items]
+    
+    def passive_torrents(self):
+        return [t for u, c in self.results.iteritems() for t in c.items if not u in self.active_feeds.keys()]
+    
+    def active_channels(self):
+        return [(c, self.active_feeds.get(u)) for u, c in self.results.iteritems() if u in self.active_feeds.keys()]
     
     def wait(self, timeout):
         self.event.wait(timeout)

@@ -5,6 +5,7 @@ Created on Feb 1, 2014
 '''
 import unittest
 import os
+import re
 from xml.etree.ElementTree import ElementTree
 
 from src.torrent.match import Match
@@ -28,7 +29,7 @@ class TestRSSCreator(unittest.TestCase):
 
     def tearDown(self):
         if os.path.exists(self.file):
-            os.remove(self.file)
+            pass #os.remove(self.file)
 
     def test_full_file(self):
         max_torrents = 25
@@ -46,6 +47,42 @@ class TestRSSCreator(unittest.TestCase):
         self.assertEqual(channel.find("title").text, self.title)
         self.assertEqual(channel.find("link").text, self.link)
         self.assertEqual(channel.find("description").text, self.description)
+        
+        # Check for CDATA
+        content = ""
+        with open(self.file, "r") as f:
+            content = f.read()        
+        cdata = re.findall("\<\!\[CDATA\[", content)
+        self.assertEqual(len(items) * 2, len(cdata))
+        
+    def test_write_read_write(self):
+        max_torrents = 25
+        number = 10 # Lower than max_torrents / 2
+        rsscreator = RSSCreator(self.matches[:number], file=self.file, max_torrents=max_torrents, title=self.title, 
+                                link=self.link, description=self.description)
+        rsscreator.start()
+        rsscreator.wait(HANDLER_WAIT)
+        rsscreator = RSSCreator(self.matches[number:number * 2], file=self.file, max_torrents=max_torrents, title=self.title, 
+                                link=self.link, description=self.description)
+        rsscreator.start()
+        rsscreator.wait(HANDLER_WAIT)
+        et = ElementTree(file=self.file)
+        channel = et.find("channel")
+        items = channel.findall("item")
+        self.assertEqual(len(items), number * 2)
+        self.assertEqual(channel.find("title").text, self.title)
+        self.assertEqual(channel.find("link").text, self.link)
+        self.assertEqual(channel.find("description").text, self.description)
+        self.maxDiff = None
+        self.assertItemsEqual([i.find("title").text for i in items], [m.torrent.title for m in self.matches[:number * 2]])
+        
+        # Check for CDATA
+        content = ""
+        with open(self.file, "r") as f:
+            content = f.read()        
+        cdata = re.findall("\<\!\[CDATA\[", content)
+        self.assertEqual(len(items) * 2, len(cdata))
+        
 
 if __name__ == "__main__":
     unittest.main()

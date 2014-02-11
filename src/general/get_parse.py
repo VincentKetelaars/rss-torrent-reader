@@ -11,8 +11,8 @@ logger = get_logger(__name__)
 class GetParse(Thread):
     '''
     This class forms an abstract class that allows for http requests and subsequent parsing
+    @param result_callback: Callback function returns input and result
     '''
-
 
     def __init__(self, input_, result_callback=None, error_callback=None):
         Thread.__init__(self)
@@ -36,7 +36,7 @@ class GetParse(Thread):
             self.error_callback(self.input)
         finally:
             if self.result_callback is not None:
-                self.result_callback(result)
+                self.result_callback(self.input, result)
         
     def value(self):
         return self.result

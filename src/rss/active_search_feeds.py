@@ -34,6 +34,12 @@ class ActiveSearchFeeds(object):
         return movies[0]
         
     def get_feeds(self, active_feed_params):
+        """
+        This method creates urls that will return results for searches on specific movies and series.
+        The movies are chosen such that the only older releases are searched than we have actually downloaded.
+        The series are chosen according to the ACTIVE_SERIES_CATEGORIES, and the respective ACTIVE_SERIES_SHARE weights.
+        @return: {url, film}
+        """
         chosen_movies = []
         if len(self.movies) > 0:
             most_current = self._get_most_current_movie()        
@@ -52,8 +58,8 @@ class ActiveSearchFeeds(object):
                 start_time = ACTIVE_SERIES_CATEGORIES[i]
             # In case there is room left for more
             chosen_series += sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
-        urls = []
+        urls = {}
         for m in chosen_movies + chosen_series:
             for u in active_feed_params.urls:
-                urls.append(u.replace(SEARCH_REPLACE_VALUE, quote_plus(m.title)))
+                urls[u.replace(SEARCH_REPLACE_VALUE, quote_plus(m.title))] = m
         return urls

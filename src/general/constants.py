@@ -38,8 +38,8 @@ NEWLINE = "\r\n"
 """
 WAIT TIMES
 """
-HANDLER_WAIT = 20.0 # Seconds
-FEED_WAIT = 20.0 # Seconds
+HANDLER_WAIT = 60.0 # Seconds
+FEED_WAIT = 60.0 # Seconds
 MERGER_WAIT = 60.0 # Seconds
 IMDB_WAIT = 60.0 # Seconds
 

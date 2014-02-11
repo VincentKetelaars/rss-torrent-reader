@@ -31,7 +31,7 @@ def main():
     imdb = IMDB(conf.get_imdb_csv_urls())
     merge = MergeIMDBCsv(imdb, movies_from_file, series_from_file)
     merge.start()
-    feed = FeedHandler(conf.get_torrent_rss_feeds() + active_feeds)
+    feed = FeedHandler(conf.get_torrent_rss_feeds(), active_feeds)
     decider = Decider(merge, feed, conf.get_torrent_preference())
     matches = decider.decide() # blocking
     factory = HandlerFactory(matches, conf)

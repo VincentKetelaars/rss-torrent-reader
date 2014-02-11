@@ -23,7 +23,7 @@ class IMDB(object):
         self.results = []
         self.lock = Lock()
         
-    def result_callback(self, result):
+    def result_callback(self, csv, result):
         with self.lock:
             if result is not None:
                 self.results.append(result)

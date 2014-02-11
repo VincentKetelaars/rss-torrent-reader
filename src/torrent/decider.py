@@ -26,25 +26,30 @@ class Decider(object):
         self.feeds.wait(FEED_WAIT)
         self.merger.wait(MERGER_WAIT)
         logger.info("Start deciding")
-        results = {}
+        self.results = {}
         movies = [m for m in self.merger.movies().itervalues() if m.should_download(sys.maxint, sys.maxint) ]
-        torrents = self.feeds.torrents()
-        for t in torrents:
-            if self.meets_requirements(t):
-                for m in movies:
-                    if self.match(m, t):
-                        if m.is_movie():
-                            logger.info("Match %s %s", m.title, t.title)
-                        elif m.is_series():
-                            logger.info("Match %s %s, episode %s", m.title, t.title, t.episode())
-                            
-                        if m.id not in results:
-                            results[m.id] = t
-                        else:
-                            results[m.id] = self.compare_torrents(results[m.id], t)
-                        break
+        for t in self.feeds.passive_torrents():
+            self.movie_matcher(t, movies)
+        for c, movie in self.feeds.active_channels():
+            for t in c.items:
+                self.movie_matcher(t, [movie])
                     
-        return [Match(self.merger.movies().get(k), v) for k, v in results.iteritems()]
+        return [Match(self.merger.movies().get(k), v) for k, v in self.results.iteritems()]
+    
+    def movie_matcher(self, t, movies):
+        if self.meets_requirements(t):
+            for m in movies:
+                if self.match(m, t):
+                    if m.is_movie():
+                        logger.debug("Match %s %s", m.title, t.title)
+                    elif m.is_series():
+                        logger.debug("Match %s %s, episode %s", m.title, t.title, t.episode())
+                        
+                    if m.id not in self.results:
+                        self.results[m.id] = t
+                    else:
+                        self.results[m.id] = self.compare_torrents(self.results[m.id], t)
+                    break
     
     def meets_requirements(self, torrent):
         """

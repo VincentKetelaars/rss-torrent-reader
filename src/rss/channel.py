@@ -40,7 +40,6 @@ class Item(object):
         self._episode = (0, 0)
         self._film_title = None
         self._film_year = 0
-        logger.debug(self.title)
         self._parse_title() # Determines resolution by claim
         self._parse_description() # Determines resolution by actual numbers
         logger.debug("%s %s %d %s %s %s", self.title, self._film_title, self._film_year, self._series, self._episode, self._resolution)        

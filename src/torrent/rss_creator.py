@@ -60,12 +60,12 @@ class RSSCreator(MatchHandler):
             root.append(channel)
         if len(matches) > self.max_torrents: # If there are more than we can fit, choose the first self.max_torrents
             matches = matches[:self.max_torrents]
-        self.insert_CDATA(matches)
         for match in matches:
             channel.insert(3, match.torrent.item) # After title, link, description
         items = channel.findall("item")
         while len(items) > self.max_torrents: # If there are more elements than we can fit
-            channel.remove(items.pop()) # Remove the oldest from the list
+            channel.remove(items.pop()) # Remove the oldest from the list        
+        self.insert_CDATA(items)
         tree.write(self.file, encoding="utf-8", xml_declaration=True)
         pretty_xml = self.prettify_xml(root)
         with open(self.file, "wb") as f:
@@ -77,12 +77,12 @@ class RSSCreator(MatchHandler):
         e.text = text
         return e
     
-    def insert_CDATA(self, matches):
-        for m in matches:
-            for e in m.torrent.item.iter():
-                if e.tag == "description" or e.tag.endswith("magnetURI") and not e.text.startswith("<![CDATA["):
+    def insert_CDATA(self, items):
+        for item in items:
+            for e in item.iter():
+                if (e.tag == "description" or e.tag.endswith("magnetURI")) and not e.text.startswith("<![CDATA["):
                     e.append(self.create_element_with_text("![CDATA[", e.text))
-                    e.text = None
+                    e.text = ""
     
     def remove_empty_space(self, element):
         for e in element.iter():
