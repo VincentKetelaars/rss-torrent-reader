@@ -35,8 +35,8 @@ nosetests.xml
 .project
 .pydevproject
 
-# log file
-log.log
+# log files
+logs/*
 
 # conf
 conf/movies.csv
