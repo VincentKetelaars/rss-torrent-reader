@@ -68,10 +68,9 @@ class IMDBMovie(object):
             return
             self.download = False
         if self.is_series():
-            if season <= self.latest_season and episode <= self.latest_episode:
+            if season < self.latest_season or (season == self.latest_season and episode <= self.latest_episode):
                 return
             self.set_episode(season, episode)
-        # Should we check the current time?
         self.time_downloaded = datetime.utcnow()
     
     def merge(self, movie):

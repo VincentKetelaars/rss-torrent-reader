@@ -9,6 +9,7 @@ from src.torrent.match_handler import MatchHandler
 from src.http.request import Request
 
 from src.logger import get_logger
+from threading import Thread
 logger = get_logger(__name__)
 
 class Downloader(MatchHandler):
@@ -19,6 +20,15 @@ class Downloader(MatchHandler):
     def __init__(self, matches, directory, **kwargs):
         MatchHandler.__init__(self, matches, name="Downloader", **kwargs)
         self.directory = directory
+        
+    def handle_matches(self, matches):
+        threads = [(m, Thread(target=self.handle, args=(m,))) for m in matches]
+        for t in threads:
+            t[1].start()
+        for t in threads:
+            t[1].join() # Wait till they are all done
+            self.successes.append(t[0])
+        return matches
         
     def handle(self, match):
         url = match.torrent.url()

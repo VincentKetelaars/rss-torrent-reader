@@ -13,6 +13,8 @@ from src.general.constants import HANDLER_WAIT
 from src.torrent.email_handler import EmailHandler
 logger = get_logger(__name__)
 
+HANDLER_LOOKUP = {"downloader" : Downloader, "rsscreator" : RSSCreator, "email" : EmailHandler}
+
 class HandlerFactory(Thread):
     '''
     This class takes in Configuration and instantiates the handlers it is supposed to use
@@ -39,12 +41,9 @@ class HandlerFactory(Thread):
         self.handled_matches = set(self.matches) # Initially all are handled
     
     def _get_handler(self, handler, params, primary=False):
-        if handler == "downloader":
-            return Downloader(self.matches, essential=primary, **params)
-        elif handler == "rsscreator":
-            return RSSCreator(self.matches, essential=primary, **params)
-        elif handler == "email":
-            return EmailHandler(self.matches, essential=primary, **params)
+        call = HANDLER_LOOKUP.get(handler, None)
+        if call is not None:
+            return call(self.matches, essential=primary, **params)
         else:
             logger.error("This %s handler is unknown", handler)
         return None

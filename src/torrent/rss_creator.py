@@ -98,5 +98,8 @@ class RSSCreator(MatchHandler):
         """
         self.remove_empty_space(element)
         rough_string = ET.tostring(element, encoding)
-        reparsed = minidom.parseString(rough_string)
+        try:
+            reparsed = minidom.parseString(rough_string)
+        except UnicodeEncodeError:
+            reparsed = rough_string
         return reparsed.toprettyxml(encoding=encoding)

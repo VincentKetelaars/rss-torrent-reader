@@ -17,6 +17,7 @@ class MatchHandler(Thread):
         self.matches = matches
         self.event = Event()
         self.essential = essential
+        self.successes = []
         
     def run(self):
         self.successes = self.handle_matches(self.matches)        

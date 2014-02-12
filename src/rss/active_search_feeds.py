@@ -46,6 +46,9 @@ class ActiveSearchFeeds(object):
             dmovies = [m for m in self.movies.itervalues() if m.should_download() and 
                        (m.release < most_current.release or m.release == datetime.min)]
             chosen_movies = sample(dmovies, min(active_feed_params.max_movies, len(dmovies)))
+            if len(chosen_movies) < active_feed_params.max_movies: # Fill up as much as possible if needed
+                dmovies = [m for m in self.movies.itervalues() if m.should_download() and m.release > most_current.release]
+                chosen_movies += sample(dmovies, min(active_feed_params.max_movies - len(chosen_movies), len(dmovies)))
         dseries = [s for s in self.series.itervalues() if s.should_download(sys.maxint, sys.maxint)]
         chosen_series = []
         if len(dseries) > 0:
