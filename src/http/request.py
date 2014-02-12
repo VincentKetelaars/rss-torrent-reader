@@ -10,6 +10,8 @@ from cookielib import CookieJar
 from collections import OrderedDict
 
 from src.logger import get_logger
+import httplib
+from httplib import IncompleteRead
 logger = get_logger(__name__)
 
 IMDBLOGIN = "https://secure.imdb.com/register/login?ref_=nv_usr_lgin_3"
@@ -72,6 +74,9 @@ class Request(object):
                         logger.warning("Don't know encoding %s", encoding)                        
             else:
                 logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), self.url)
+        except IncompleteRead as e: # Probably the servers fault
+            content = e.partial # Let's hope it's not encoded
+            logger.debug("We've got an IncompleteRead, partial content of length %d", len(content))
         except:
             # TODO: Retry in some cases..
             logger.exception("Can't retrieve request %s", self.url)

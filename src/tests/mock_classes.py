@@ -24,8 +24,9 @@ class MockMerger(MergeIMDBCsv):
 
 class MockTorrentFeed(FeedHandler):
 
-    def __init__(self, channel):
-        self.results = [channel]
+    def __init__(self, url_channel):
+        self.results = url_channel
+        self.active_feeds = {}
         
     def wait(self, timeout):
         return

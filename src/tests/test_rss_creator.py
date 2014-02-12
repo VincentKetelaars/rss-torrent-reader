@@ -29,7 +29,7 @@ class TestRSSCreator(unittest.TestCase):
 
     def tearDown(self):
         if os.path.exists(self.file):
-            pass #os.remove(self.file)
+            os.remove(self.file)
 
     def test_full_file(self):
         max_torrents = 25

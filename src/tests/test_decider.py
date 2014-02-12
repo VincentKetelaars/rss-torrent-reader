@@ -25,28 +25,28 @@ class TestDecider(unittest.TestCase):
         not_0 = "DD5"
         not_list = [not_0]
         p = Preference(not_list, [], [], 0, 0)
-        decider = Decider(MockMerger(self.movies), MockTorrentFeed(self.channel), p)
+        decider = Decider(MockMerger(self.movies), MockTorrentFeed({"" : self.channel}), p)
         result = decider.decide()
         
         self.assertEqual(len(result), 0)
         
     def test_resolution(self):
         p = Preference([], [], [], 1920, 1080)
-        decider = Decider(MockMerger(self.movies), MockTorrentFeed(self.channel), p)
+        decider = Decider(MockMerger(self.movies), MockTorrentFeed({"" : self.channel}), p)
         result = decider.decide()
         self.assertEqual(len(result), 1)
         p = Preference([], [], [], 1921, 1081)
-        decider = Decider(MockMerger(self.movies), MockTorrentFeed(self.channel), p)
+        decider = Decider(MockMerger(self.movies), MockTorrentFeed({"" : self.channel}), p)
         result = decider.decide()        
         self.assertEqual(len(result), 0)
         p = Preference([], [], [], 640, 480)
-        decider = Decider(MockMerger(self.movies), MockTorrentFeed(self.channel), p)
+        decider = Decider(MockMerger(self.movies), MockTorrentFeed({"" : self.channel}), p)
         result = decider.decide()        
         self.assertEqual(len(result), 1)
         
     def test_compare(self):
         p = Preference([], [], ["IMAX", "1080p"], 1920, 1080)
-        decider = Decider(MockMerger(self.movies), MockTorrentFeed(self.channel), p)
+        decider = Decider(MockMerger(self.movies), MockTorrentFeed({"" : self.channel}), p)
         matches = decider.decide()        
         self.assertEqual(len(matches), 1)
         self.assertIn(p.pref_list[0].lower(), matches[0].torrent.title.lower())
@@ -55,14 +55,14 @@ class TestDecider(unittest.TestCase):
         torrent = "A Very Harold and Kumar Christmas 2011 3D HSBS YIFY"
         movie = "A Very Harold & Kumar Christmas"
         decider = Decider(MockMerger({"asdf" : MockMovie(movie, 2011, "Feature Film")}), 
-                          MockTorrentFeed(MockChannel([MockItem(torrent, "")])), Preference([],[],[],0,0))
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), Preference([],[],[],0,0))
         result = decider.decide()
         self.assertEqual(len(result), 1)
         
         torrent = "Revolution.2012.S02E13.720p.HDTV.X264-DIMENSION [PublicHD]"
         series = "Revolution"
         decider = Decider(MockMerger({"asdfl" : MockMovie(series, 2012, "TV Series")}), 
-                          MockTorrentFeed(MockChannel([MockItem(torrent, "")])), Preference([],[],[],0,0))
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), Preference([],[],[],0,0))
         result = decider.decide()
         self.assertEqual(len(result), 1)
         
