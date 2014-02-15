@@ -22,15 +22,14 @@ class Downloader(MatchHandler):
         self.directory = directory
         
     def handle_matches(self, matches):
-        threads = [(m, Thread(target=self.handle, args=(m,))) for m in matches]
+        threads = [(m, Thread(target=self.handle, args=(m,self.successes))) for m in matches]
         for t in threads:
             t[1].start()
         for t in threads:
             t[1].join() # Wait till they are all done
-            self.successes.append(t[0])
         return matches
         
-    def handle(self, match):
+    def handle(self, match, successes):
         url = match.torrent.url()
         if url is not None:
             filename = match.torrent.filename()
@@ -45,6 +44,7 @@ class Downloader(MatchHandler):
                 try:
                     with open(path, "wb") as f:
                         f.write(download)
+                    successes.append(match)
                     return True
                 except IOError:
                     logger.error("Could not write to %s", path)

@@ -27,6 +27,7 @@ class MockTorrentFeed(FeedHandler):
     def __init__(self, url_channel):
         self.results = url_channel
         self.active_feeds = {}
+        self.passive_feeds = []
         
     def wait(self, timeout):
         return

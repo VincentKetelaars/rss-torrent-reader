@@ -38,10 +38,10 @@ NEWLINE = "\r\n"
 """
 WAIT TIMES
 """
-HANDLER_WAIT = 60.0 # Seconds
-FEED_WAIT = 60.0 # Seconds
-MERGER_WAIT = 60.0 # Seconds
-IMDB_WAIT = 60.0 # Seconds
+HANDLER_WAIT = 15.0 # Seconds per match
+FEED_WAIT = 10.0 # Seconds per url
+IMDB_WAIT = 120.0 # Seconds
+MERGER_WAIT = IMDB_WAIT
 
 """
 GENERAL CONSTANTS

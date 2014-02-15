@@ -87,7 +87,7 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        series = re.search("\s(S(\d{2})(E\d{2})*|(\d{1,2})(x\d{2})|season\s((\d{1,2})\-?)+)\s", ndtitle, re.IGNORECASE)
+        series = re.search("\s(S(\d{2})(E\d{2})*|(\d{1,2})(x\d{2})|season\s(\d+\-)?(\d{1,2}))(\s|$)", ndtitle, re.IGNORECASE)
         movies = re.search("\s(\[?\(?(\d{4})\)?\]?|720p|1080p|HDTV)\s?", ndtitle)
         if series:
             self._series = True
@@ -100,7 +100,7 @@ class Item(object):
             elif series.group(4) is not None:
                 season = int(series.group(4))
             elif series.group(7) is not None:
-                season = int(series.group(6))
+                season = int(series.group(7))
             episode = 0
             if series.group(3) is not None: 
                 episode = int(series.group(3)[1:])

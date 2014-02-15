@@ -39,6 +39,9 @@ class FeedHandler(object):
     def error_callback(self, c):
         pass
     
+    def num_feeds(self):
+        return len(self.passive_feeds) + len(self.active_feeds)
+    
     def ready(self):
         return len(self.threads) == len(self.results)
     

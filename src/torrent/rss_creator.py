@@ -5,9 +5,10 @@ Created on Feb 1, 2014
 '''
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, Element, ParseError
+from xml.dom import minidom
+from datetime import datetime
 
 from src.torrent.match_handler import MatchHandler
-from xml.dom import minidom
 
 from src.logger import get_logger
 logger = get_logger(__name__)
@@ -18,9 +19,9 @@ ET._original_serialize_xml = ET._serialize_xml
 def _serialize_xml(write, elem, encoding, qnames, namespaces):
     if elem.tag == '![CDATA[':
         try:
-            write("<%s%s]]>" % (elem.tag, elem.text))
+            write("<%s%s]]>" % (elem.tag, elem.text.encode("utf-8")))
         except UnicodeEncodeError: # TODO, handle this better
-            logger.error("Can't encode this: %s", elem.text)
+            logger.exception("Can't encode this: %s", elem.text)
         return
     return ET._original_serialize_xml(write, elem, encoding, qnames, namespaces)
 ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
@@ -41,6 +42,7 @@ class RSSCreator(MatchHandler):
     def handle_matches(self, matches):
         if self.file is None or len(matches) == 0:
             return []
+        logger.debug("Writing %d matches to %s", len(matches), self.file)
         ET.register_namespace("torrent", "http://xmlns.ezrss.it/0.1/")
         try:
             tree = ElementTree(file=self.file)
@@ -57,6 +59,8 @@ class RSSCreator(MatchHandler):
             channel.append(self.create_element_with_text("title", self.title))
             channel.append(self.create_element_with_text("link", self.link))
             channel.append(self.create_element_with_text("description", self.description))
+            build_date = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S %j") # Sat, 07 Sep 2002 9:42:31 GMT
+            channel.append(self.create_element_with_text("lastBuildDate", build_date)) 
             root.append(channel)
         if len(matches) > self.max_torrents: # If there are more than we can fit, choose the first self.max_torrents
             matches = matches[:self.max_torrents]
@@ -80,9 +84,12 @@ class RSSCreator(MatchHandler):
     def insert_CDATA(self, items):
         for item in items:
             for e in item.iter():
-                if (e.tag == "description" or e.tag.endswith("magnetURI")) and not e.text.startswith("<![CDATA["):
-                    e.append(self.create_element_with_text("![CDATA[", e.text))
-                    e.text = ""
+                if (e.tag == "description" or e.tag.endswith("magnetURI")):
+                    if not e.text is None and not e.text.startswith("<![CDATA["):
+                        e.append(self.create_element_with_text("![CDATA[", e.text))
+                        e.text = ""
+                    else:
+                        logger.warning("Text is None for item %s and tag %s", item.find("title").text, e.tag)
     
     def remove_empty_space(self, element):
         for e in element.iter():
@@ -101,5 +108,6 @@ class RSSCreator(MatchHandler):
         try:
             reparsed = minidom.parseString(rough_string)
         except UnicodeEncodeError:
-            reparsed = rough_string
+            logger.exception("")
+            return rough_string
         return reparsed.toprettyxml(encoding=encoding)

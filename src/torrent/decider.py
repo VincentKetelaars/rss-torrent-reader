@@ -23,7 +23,7 @@ class Decider(object):
         self.preference = preference
         
     def decide(self):
-        self.feeds.wait(FEED_WAIT)
+        self.feeds.wait(FEED_WAIT * self.feeds.num_feeds())
         self.merger.wait(MERGER_WAIT)
         logger.info("Start deciding")
         self.results = {}

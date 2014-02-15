@@ -14,20 +14,20 @@ class WriteIMDBToCsv(Thread):
     Write the list of movies and series to two separate files
     '''
 
-    def __init__(self, movies, handler, movies_file, series_file):
+    def __init__(self, movies, handler_factory, movies_file, series_file):
         Thread.__init__(self)
         self.movies = movies
-        self.handler = handler
+        self.handler_factory = handler_factory
         self.movies_file = movies_file
         self.series_file = series_file
         
     def run(self):
-        self.handler.wait(HANDLER_WAIT)
+        self.handler_factory.wait(HANDLER_WAIT * self.handler_factory.num_matches())
         
-        if len(self.movies) == 0: # Something has probably gone wrong.. Not overwriting this
+        if len(self.movies) == 0: # Something has probably gone wrong.. Not overwriting the current file
             return
         
-        for match in self.handler.handled():
+        for match in self.handler_factory.handled():
             logger.info("%s %shas been handled", match.torrent.film_title(), "%s " % (match.torrent.episode(),) if match.movie.is_series() else "")
             self.movies[match.movie.id].handled(*match.torrent.episode()) # Update episode number
         

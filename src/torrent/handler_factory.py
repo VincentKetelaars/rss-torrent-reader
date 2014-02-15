@@ -41,7 +41,7 @@ class HandlerFactory(Thread):
         self.handled_matches = set(self.matches) # Initially all are handled
     
     def _get_handler(self, handler, params, primary=False):
-        call = HANDLER_LOOKUP.get(handler, None)
+        call = HANDLER_LOOKUP.get(handler.lower(), None)
         if call is not None:
             return call(self.matches, essential=primary, **params)
         else:
@@ -66,10 +66,14 @@ class HandlerFactory(Thread):
                 break
         self.event.set()
         
+    def num_matches(self):
+        return len(self.matches)
+        
     def wait(self, timeout=0.0):
         self.event.wait(timeout)
         
     def handled(self):
         if all([h.done() for h in self.handler_threads if h.essential]):
             return list(self.handled_matches)
-        return []
+        # TODO: Also if only partially done, check for those
+        return

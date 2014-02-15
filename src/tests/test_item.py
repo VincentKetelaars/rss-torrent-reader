@@ -73,6 +73,12 @@ class TestItem(unittest.TestCase):
         self.assertTrue(item.is_series())
         self.assertEqual(item.episode(), (4,0))
         
+        title = "Dexter season 8"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Dexter")
+        self.assertTrue(item.is_series())
+        self.assertEqual(item.episode(), (8,0))
+        
     def test_parsing_title_movie(self):        
         title = "The Counselor 2013 UNRATED EXTENDED 1080p BluRay AVC DTS HD MA 5 1 PublicHD"
         item = MockItem(title, "")
