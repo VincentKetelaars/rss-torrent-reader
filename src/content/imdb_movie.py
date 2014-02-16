@@ -71,14 +71,15 @@ class IMDBMovie(object):
     
     def handled(self, season=0, episode=0):
         if not self.download: # Already marked as downloaded
-            return
+            return False
         if self.is_movie():
             self.download = False
         if self.is_series():
             if season < self.latest_season or (season == self.latest_season and episode <= self.latest_episode):
-                return
+                return False
             self.set_episode(season, episode)
         self.time_downloaded = datetime.utcnow()
+        return True
     
     def merge(self, movie):
         if movie is None:
