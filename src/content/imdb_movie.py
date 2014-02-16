@@ -41,6 +41,12 @@ class IMDBMovie(object):
         self.latest_season = latest_season
         self.latest_episode = latest_episode
         self.time_downloaded = datetime(*IMDB_DEFAULT_DATE)
+        
+    def inclusive_title(self):
+        """
+        Return title + episode (if series)
+        """
+        return self.title + (" S%02dE%02d" % (self.latest_season, self.latest_season) if self.is_series() else "")
 
     def is_series(self):
         return self.type in SERIES_TYPES

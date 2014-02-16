@@ -37,7 +37,7 @@ class EmailHandler(MatchHandler):
         
         txt = "These are the torrents that correspond to movies or series in your IMDB Watchlist\n"
         for m in matches:
-            txt += m.torrent.url() + " \n"
+            txt += self._email_content(m) + " \n"
         msg = MIMEText(txt)
         
         msg['Subject'] = 'Torrent URLs'
@@ -59,5 +59,10 @@ class EmailHandler(MatchHandler):
             return []
         finally:
             smtp.quit()
-        return matches        
+        return matches
+    
+    def _email_content(self, match):
+        text = "Title: %s\nIMDB url: %s\nTorrent title: %s\nTorrent url: %s\n" % \
+        (match.movie.inclusive_title(), match.movie.url, match.torrent.title, match.torrent.url())
+        return text
         

@@ -40,7 +40,8 @@ class MockMovie(IMDBMovie):
 
 class MockTorrent(object):
     
-    def __init__(self, filename, url):
+    def __init__(self, filename, url, title=""):
+        self.title = title
         self._filename = filename
         self._url = url
     
