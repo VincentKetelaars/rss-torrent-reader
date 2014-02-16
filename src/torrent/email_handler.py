@@ -62,7 +62,8 @@ class EmailHandler(MatchHandler):
         return matches
     
     def _email_content(self, match):
-        text = "Title: %s\nIMDB url: %s\nTorrent title: %s\nTorrent url: %s\n" % \
-        (match.movie.inclusive_title(), match.movie.url, match.torrent.title, match.torrent.url())
+        text = "Title: %s%s\nIMDB url: %s\nTorrent title: %s\nTorrent url: %s\n" % \
+        (match.movie.title, (" S%02dE%02d" % match.torrent.episode() if match.movie.is_series() else ""), 
+         match.movie.url, match.torrent.title, match.torrent.url())
         return text
         
