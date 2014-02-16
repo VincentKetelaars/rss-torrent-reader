@@ -79,10 +79,11 @@ class Decider(object):
         if (movie.is_series() and not torrent.is_series()) or (movie.is_movie() and torrent.is_series()):
             return False
         
-        match, rank = self._match_titles(movie.title, torrent.film_title())
-        if match and rank == 0:
-            if movie.is_series() and not movie.should_download(*torrent.episode()):
-                return False
+        if movie.is_series() and not movie.should_download(*torrent.episode()):
+            return False
+        
+        match, rank = self._match_titles(movie.title, torrent.film_title())        
+        if match and rank == 0:            
             return True
         
         if not match: # Only partial matches continue
