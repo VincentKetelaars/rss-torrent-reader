@@ -46,7 +46,7 @@ class IMDBMovie(object):
         """
         Return title + episode (if series)
         """
-        return self.title + (" S%02dE%02d" % (self.latest_season, self.latest_season) if self.is_series() else "")
+        return self.title + (" S%02dE%02d" % (self.latest_season, self.latest_episode) if self.is_series() else "")
 
     def is_series(self):
         return self.type in SERIES_TYPES
