@@ -11,6 +11,7 @@ from src.rss.torrent import Torrent
 from src.http.request import Request
 
 from src.logger import get_logger
+from xml.etree.ElementTree import ParseError
 logger = get_logger(__name__)
 
 class TorrentRetriever(GetParse):
@@ -25,7 +26,10 @@ class TorrentRetriever(GetParse):
     
     def parse(self, page):
         if page is not None:
-            rss = ET.fromstring(page)
+            try:
+                rss = ET.fromstring(page)
+            except ParseError:
+                return None
             c = rss.find("channel")
             title = c.find("title")
             desc = c.find("description")
