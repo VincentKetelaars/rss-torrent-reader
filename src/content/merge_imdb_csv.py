@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 class MergeIMDBCsv(Thread):
 
     def __init__(self, imdb, movies_from_file, series_from_file):
-        Thread.__init__(self)
+        Thread.__init__(self, name="IMDBMerger")
         self.imdb = imdb
         self.movies_from_file = movies_from_file
         self.series_from_file = series_from_file

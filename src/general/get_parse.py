@@ -14,8 +14,8 @@ class GetParse(Thread):
     @param result_callback: Callback function returns input and result
     '''
 
-    def __init__(self, input_, result_callback=None, error_callback=None):
-        Thread.__init__(self)
+    def __init__(self, input_, result_callback=None, error_callback=None, name="GetParse"):
+        Thread.__init__(self, name=name)
         self.setDaemon(True)
         self.input = input_
         self.result_callback = result_callback

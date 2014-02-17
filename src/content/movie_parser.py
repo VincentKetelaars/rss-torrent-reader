@@ -18,6 +18,9 @@ logger = get_logger(__name__)
 
 class MovieParser(GetParse):
     
+    def __init__(self, *args, **kwargs):
+        GetParse.__init__(self, name="MovieParser", *args, **kwargs)
+    
     def parse(self, content):
         """
         Parse CSV watchlist file

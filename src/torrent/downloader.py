@@ -22,7 +22,7 @@ class Downloader(MatchHandler):
         self.directory = directory
         
     def handle_matches(self, matches):
-        threads = [(m, Thread(target=self.handle, args=(m,self.successes))) for m in matches]
+        threads = [(m, Thread(target=self.handle, name="Downloader_" + m.movie.title, args=(m,self.successes))) for m in matches]
         for t in threads:
             t[1].start()
         for t in threads:

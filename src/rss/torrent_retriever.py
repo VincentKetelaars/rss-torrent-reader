@@ -18,6 +18,9 @@ class TorrentRetriever(GetParse):
        
     NAMESPACES = {"torrent" : "http://xmlns.ezrss.it/0.1/"}
     
+    def __init__(self, *args, **kwargs):
+        GetParse.__init__(self, name="TorrentRetriever", *args, **kwargs)
+    
     def item_text(self, item, child):
         x = item.find(child)
         if x is not None:

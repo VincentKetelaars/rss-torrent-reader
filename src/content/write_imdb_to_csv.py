@@ -15,7 +15,7 @@ class WriteIMDBToCsv(Thread):
     '''
 
     def __init__(self, movies, handler_factory, movies_file, series_file):
-        Thread.__init__(self)
+        Thread.__init__(self, name="IMDBCSVWriter")
         self.movies = movies
         self.handler_factory = handler_factory
         self.movies_file = movies_file
@@ -25,6 +25,7 @@ class WriteIMDBToCsv(Thread):
         self.handler_factory.wait(HANDLER_WAIT * self.handler_factory.num_matches())
         
         if len(self.movies) == 0: # Something has probably gone wrong.. Not overwriting the current file
+            logger.info("We are not writing %d movies to file", len(self.movies))
             return
         
         for match in self.handler_factory.handled():

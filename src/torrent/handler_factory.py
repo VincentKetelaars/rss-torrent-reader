@@ -75,5 +75,9 @@ class HandlerFactory(Thread):
     def handled(self):
         if all([h.done() for h in self.handler_threads if h.essential]):
             return list(self.handled_matches)
-        # TODO: Also if only partially done, check for those
-        return
+        # Also if only partially done, check for those
+        handled = set(self.matches)
+        for handler in self.handler_threads:
+            if handler.essential:
+                handled.intersection_update(handler.handled())
+        return list(handled)
