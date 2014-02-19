@@ -50,6 +50,7 @@ RESOLUTION_ZERO = (0, 0) # default / unknown
 RESOLUTION_720 = (1280, 720)
 RESOLUTION_1080 = (1920, 1080)
 RESOLUTION_HDTV = (720, 404) # EZTV HDTV Torrent example resolution
+RESOLUTION_DVDRIP = (600, 300) # Ranges from 500-700 x 250-400 in a dozen tests
 RESOLUTION_BRRIP = RESOLUTION_720 # Use this as first measure and hope for more in the description
 
 """

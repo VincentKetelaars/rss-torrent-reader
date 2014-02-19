@@ -8,7 +8,7 @@ import unittest
 from src.tests.test_decider import get_channel
 from src.tests.mock_classes import MockItem
 from src.general.constants import RESOLUTION_HDTV, RESOLUTION_720,\
-    RESOLUTION_1080, RESOLUTION_BRRIP
+    RESOLUTION_1080, RESOLUTION_BRRIP, RESOLUTION_DVDRIP, RESOLUTION_ZERO
 
 class TestItem(unittest.TestCase):
 
@@ -58,7 +58,7 @@ class TestItem(unittest.TestCase):
         self.assertEqual(item.film_title(), "Game of Thrones")
         self.assertTrue(item.is_series())
         self.assertEqual(item.episode(), (1,0))
-        self.assertEqual(item.resolution(), (0, 0))
+        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
         
         title = "[TORRENT] Opposite Worlds S01E05E06 HDTV x264-FUM[ettv]"
         item = MockItem(title, "")
@@ -77,7 +77,25 @@ class TestItem(unittest.TestCase):
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Dexter")
         self.assertTrue(item.is_series())
+        self.assertEqual(item.episode(), (8,0))        
+        
+        title =  "Terra Nova S01E01-02 XVID Dual Audio"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Terra Nova")
+        self.assertTrue(item.is_series())
+        self.assertEqual(item.episode(), (1,2))
+        
+        title = "How I Met Your Mother S01-S08 DVDRip XviD-SP"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "How I Met Your Mother")
+        self.assertTrue(item.is_series())
         self.assertEqual(item.episode(), (8,0))
+        
+        title = "Lost The Complete Series Season 1,2,3,4,5,6 + English Subs"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Lost The Complete Series")
+        self.assertTrue(item.is_series())
+        self.assertEqual(item.episode(), (6,0))
         
     def test_parsing_title_movie(self):        
         title = "The Counselor 2013 UNRATED EXTENDED 1080p BluRay AVC DTS HD MA 5 1 PublicHD"
@@ -121,6 +139,66 @@ class TestItem(unittest.TestCase):
         self.assertTrue(item.is_movie())
         self.assertEqual(item.film_year, 2004)
         self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        
+        title = "Green Street Hooligans {2005} DVDRip.Xvid~Wolftatt2~"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Green Street Hooligans")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2005)
+        self.assertEqual(item.resolution(), RESOLUTION_DVDRIP)
+        
+        title = "Green Street Hooligans[2005]DvDrip-aXXo"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Green Street Hooligans")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2005)
+        self.assertEqual(item.resolution(), RESOLUTION_DVDRIP)
+        
+        title = "Green Street Hooligans Duology BRRip H264(BINGOWINGZ UKB RG)"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Green Street Hooligans Duology")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        
+        title = "The Last Samurai(2003)1080p BDRip In[Hindi-Tamil-English]AC3-DGrea8"        
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "The Last Samurai")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2003)
+        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        
+        title = "Indiana Jones and the Last Crusade DVD iso Subtitles English, German, French, Dutch, Norwegian, Swedish, Danish, Finnish"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Indiana Jones and the Last Crusade")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.resolution(), RESOLUTION_DVDRIP)
+
+        title = "Homefront *2013* [WEB-DL.XviD.AC3] [5:1] [ENG / Subtitles PL]"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Homefront")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2013)
+        self.assertEqual(item.resolution(), RESOLUTION_ZERO)
+        
+        title = "The 40 Year Old Virgin UNRATED DVDRip XviD-DiAMOND"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "The 40 Year Old Virgin UNRATED")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.resolution(), RESOLUTION_DVDRIP)
+        
+        title = "Green Street Hooligans Trilogy 720P BRRIPS XVID AC3-MAJESTiC"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "Green Street Hooligans Trilogy")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        
+        title = "2012 2009 1080p BrRip x264 1 7 GB YIFY"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "2012")
+        self.assertTrue(item.is_movie())
+        self.assertEqual(item.film_year, 2009)
+        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        
         
     def test_description_parsing(self):
         description = "RESOLUTION...................: 1920*800"

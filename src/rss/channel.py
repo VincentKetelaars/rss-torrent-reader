@@ -7,7 +7,7 @@ import re
 
 from src.logger import get_logger
 from src.general.constants import RESOLUTION_720, RESOLUTION_1080,\
-    RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO
+    RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO, RESOLUTION_DVDRIP
 logger = get_logger(__name__)
 
 class Channel(object):
@@ -87,25 +87,25 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        series = re.search("\s(S(\d{2})(E\d{2})*|(\d{1,2})(x\d{2})|season\s(\d+\-)?(\d{1,2}))(\s|$)", ndtitle, re.IGNORECASE)
-        movies = re.search("\s(\[?\(?(\d{4})\)?\]?|720p|1080p|HDTV)\s?", ndtitle)
+        series = re.search("\s((S(\d{2}\-?))+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?(\d{1,2},?)+)(\s|$)", ndtitle, re.IGNORECASE)
+        movies = re.search("\s?(\*?{?\[?\(?(\d{4})\)?\]?}?|720p|1080p|HDTV|dvd(rip)?|brrip)\s?", ndtitle[3:], re.IGNORECASE)
         if series:
             self._series = True
             index = ndtitle.find(series.group(1).strip())
             self._film_title = ndtitle[0:index].strip()
             # If it is only season, we set the episode to 0, because you can't know how much of the season is in there
             season = 0
-            if series.group(2) is not None:
-                season = int(series.group(2))
-            elif series.group(4) is not None:
-                season = int(series.group(4))
-            elif series.group(7) is not None:
-                season = int(series.group(7))
+            if series.group(3) is not None:
+                season = int(series.group(3))
+            elif series.group(6) is not None:
+                season = int(series.group(6))
+            elif series.group(9) is not None:
+                season = int(series.group(9))
             episode = 0
-            if series.group(3) is not None: 
-                episode = int(series.group(3)[1:])
-            elif series.group(5) is not None:
-                episode = int(series.group(5)[1:])
+            if series.group(5) is not None: 
+                episode = int(series.group(5))
+            elif series.group(7) is not None:
+                episode = int(series.group(7))
             self._episode = (season, episode)
         elif movies:
             self._series = False
@@ -130,9 +130,9 @@ class Item(object):
         if resolution:
             self._resolution = (int(resolution.group(1)), int(resolution.group(2)))
         else:
-            resolution = re.findall("(720p|1080p|HDTV|BRRIP)", text, re.IGNORECASE)        
+            resolution = re.findall("(720p|1080p|HDTV|B[RD]RIP|dvd(rip)?)", text, re.IGNORECASE)        
             for r in resolution: # Could be multiple indicators in the string
-                v = self._get_resolution_from_string(r)
+                v = self._get_resolution_from_string(r[0])
                 # Lower value is probably a better inidicator of actual value
                 if v != RESOLUTION_ZERO and (v < self._resolution or self._resolution == RESOLUTION_ZERO):
                     self._resolution = v
@@ -144,8 +144,10 @@ class Item(object):
             return RESOLUTION_1080
         elif s.upper() =="HDTV":
             return RESOLUTION_HDTV
-        elif s.upper() == "BRRIP":
+        elif s.upper() == "BRRIP" or s.upper() == "BDRIP":
             return RESOLUTION_BRRIP
+        elif s.upper() == "DVDRIP" or s.upper() == "DVD":
+            return RESOLUTION_DVDRIP
         else:
             return RESOLUTION_ZERO
             
