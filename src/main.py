@@ -3,6 +3,17 @@ Created on Oct 20, 2013
 
 @author: Vincent Ketelaars
 '''
+
+from src.logger import get_logger
+logger = get_logger(__name__)
+
+# Overwrite sys.excepthook to ensure that uncaught exceptions are also logged
+import sys
+import traceback
+def uncaught_logger(etype, value, tb):
+    logger.error("".join(traceback.format_exception(etype, value, tb)))
+sys.excepthook = uncaught_logger
+
 from src.conf.configuration import Configuration
 
 from src.general.constants import CONF_FILE
@@ -10,13 +21,10 @@ from src.content.imdb import IMDB
 from src.rss.feed_handler import FeedHandler
 from src.content.write_imdb_to_csv import WriteIMDBToCsv
 from src.content.merge_imdb_csv import MergeIMDBCsv
-
-from src.logger import get_logger
 from src.torrent.decider import Decider
 from src.torrent.handler_factory import HandlerFactory
 from src.content.imdb_read_from_file import IMDBReadFromFile
 from src.rss.active_search_feeds import ActiveSearchFeeds
-logger = get_logger(__name__)
 
 def main():
 #     app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
