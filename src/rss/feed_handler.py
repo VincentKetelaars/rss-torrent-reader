@@ -27,12 +27,14 @@ class FeedHandler(object):
         for t in self.threads: 
             t.start()
         self.results = {}
+        self._returned = 0
         self.lock = Lock()
 
     def result_callback(self, feed, result):
         with self.lock:
             if result is not None:
                 self.results[feed] = result
+            self._returned += 1
             if self.ready():
                 self.event.set()
 
@@ -43,7 +45,7 @@ class FeedHandler(object):
         return len(self.passive_feeds) + len(self.active_feeds)
     
     def ready(self):
-        return len(self.threads) == len(self.results)
+        return len(self.threads) == self._returned
     
     def channels(self):
         return self.results.values()

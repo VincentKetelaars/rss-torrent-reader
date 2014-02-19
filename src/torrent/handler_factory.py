@@ -9,7 +9,6 @@ from src.torrent.downloader import Downloader
 from src.torrent.rss_creator import RSSCreator
 
 from src.logger import get_logger
-from src.general.constants import HANDLER_WAIT
 from src.torrent.email_handler import EmailHandler
 logger = get_logger(__name__)
 
@@ -51,7 +50,7 @@ class HandlerFactory(Thread):
     def run(self):
         for handler in self.handler_threads:
             handler.start()
-        for _ in range(0, int(HANDLER_WAIT / self.LOOP_WAIT)):
+        while(len(self.handler_threads)):
             for handler in self.handler_threads:
                 if handler.done():
                     self.handler_threads.remove(handler)
@@ -60,10 +59,7 @@ class HandlerFactory(Thread):
                         self.handled_matches.intersection_update(handler.handled())
                     if handler.handled():
                         logger.info("%s handled %s correctly", handler.name, [m.torrent.film_title() for m in handler.handled()])
-            if len(self.handler_threads) > 0:
-                self.event.wait(self.LOOP_WAIT)
-            else:
-                break
+            self.event.wait(self.LOOP_WAIT)
         self.event.set()
         
     def num_matches(self):

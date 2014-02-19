@@ -25,9 +25,11 @@ class Downloader(MatchHandler):
         threads = [(m, Thread(target=self.handle, name="Downloader_" + m.movie.title, args=(m,self.successes))) for m in matches]
         for t in threads:
             t[1].start()
+        successes = []
         for t in threads:
             t[1].join() # Wait till they are all done
-        return matches
+            successes.append(t[0])
+        return successes
         
     def handle(self, match, successes):
         url = match.torrent.url()
@@ -45,6 +47,7 @@ class Downloader(MatchHandler):
                     with open(path, "wb") as f:
                         f.write(download)
                     successes.append(match)
+                    logger.info("Successfully downloaded %s to %s", url, path)
                     return True
                 except IOError:
                     logger.error("Could not write to %s", path)

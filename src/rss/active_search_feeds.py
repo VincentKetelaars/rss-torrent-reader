@@ -64,5 +64,5 @@ class ActiveSearchFeeds(object):
         urls = {}
         for m in chosen_movies + chosen_series:
             for u in active_feed_params.urls:
-                urls[u.replace(SEARCH_REPLACE_VALUE, quote_plus(m.title))] = m
+                urls[u.replace(SEARCH_REPLACE_VALUE, quote_plus(m.search_string()))] = m
         return urls

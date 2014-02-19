@@ -19,7 +19,7 @@ class IMDB(object):
         self.threads = [MovieParser(c, self.result_callback, self.error_callback) for c in csvs]
         for t in self.threads:
             t.start()
-        self.returned = 0
+        self._returned = 0
         self.results = []
         self.lock = Lock()
         
@@ -27,7 +27,7 @@ class IMDB(object):
         with self.lock:
             if result is not None:
                 self.results.append(result)
-            self.returned += 1
+            self._returned += 1
             if self.ready():
                 self.event.set()
 
@@ -35,7 +35,7 @@ class IMDB(object):
         pass
     
     def ready(self):
-        return len(self.threads) == self.returned
+        return len(self.threads) == self._returned
     
     def movies(self):
         """

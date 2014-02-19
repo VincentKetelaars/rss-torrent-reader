@@ -3,11 +3,12 @@ Created on Dec 31, 2013
 
 @author: Vincent Ketelaars
 '''
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.general.constants import SERIES_TYPES, MOVIE_TYPES, IMDB_DEFAULT_DATE
 
 from src.logger import get_logger
 from src.general.constants import IMDB_TIMESTAMP_FORMAT
+import random
 logger = get_logger(__name__)
 
 class IMDBMovie(object):
@@ -46,7 +47,15 @@ class IMDBMovie(object):
         """
         Return title + episode (if series)
         """
-        return self.title + (" S%02dE%02d" % (self.latest_season, self.latest_episode) if self.is_series() else "")
+        return self.title + (" %s" % (self.episode_to_string(self.latest_season, self.latest_episode),) if self.is_series() else "")
+
+    def episode_to_string(self, season, episode):
+        """
+        @param season: integer of at least 1
+        @param episode: integer of at least 0
+        @return: S{season}E{episode}, unless episode is 0. Then S{season}
+        """
+        return "S%02dE%02d" % (season, episode) if episode > 0 else "S%02d" % (season,)
 
     def is_series(self):
         return self.type in SERIES_TYPES
@@ -113,6 +122,35 @@ class IMDBMovie(object):
                          self.year, ", ".join(self.genres), self.votes, self.release.strftime("%Y-%m-%d"), 
                          self.url, self.time_downloaded.strftime(IMDB_TIMESTAMP_FORMAT)])
         return line
+    
+    def predict_next(self):
+        """
+        Predict next episode
+        @return: tuple of season and episode, episode of zero means entire season
+        """
+        if not self.is_series():
+            return
+        if self.latest_season == 0: # Initial value
+            return (1, 0)
+        if self.latest_episode == 0: # First episode of the season
+            return (self.latest_season, 1)
+        if self.time_downloaded != IMDB_DEFAULT_DATE and self.time_downloaded + timedelta(days=175) < datetime.utcnow(): # Season should be over after half a year
+            return (self.latest_season + 1, 1)
+        # Within two weeks odds are very high that we're in the same season still
+        if self.time_downloaded + timedelta(days=15) > datetime.utcnow(): 
+            return (self.latest_season, self.latest_episode + 1)
+        if random.random() < 0.25: # Allow chance that we're in the next season
+            return (self.latest_season + 1, 0)
+        # else
+        return (self.latest_season, self.latest_episode + 1) # Default 
+        
+    def search_string(self):
+        if self.is_movie():
+            return self.title
+        elif self.is_series():
+            return self.title + " " + self.episode_to_string(*self.predict_next())
+        else:
+            return self.title
     
     def __str__(self):
         return "%s %s %s %d %s %d %d" % (self.id, self.title, self.url, self.year, self.download,
