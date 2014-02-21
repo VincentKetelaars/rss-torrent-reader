@@ -50,7 +50,7 @@ class TestItem(unittest.TestCase):
         self.assertEqual(item.film_title(), "Game Of Thrones")
         self.assertTrue(item.is_series())
         self.assertEqual(item.episode(), (3,0))
-        self.assertEqual(item.resolution(), RESOLUTION_HDTV)
+        self.assertEqual(item.resolution(), RESOLUTION_720)
         
         #title = "Game of Thrones Season 1, 2, 3 Extras BDRip TSV "
         title = "Game of Thrones Season 1 Extras BDRip TSV "
@@ -165,7 +165,7 @@ class TestItem(unittest.TestCase):
         self.assertEqual(item.film_title(), "The Last Samurai")
         self.assertTrue(item.is_movie())
         self.assertEqual(item.film_year, 2003)
-        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        self.assertEqual(item.resolution(), RESOLUTION_1080)
         
         title = "Indiana Jones and the Last Crusade DVD iso Subtitles English, German, French, Dutch, Norwegian, Swedish, Danish, Finnish"
         item = MockItem(title, "")
@@ -197,7 +197,7 @@ class TestItem(unittest.TestCase):
         self.assertEqual(item.film_title(), "2012")
         self.assertTrue(item.is_movie())
         self.assertEqual(item.film_year, 2009)
-        self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
+        self.assertEqual(item.resolution(), RESOLUTION_1080)
         
         
     def test_description_parsing(self):
@@ -207,6 +207,12 @@ class TestItem(unittest.TestCase):
         self.assertTrue(item.is_movie())
         self.assertEqual(item.film_year, 2013)
         self.assertEqual(item.resolution(), (1920, 800))
+        
+        description = "[center][img]http://imageshack.us/scaled/landing/845/122600x194.jpg[/img][/center]http://www.imdb.com/title/tt0903747/[FILE SIZE]:[275MB[RESOLUTION]::[1280x720[SUBTITLES]:[Muxed"
+        item = MockItem("Arrow S02E01 - City of Heroes [275MB nItRo].mkv", description)
+        self.assertEqual(item.film_title(), "Arrow")
+        self.assertTrue(item.is_series())
+        self.assertEqual(item.resolution(), (1280, 720))
 
 if __name__ == "__main__":
     unittest.main()

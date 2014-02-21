@@ -36,25 +36,37 @@ class Item(object):
         self.torrent = torrent # Torrent
         
         self._series = False
-        self._resolution = (0, 0)
+        self._resolution = RESOLUTION_ZERO
         self._episode = (0, 0)
         self._film_title = None
         self._film_year = 0
         self._parse_title() # Determines resolution by claim
         self._parse_description() # Determines resolution by actual numbers
-        logger.debug("%s %s %d %s %s %s", self.title, self._film_title, self._film_year, self._series, self._episode, self._resolution)        
+        logger.debug("%s %s %d %s", self.title, self.inclusive_title(), self._film_year, self._resolution)        
     
     def url(self):
         return self.enclosure.get("url", None)
     
     def filename(self):
-        f = self.torrent.get("fileName")
+        f = self.torrent.get("fileName") if self.torrent is not None else None
         if f is None:
             f = self.title + ".torrent"
         return f
     
+    def size(self):
+        s = self.torrent.get("contentLength") if self.torrent is not None else None
+        if s is None:
+            s = self.enclosure.get("length")
+        return int(s) if s is not None else 0
+    
     def film_title(self):
         return self._film_title if self._film_title is not None else self.title.replace(".", " ")
+    
+    def inclusive_title(self):
+        """
+        Return title + episode (if series)
+        """
+        return self.film_title() + (" S%02dE%02d" % self.episode() if self.is_series() else "")
     
     def is_series(self):
         return self._series
@@ -87,7 +99,7 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        series = re.search("\s((S(\d{2}\-?))+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?(\d{1,2},?)+)(\s|$)", ndtitle, re.IGNORECASE)
+        series = re.search("\s((S(\d{2}\-?))+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?((\d{1,2}),?)+)(\s|$)", ndtitle, re.IGNORECASE)
         movies = re.search("\s?(\*?{?\[?\(?(\d{4})\)?\]?}?|720p|1080p|HDTV|dvd(rip)?|brrip)\s?", ndtitle[3:], re.IGNORECASE)
         if series:
             self._series = True
@@ -99,8 +111,8 @@ class Item(object):
                 season = int(series.group(3))
             elif series.group(6) is not None:
                 season = int(series.group(6))
-            elif series.group(9) is not None:
-                season = int(series.group(9))
+            elif series.group(10) is not None:
+                season = int(series.group(10))
             episode = 0
             if series.group(5) is not None: 
                 episode = int(series.group(5))
@@ -126,15 +138,22 @@ class Item(object):
         self._update_resolution(self.description)
                     
     def _update_resolution(self, text):
-        resolution = re.search("(\d{3,4})[x*](\d{3,4})", text, re.IGNORECASE)
-        if resolution:
-            self._resolution = (int(resolution.group(1)), int(resolution.group(2)))
-        else:
-            resolution = re.findall("(720p|1080p|HDTV|B[RD]RIP|dvd(rip)?)", text, re.IGNORECASE)        
+        resolutions = re.findall("(\d{3,4})[x*](\d{3,4})", text, re.IGNORECASE)
+        resolution = RESOLUTION_ZERO
+        for r in resolutions:
+            width = int(r[0])
+            height = int(r[1])
+            # Some descriptions might have values that look like actual resolutions but aren't. So compare them to 16:9 screen
+            if resolution == RESOLUTION_ZERO or abs(16 / 9 - width / height) < abs(16 / 9 - resolution[0] / resolution[1]):
+                resolution = (width, height)
+        if resolution != RESOLUTION_ZERO:
+            self._resolution = resolution
+        if self._resolution == RESOLUTION_ZERO:
+            resolution = re.findall("(720p|1080p|HDTV|B[RD]RIP|BLURAY|dvd(rip)?)", text, re.IGNORECASE)        
             for r in resolution: # Could be multiple indicators in the string
                 v = self._get_resolution_from_string(r[0])
-                # Lower value is probably a better inidicator of actual value
-                if v != RESOLUTION_ZERO and (v < self._resolution or self._resolution == RESOLUTION_ZERO):
+                # Let's trust the torrent with the highest indicator winning
+                if v != RESOLUTION_ZERO and (v > self._resolution or self._resolution == RESOLUTION_ZERO):
                     self._resolution = v
             
     def _get_resolution_from_string(self, s):
@@ -144,7 +163,7 @@ class Item(object):
             return RESOLUTION_1080
         elif s.upper() =="HDTV":
             return RESOLUTION_HDTV
-        elif s.upper() == "BRRIP" or s.upper() == "BDRIP":
+        elif s.upper() == "BRRIP" or s.upper() == "BDRIP" or s.upper() == "BLURAY":
             return RESOLUTION_BRRIP
         elif s.upper() == "DVDRIP" or s.upper() == "DVD":
             return RESOLUTION_DVDRIP

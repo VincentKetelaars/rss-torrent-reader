@@ -68,6 +68,11 @@ class Decider(object):
             logger.debug("%s does not have the required resolution of %dx%d with only %dx%d", 
                          torrent.title, self.preference.min_width, self.preference.min_height, width, height)
             return False
+        
+        if torrent.is_movie():
+            if torrent.size() < self.preference.min_movie_size or torrent.size() > self.preference.max_movie_size:
+                logger.debug("%s does not have the required size but %dMB", torrent.title, torrent.size() / 1024 / 1024)
+                return False
         return True
         
     def match(self, movie, torrent):
@@ -89,15 +94,15 @@ class Decider(object):
         if not match: # Only partial matches continue
             return False
         
-        if torrent.description.find(movie.url) >= 0:
+        if torrent.description.find(movie.url) >= 0: # TODO: Can be part of a larger set of movies
             return True
         
-        logger.debug("Partial match %s %s", movie.title, torrent.title)
-        for a in self.preference.allowed_list:
-            if a in torrent.film_title().lower():
-                return True
-        
-        if str(movie.year) in torrent.film_title():
+        logger.debug("Partial match %s %s", movie.title, torrent.film_title())
+        t = torrent.film_title().lower()
+        # Remove all allowed words from the title string
+        for a in self.preference.allowed_list + [str(movie.year)]:
+            t = t.replace(a.lower(), "")
+        if self._match_titles(movie.title, t.strip()):
             return True
         return False
     
@@ -106,7 +111,7 @@ class Decider(object):
         Determine whether two titles are equal
         It gives a perfect match a score of 0, subsequent 'worse' matches are given increasing higher numbers
         If there is not match at all it returns (False, -1)
-        @rtype: (Boolean, int) 
+        @rtype: (Boolean, int)
         """
         # Make both lowercase
         mtitle = mtitle.lower() 

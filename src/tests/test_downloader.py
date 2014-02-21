@@ -6,7 +6,7 @@ Created on Jan 20, 2014
 import unittest
 import os
 
-from src.tests.mock_classes import MockTorrent
+from src.tests.mock_classes import MockTorrent, MockMovie
 from src.torrent.match import Match
 from src.tests.constants import TEST_DIRECTORY, TEST_MAX_WAIT
 from src.torrent.downloader import Downloader
@@ -23,8 +23,8 @@ class TestDownloader(unittest.TestCase):
         self.directory = TEST_DIRECTORY
         self.path = os.path.join(self.directory, self.filename)
         self.path2 = os.path.join(self.directory, self.filename2)
-        match = Match(None, MockTorrent(self.filename, self.url))
-        match2 = Match(None, MockTorrent(self.filename2, self.url2))
+        match = Match(MockMovie("", 1234, "Feature Film"), MockTorrent(self.filename, self.url))
+        match2 = Match(MockMovie("title", 1234, "Feature Film"), MockTorrent(self.filename2, self.url2))
         self.downloader = Downloader([match, match2], self.directory)
 
     def tearDown(self):

@@ -8,7 +8,9 @@ import ConfigParser
 from src.content.imdb_csv import IMDBCsv
 from src.logger import get_logger
 from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
-    DEFAULT_MAX_MOVIES, DEFAULT_MAX_SERIES
+    DEFAULT_MAX_MOVIES, DEFAULT_MAX_SERIES, PREFERENCE_TITLE_NOT,\
+    PREFERENCE_TITLE_ALLOWED, PREFERENCE_TITLE_PREF, PREFERENCE_MIN_WIDTH,\
+    PREFERENCE_MIN_HEIGHT, PREFERENCE_MIN_MOVIE_SIZE, PREFERENCE_MAX_MOVIE_SIZE
 from src.torrent.preference import Preference
 from src.rss.active_search_params import ActiveSearchParameters
 logger = get_logger(__name__)
@@ -37,12 +39,14 @@ class Configuration(object):
         return (m, s)
     
     def get_torrent_preference(self):
-        not_list = self._get_option("match", "title_not", default=[], is_list=True)
-        allowed_list = self._get_option("match", "title_allowed", default=[], is_list=True)
-        pref_list = self._get_option("match", "title_pref", default=[], is_list=True)
-        width = self._get_option("match", "min_width", default=0)
-        height = self._get_option("match", "min_height", default=0)
-        return Preference(not_list, allowed_list, pref_list, width, height)
+        not_list = self._get_option("match", "title_not", default=PREFERENCE_TITLE_NOT, is_list=True)
+        allowed_list = self._get_option("match", "title_allowed", default=PREFERENCE_TITLE_ALLOWED, is_list=True)
+        pref_list = self._get_option("match", "title_pref", default=PREFERENCE_TITLE_PREF, is_list=True)
+        width = self._get_option("match", "min_width", default=PREFERENCE_MIN_WIDTH)
+        height = self._get_option("match", "min_height", default=PREFERENCE_MIN_HEIGHT)
+        min_movie_size = self._get_option("match", "min_movie_size", default=PREFERENCE_MIN_MOVIE_SIZE)
+        max_movie_size = self._get_option("match", "max_movie_size", default=PREFERENCE_MAX_MOVIE_SIZE)
+        return Preference(not_list, allowed_list, pref_list, width, height, min_movie_size, max_movie_size)
     
     def get_handler(self, handler):
         return self._get_all_options_as_dictionary("handler_" + handler.lower())

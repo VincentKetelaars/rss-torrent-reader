@@ -12,6 +12,7 @@ import test_rss_creator
 import test_configuration
 import test_imdb_movie
 import test_imdb_read_write
+import test_preference
 
 def suite():
     suite = unittest.TestSuite()
@@ -22,6 +23,7 @@ def suite():
     suite.addTest(unittest.TestLoader().loadTestsFromModule(test_configuration))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(test_imdb_movie))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(test_imdb_read_write))
+    suite.addTest(unittest.TestLoader().loadTestsFromModule(test_preference))
     return suite
 
 if __name__ == '__main__':

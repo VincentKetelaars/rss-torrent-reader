@@ -54,6 +54,17 @@ RESOLUTION_DVDRIP = (600, 300) # Ranges from 500-700 x 250-400 in a dozen tests
 RESOLUTION_BRRIP = RESOLUTION_720 # Use this as first measure and hope for more in the description
 
 """
+TORRENT PREFERENCES
+"""
+PREFERENCE_TITLE_NOT = ["R5","R6","dvdscr","cam"]
+PREFERENCE_TITLE_ALLOWED = ["extended","theatrical","edition","extra","complete","unrated"]
+PREFERENCE_TITLE_PREF = []
+PREFERENCE_MIN_WIDTH = 0
+PREFERENCE_MIN_HEIGHT = 0
+PREFERENCE_MIN_MOVIE_SIZE = "0MB"
+PREFERENCE_MAX_MOVIE_SIZE = "20GB"
+
+"""
 ACTIVE SEARCH
 """
 SEARCH_REPLACE_VALUE = "SEARCH_PARAMETERS"

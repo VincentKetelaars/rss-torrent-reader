@@ -1,3 +1,4 @@
 Lots of threads are spawned, we should make sure that if the main thread is killed/done, the others are kindly killed as well.
 Ensure that no problems occur with files and so on half written to.
 Languages should be used.
+Set max and min size
