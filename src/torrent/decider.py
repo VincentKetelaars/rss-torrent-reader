@@ -27,6 +27,8 @@ class Decider(object):
         self._allowed_languages = [l for l in allowed_languages if l is not None]
         preferred_subtitles = [self.languages_api.get_language(l) for l in preference.languages]
         self._preferred_subtitles = [l for l in preferred_subtitles if l is not None]
+        logger.debug("ALLOWED: %s", [str(l) for l in self._allowed_languages])
+        logger.debug("PREFERRED: %s", [str(l) for l in self._preferred_subtitles])
         
     def decide(self):
         self.feeds.wait(FEED_WAIT * self.feeds.num_feeds())
@@ -152,7 +154,7 @@ class Decider(object):
             for l in self.languages_api.languages.itervalues():
                 if not l in self._allowed_languages:
                     for s in l.languages_en: # Only try english, not french, also no subtitles
-                        if t.find(s) > 0:
+                        if t.find(s.lower()) > 0:
                             logger.debug("Found %s language", s)
                             return False
         return True
@@ -188,11 +190,11 @@ class Decider(object):
         if t1_title.find("sub"):
             for l in self._preferred_subtitles:
                 for p in l.languages_en + l.acronyms():
-                    if t1_title.find(p) > 0:
+                    if t1_title.find(p.lower()) > 0:
                         return t1
         if t2_title.find("sub"):
             for l in self._preferred_subtitles:
                 for p in l.languages_en + l.acronyms():
-                    if t2_title.find(p) > 0:
+                    if t2_title.find(p.lower()) > 0:
                         return t2
         return t1 # We have to default to something
