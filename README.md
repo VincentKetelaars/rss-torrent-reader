@@ -19,8 +19,10 @@ Once all of this is finished, torrents are matched with movies and series. If su
 You can get the repository with:
 
 ```sh
-git clone git://github.com/VincentKetelaars/rss-torrent-reader.git
+git clone --recursive git://github.com/VincentKetelaars/rss-torrent-reader.git
 ```
+
+Make sure you add the recursive argument since this project makes use of another.
 
 There is nothing to install, but:
 - Take care to configure your configuration file 

@@ -6,7 +6,7 @@ Created on Feb 21, 2014
 import unittest
 from src.torrent.preference import Preference
 
-class Test(unittest.TestCase):
+class TestPreference(unittest.TestCase):
 
 
     def setUp(self):
@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         pass
 
     def test_parse(self):
-        pref = Preference(None, None, None, None, None, "", "")
+        pref = Preference([], [], [], 0, 0, "", "", [], [])
         self.assertEqual(pref.min_movie_size, 0)
         self.assertEqual(pref.max_movie_size, 0)
         sizes = "700MB"
@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         sizes = "5GB"
         size = 5 * Preference.GB
         self.assertEqual(pref.parse_size(sizes), size)
-        pref = Preference(None, None, None, None, None, "234KB", "2313MB")
+        pref = Preference([], [], [], 0, 0, "234KB", "2313MB", [], [])
         self.assertEqual(pref.min_movie_size, 234 * Preference.KB)
         self.assertEqual(pref.max_movie_size, 2313 * Preference.MB)
 

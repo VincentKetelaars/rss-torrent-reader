@@ -13,13 +13,14 @@ from src.tests.test_decider import get_channel
 from src.tests.mock_classes import MockMovie
 from src.torrent.rss_creator import RSSCreator
 from src.general.constants import HANDLER_WAIT
+from src.tests.constants import TEST_DIRECTORY
 from src.logger import get_logger
 logger = get_logger(__name__)
 
 class TestRSSCreator(unittest.TestCase):
 
     def setUp(self):
-        self.file = "/tmp/test_torrent_rss.xml"
+        self.file = os.path.join(TEST_DIRECTORY, "/test_torrent_rss.xml")
         channel = get_channel()
         movie = MockMovie("somethingorother", 2014, "Feature Film")
         self.matches = [Match(movie, t) for t in channel.items]

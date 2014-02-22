@@ -9,6 +9,7 @@ from src.logger import get_logger
 from src.torrent.match import Match
 from src.general.constants import FEED_WAIT, MERGER_WAIT
 import re
+from languages.api import API
 logger = get_logger(__name__)
 
 class Decider(object):
@@ -21,6 +22,11 @@ class Decider(object):
         self.merger = merger
         self.feeds = feeds
         self.preference = preference
+        self.languages_api = API()
+        allowed_languages = [self.languages_api.get_language(l) for l in preference.languages]
+        self._allowed_languages = [l for l in allowed_languages if l is not None]
+        preferred_subtitles = [self.languages_api.get_language(l) for l in preference.languages]
+        self._preferred_subtitles = [l for l in preferred_subtitles if l is not None]
         
     def decide(self):
         self.feeds.wait(FEED_WAIT * self.feeds.num_feeds())
@@ -40,6 +46,8 @@ class Decider(object):
         if self.meets_requirements(t):
             for m in movies:
                 if self.match(m, t):
+                    if not self.languages_check_out(t): # Check for languages after match (probably less computationally intensive)
+                        continue
                     if m.is_movie():
                         logger.debug("Match %s %s", m.title, t.title)
                     elif m.is_series():
@@ -135,6 +143,19 @@ class Decider(object):
             else: # Partial
                 return (True, 1)
         return (False, -1) # No match whatsoever
+    
+    def languages_check_out(self, torrent):
+        t = torrent.title[len(torrent.film_title()):].lower() # Take only the part after the title
+        if t.find("sub") > 0: # Assume the language mentioned are subtitles
+            return True # We don't judge on subtitles
+        else: # Languages mentioned now probably indicate spoken languages
+            for l in self.languages_api.languages.itervalues():
+                if not l in self._allowed_languages:
+                    for s in l.languages_en: # Only try english, not french, also no subtitles
+                        if t.find(s) > 0:
+                            logger.debug("Found %s language", s)
+                            return False
+        return True
         
     def compare_torrents(self, t1, t2):
         """
@@ -150,8 +171,8 @@ class Decider(object):
                 return t1
             else:
                 return t2
-        t1_title = t1.title.lower()
-        t2_title = t2.title.lower()
+        t1_title = t1.title[len(t1.film_title()):].lower() # Don't use the actual title
+        t2_title = t2.title[len(t1.film_title()):].lower() # Don't use the actual title
         for item in self.preference.pref_list:
             if item.lower() in t1_title and item.lower() not in t2_title:
                 return t1
@@ -163,4 +184,15 @@ class Decider(object):
             return t2
         elif t1.resolution() > t2.resolution():
             return t1
+        # Compare on subtitles
+        if t1_title.find("sub"):
+            for l in self._preferred_subtitles:
+                for p in l.languages_en + l.acronyms():
+                    if t1_title.find(p) > 0:
+                        return t1
+        if t2_title.find("sub"):
+            for l in self._preferred_subtitles:
+                for p in l.languages_en + l.acronyms():
+                    if t2_title.find(p) > 0:
+                        return t2
         return t1 # We have to default to something
