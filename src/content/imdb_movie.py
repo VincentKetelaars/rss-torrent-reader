@@ -71,7 +71,7 @@ class IMDBMovie(object):
         if self.is_movie():
             return self.download
         if self.is_series():
-            return self.download and season > self.latest_season or (season == self.latest_season and episode > self.latest_episode)
+            return self.download and (season > self.latest_season or (season == self.latest_season and episode > self.latest_episode))
         logger.debug("Dealing with unknown film of type %s", self.type)
         return False
     

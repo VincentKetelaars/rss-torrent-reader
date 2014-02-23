@@ -4,18 +4,21 @@ Created on Jan 9, 2014
 @author: Vincent Ketelaars
 '''
 
+import os
+import sys
+import re
 import BaseHTTPServer
 import urlparse
+import cgi
+import json
 from threading import Thread, Event, Lock
+import xml.etree.ElementTree as ET
 
-from src.logger import get_logger
-import os
 from src.conf.configuration import Configuration
 from src.general.constants import CONF_FILE, DEFAULT_PORT, DEFAULT_HOST,\
     NEWLINE
-from src.content.movie_parser import MovieParser
-import cgi
-import json
+from src.content.imdb_read_from_file import IMDBReadFromFile
+from src.logger import get_logger
 logger = get_logger(__name__)
 
 class HTMLCreator(object):
@@ -58,8 +61,13 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     MOVIES_SERIES_TEMPLATE_PAGE = "/films.html"
     MOVIES_PAGE = "/movies.html"
     SERIES_PAGE = "/series.html"
+    CONFIGURATION_PAGE = "/configuration.html"
     SAVE_MOVIES = "movie-save"
     SAVE_SERIES = "series-save"
+    SAVE_CONFIGURATION = "conf-save"
+    SAVE_CONFIGURATION_FILE = "configuration-file"
+    CONFIGURATION_FILE_SET_LOCATION_FILE = "src/general/constants.py"
+    CONFIGURATION_FILE_SET_LOCATION_ENV = "CONF_FILE = "
     INVALID_RESPONSE = "This is not the page you are looking for"
     
     def __init__(self, movies_file, series_file, *args):
@@ -71,19 +79,10 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.read_files()
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *args)
         
-    def read_files(self):
-        def read_file(file_):
-            result = {}
-            try:
-                with open(file_, "r") as f:
-                    result = MovieParser(None).parse(f.read())
-            except EnvironmentError:
-                logger.debug("Reading of %s failed", file_)
-            return result
-            
+    def read_files(self):            
         self.lock.acquire()
-        self.movies = read_file(self.movies_file)
-        self.series = read_file(self.series_file)
+        self.movies = IMDBReadFromFile(self.movies_file).read()
+        self.series = IMDBReadFromFile(self.series_file).read()
         self.lock.release()
             
     def do_POST(self):
@@ -102,18 +101,44 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return self.send_error(404)
         do = do[0]
         
-        saved = False 
+        message = "Something went wrong. Please consult the logs."
         if do == self.SAVE_MOVIES:
-            saved = self.save_movies(form)
+            if self.save_movies(form):
+                message = "Saved values for movies to file!"
+            else:
+                message = "Could not save the changes! Please try again or report the problem."
         elif do == self.SAVE_SERIES:
-            saved = self.save_series(form)
+            if self.save_series(form):
+                message = "Saved values for series to file!"
+            else:
+                message = "Could not save the changes! Please try again or report the problem."
+        elif do == self.SAVE_CONFIGURATION:
+            if self.save_configuration(form):
+                message = "Configuration has been saved!"
+            else:
+                message = "Could not save the changes! Please try again or report the problem."
+        elif do == self.SAVE_CONFIGURATION_FILE:
+            if self.edit_configuration_file_location(form):
+                message = "Successfully set file location!"
+            else:
+                message = "Could not save the changes! Please try again or report the problem."
         else:
             logger.debug("Don't know what to do with %s", do)
         
-        message = "Something went wrong. Please consult the logs."
-        if saved:
-            message = "Values were saved!"
         self.wfile.write(json.dumps({"message" : message}))
+        
+    def edit_configuration_file_location(self, form):
+        filename = form.get("configuration-file", [""])[0] # It doesn't have to be there
+        if os.path.isfile(filename):
+            with self.lock:
+                with open(self.CONFIGURATION_FILE_SET_LOCATION_FILE, "r") as f:
+                    content = f.read()
+                content = re.sub("(" + self.CONFIGURATION_FILE_SET_LOCATION_ENV + ").+(\n)", r'\1"' + filename + r'"\2', content, 1)
+                with open(self.CONFIGURATION_FILE_SET_LOCATION_FILE, "w") as f:
+                    f.write(content)
+            logger.debug("New file location for the configuration file: %s", filename)
+            return True
+        return False
             
     def save_movies(self, form):
         for m in self.movies.itervalues():
@@ -134,10 +159,18 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return 0
         
         for ser in self.series.itervalues():
+            if form.get(ser.id, None) is not None:
+                ser.download = True
+            else:
+                ser.download = False
             ser.latest_season = to_int(form.get(ser.id + "_season", [0])[0])
             ser.latest_episode = to_int(form.get(ser.id + "_episode", [0])[0])
             
         return self.write_to_file(self.series, self.series_file)
+    
+    def save_configuration(self, form):
+        logger.debug(form)
+        
         
     def write_to_file(self, movies, file_):
         self.lock.acquire()
@@ -183,14 +216,24 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif path == self.SERIES_PAGE:
             body, success = self.content_from_file(self.MOVIES_SERIES_TEMPLATE_PAGE)
             body = self.fill_series(body)
+        elif path == self.CONFIGURATION_PAGE:
+            body, success = self.content_from_file(path)
+            body = self.fill_configuration(body)
         else:
             body, success = self.content_from_file(path)
         
         if not success:
-            self.redirect_to_main()            
+            self.redirect_to_main()
             
+        _, extension =  os.path.splitext(path)
         self.send_response(200)
         self.send_header("Content-type", "text/html")
+        if extension == ".css":
+            self.send_header("Content-type", "text/css")
+        elif extension == ".js":
+            self.send_header("Content-type", "text/javascript")
+        elif any([extension == end for end in [".jpg", ".jpeg", ".png"]]):
+            self.send_header("Content-type", "image/" + extension[1:])
         self.send_header("Content-length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -199,7 +242,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         explanation = "The selected movies will be downloaded"
         c = HTMLCreator()
         trs = c.tr(c.td(c.input({"type" : "checkbox", "id" : '"check-all"'}) + "Download") + 
-                   c.td("Movie") + c.td("Year"), c.td("Added"))
+                   c.td("Movie") + c.td("Year") + c.td("Added"))
         movies = sorted(self.movies.values(), key=lambda x: x.modified, reverse=True)
         for m in movies:
             added = m.modified.strftime("%Y-%m-%d %H:%M:%S")
@@ -213,13 +256,17 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def fill_series(self, body):        
         explanation = "Episodes will be downloaded if they are later than the episode indicated in on this sheet"
         c = HTMLCreator()
-        trs = c.tr(c.td("Season") + c.td("Episode") + c.td("Series") + c.td("Year") + c.td("Added"))
+        trs = c.tr(c.td("Download") + c.td("Season") + c.td("Episode") + c.td("Series") + c.td("Year") + c.td("Added"))
         series = sorted(self.series.values(), key=lambda x: x.modified, reverse=True)
         for s in series:
             added = s.modified.strftime("%Y-%m-%d %H:%M:%S")
+            input_attr = {"type" : 'checkbox', "name" : s.id, "value" : "1", "class" : "checkbox"}
+            if s.should_download(sys.maxint, sys.maxint):
+                logger.debug(str(s))
+                input_attr["checked"] = None
             season_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_season", "value" : str(s.latest_season)}
             episode_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_episode", "value" : str(s.latest_episode)}
-            tr = c.tr(c.td(c.input(season_attr)) + c.td(c.input(episode_attr)) + c.td(s.title) + 
+            tr = c.tr(c.td(c.input(input_attr)) + c.td(c.input(season_attr)) + c.td(c.input(episode_attr)) + c.td(s.title) + 
                       c.td(str(s.year if s.year != -1 else "????")) + c.td(added))
             trs += tr + NEWLINE
         return self.fill_films(body, "Series", "series", explanation, trs)
@@ -232,6 +279,30 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         index = body.find("</table>")
         body = body[0:index] + trs + body[index:]
         return body
+    
+    def fill_configuration(self, body, configuration_file=None):
+        if configuration_file is None:
+            configuration_file = self.get_configuration_file_location()
+        if configuration_file is None:
+            return body
+        cfg = Configuration(configuration_file)
+        root = ET.fromstring(body)
+        html_body = root.find("body")
+        file_form = html_body.find("form")
+        input_file = file_form.find("input")
+        input_file.set("value", configuration_file)
+        
+        return ET.tostring(root, method="html")
+        
+    def get_configuration_file_location(self):
+        with self.lock:
+            with open(self.CONFIGURATION_FILE_SET_LOCATION_FILE, "r") as f:
+                content = f.read()
+            match = re.search(self.CONFIGURATION_FILE_SET_LOCATION_ENV + "(.+)\n", content)
+            if match:
+                return match.group(1).strip().strip('"')
+        return None
+        
     
     def content_from_file(self, path):
         f = self.get_file(path)

@@ -1,0 +1,27 @@
+<html>
+<head>
+	<title>Configuration</title>
+	<link rel="stylesheet" type="text/css" href="default.css"></link>
+</head>
+<body>
+	<h2>Configuration</h2>
+	<p>This page allows you to setup the configuration file to your wishes.
+		First determine the configuration file you wish to use, and set <b>Use</b>. To show what the configuration file entails, press <b>Show</b>.</p>
+	<form method="POST" id="configuration-file-form">
+		<input type="text" size="50" name="configuration-file"></input>
+		<button type="submit" id="configuration-show-button" name="do" value="configuration-show">Show</button>
+		<button type="submit" id="configuration-file-button" name="do" value="configuration-file">Use</button>
+	</form>
+	<div id="configuration-content">
+		<form method="POST" id="save-form">
+		<div id="torrent-feeds">
+		<p>List the RSS feeds that you would like to monitor</p>
+		<input type="image" src="pics/add.png" onclick="return add_input_element(this, 'feed')" width="20" height="20"></input>
+		</div>
+		</form>
+		<button type="submit" class="save-button" name="do" value="conf-save">Save</button>
+	</div>
+</body>
+<script src="js/jquery2.js"></script>
+<script src="js/functions.js"></script>
+</html>

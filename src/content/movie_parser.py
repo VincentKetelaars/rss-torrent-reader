@@ -92,11 +92,8 @@ class MovieParser(GetParse):
                               rated, rating, runtime, year, genres, numvotes, release_date, args[15])
                 f = first_arg(args[0])
                 try:
-                    if len(f) == 2: # season - episode: Should be fased out
-                        m.latest_season = f[0]
-                        m.latest_episode = f[1]
-                    elif len(f) == 3:
-                        m.download = f
+                    if len(f) == 3:
+                        m.download = f[0]
                         m.latest_season = f[1]
                         m.latest_episode = f[2]
                 except TypeError:
