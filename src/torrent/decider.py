@@ -112,7 +112,8 @@ class Decider(object):
         # Remove all allowed words from the title string
         for a in self.preference.allowed_list + [str(movie.year)]:
             t = t.replace(a.lower(), "")
-        if self._match_titles(movie.title, t.strip()):
+        match, rank = self._match_titles(movie.title, t.strip())
+        if match and rank == 0:
             return True
         return False
     

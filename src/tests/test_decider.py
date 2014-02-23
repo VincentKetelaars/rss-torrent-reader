@@ -73,6 +73,14 @@ class TestDecider(unittest.TestCase):
         result = decider.decide()
         self.assertEqual(len(result), 1)
         
+        torrent = "Safe Haven (2013) 720p BrRip x264 - YIFY"
+        decider = Decider(MockMerger({"asdfl" : MockMovie("Safe", 2013, "Feature Film")}),
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), 
+                          Preference([],["unrated", "extended"],[],0,0,"", "20GB", [], []))
+        result = decider.decide()
+        self.assertEqual(len(result), 0)
+        
+        
     def test_languages(self):
         torrent = "Rise.Of.The.Guardians.2012.FRENCH.720p.BluRay.AC3.x264-TMB"
         decider = Decider(MockMerger({"asdf" : MockMovie("Rise Of The Guardians", 2012, "Feature Film")}), 
