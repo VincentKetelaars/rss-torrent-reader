@@ -96,6 +96,7 @@ class IMDBMovie(object):
         self.download = movie.download
         self.latest_season = movie.latest_season
         self.latest_episode = movie.latest_episode
+        self.time_downloaded = movie.time_downloaded
         # Anything else that where the old value might be useful?
         
     def to_line(self):

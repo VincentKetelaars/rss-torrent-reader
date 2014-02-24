@@ -56,7 +56,7 @@ RESOLUTION_BRRIP = RESOLUTION_720 # Use this as first measure and hope for more 
 """
 TORRENT PREFERENCES
 """
-PREFERENCE_TITLE_NOT = ["R5","R6","dvdscr","cam"]
+PREFERENCE_TITLE_NOT = ["R5","R6","dvdscr","cam","ts"]
 PREFERENCE_TITLE_ALLOWED = ["extended","theatrical","edition","extra","complete","unrated"]
 PREFERENCE_TITLE_PREF = []
 PREFERENCE_MIN_WIDTH = 0
