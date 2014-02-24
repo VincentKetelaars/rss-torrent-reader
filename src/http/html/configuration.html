@@ -15,8 +15,40 @@
 	<div id="configuration-content">
 		<form method="POST" id="save-form">
 		<div id="torrent-feeds">
-		<p>List the RSS feeds that you would like to monitor</p>
-		<input type="image" src="pics/add.png" onclick="return add_input_element(this, 'feed')" width="20" height="20"></input>
+			<h3>Torrent Feeds</h3>
+			<p>List the RSS feeds that you would like to monitor</p>
+			<input type="image" src="pics/add.png" onclick="return add_input_element(this, 'feed')" width="20" height="20"></input>
+		</div>
+		<div id="imdb-feed">
+			<h3>IMDB Feeds</h3>
+			<p>List the IMDB watchlists that you would like to monitor</p>
+			<input type="image" src="pics/add.png" onclick="return add_imdb_input(this)" width="20" height="20"></input>
+		</div>
+		<div>
+			<h3>Information Storage</h3>
+			<p>Determine where the movies and series information will be stored</p>
+			<p>Movies file: <input type="text" size="50" name="movies_file"></input></p>
+			<p>Series file: <input type="text" size="50" name="series_file"></input></p>
+		</div>
+		<div id="active-feed">
+			<h3>Active Feeds</h3>
+			<p>List feeds that can be used for active searches. Also limit the number of these searches for movies and series.</p>
+			<p>Maximum movies: <input type="text" size="50" name="max_movies"></input></p>
+			<p>Maximum series: <input type="text" size="50" name="max_series"></input></p>
+			<input type="image" src="pics/add.png" onclick="return add_input_element(this, 'active_url')" width="20" height="20"></input>
+		</div>
+		<div>
+			<h3>Preferences</h3>
+			<p>List your preferences here</p>
+			<p>Not in Title:<input type="text" size="30" name="title_not"></input>Comma separated list of keywords that you do not want in the torrent's title</p>
+			<p>Allowed in Title:<input type="text" size="30" name="title_allowed"></input>Comma separated list of keywords that you allow the torrent title to be obfuscated with</p>
+			<p>Preferred in Title:<input type="text" size="30" name="title_pref"></input>Comma separated list of keywords that indicate preference in torrent's title</p>
+			<p>Minimum width<input type="text" size="10" name="min_width"></input>Minimum width for the movie's resolution (pixels)</p>
+			<p>Minimum height<input type="text" size="10" name="min_height"></input>Minimum height for the movie's resolution (pixels)</p>
+			<p>Minimum movie size<input type="text" size="10" name="min_movie_size"></input>Minimum size of the movie (e.g. 700MB or 2GB)</p>
+			<p>Maximum movie size<input type="text" size="10" name="max_movie_size"></input>Maximum size of the movie (e.g. 5GB)</p>
+			<p>Languages<input type="text" size="30" name="languages"></input>Comma separated list of languages (or acronyms) allowed to be spoken</p>
+			<p>Subtitles<input type="text" size="30" name="subtitles"></input>Comma separated list of languages that are preferred for subtitles</p>
 		</div>
 		</form>
 		<button type="submit" class="save-button" name="do" value="conf-save">Save</button>

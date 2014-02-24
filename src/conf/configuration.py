@@ -59,7 +59,7 @@ class Configuration(object):
                 self._get_option("handlers", "secondary", default=[], is_list=True))
         
     def get_active_feeds(self):
-        feeds = [l[0] for l in self._get_list("active", ["url"], 0)]
+        feeds = [l[0] for l in self._get_list("active", ["active_url"], 0)]
         max_movies = self._get_option("active", "max_movies", DEFAULT_MAX_MOVIES)
         max_series = self._get_option("active", "max_series", DEFAULT_MAX_SERIES)
         return ActiveSearchParameters(feeds, max_movies, max_series)
