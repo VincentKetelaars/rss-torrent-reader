@@ -230,6 +230,11 @@ class TestItem(unittest.TestCase):
         description= "Size: 1GB&lt;br /&gt;"
         item = MockItem("", description)
         self.assertEqual(item.size(), 1 * GB)
+        
+        description = "Genre: Horror | Mystery&lt;br /&gt;Quality: 720p&lt;br /&gt;\nSize: 814.42 MB&lt;br /&gt;Run Time: 1hr 48 min&lt;br/&gt;"
+        item = MockItem("", description)
+        self.assertEqual(item.size(), 814.42 * MB)
+        self.assertEqual(item.resolution(), RESOLUTION_720)
 
 if __name__ == "__main__":
     unittest.main()

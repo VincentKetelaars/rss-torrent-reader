@@ -44,7 +44,7 @@ class Item(object):
         self._film_year = 0
         self._parse_title() # Determines resolution by claim
         self._parse_description() # Determines resolution by actual numbers
-        logger.debug("%s %s %d %s", self.title, self.inclusive_title(), self._film_year, self._resolution)        
+        logger.debug("%s %s %d %s %s", self.title, self.inclusive_title(), self._film_year, self._resolution, self._size)        
     
     def url(self):
         return self.enclosure.get("url", None)
@@ -180,7 +180,7 @@ class Item(object):
         size_parse = "\d+\.?\d*\s*[KMGT]B"
         match = re.search(size_parse, s, re.IGNORECASE)
         if match:
-            if self._size == 0:
+            if self._size <= 50000: # Movies / Series are bigger than this, so any value below this is either in KB or bullshit
                 self._size = string_to_size(match.group(0))
             
     def __str__(self):
