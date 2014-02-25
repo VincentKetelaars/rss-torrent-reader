@@ -70,10 +70,13 @@ class RSSCreator(MatchHandler):
         while len(items) > self.max_torrents: # If there are more elements than we can fit
             channel.remove(items.pop()) # Remove the oldest from the list        
         self.insert_CDATA(items)
-        tree.write(self.file, encoding="utf-8", xml_declaration=True)
+#         tree.write(self.file, encoding="utf-8", xml_declaration=True)
         pretty_xml = self.prettify_xml(root)
-        with open(self.file, "wb") as f:
-            f.write(pretty_xml)
+        try:
+            with open(self.file, "wb") as f:
+                f.write(pretty_xml)
+        except IOError:
+            return []
         return matches
     
     def create_element_with_text(self, tag, text, attrib={}):

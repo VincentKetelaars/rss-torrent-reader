@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 class TestRSSCreator(unittest.TestCase):
 
     def setUp(self):
-        self.file = os.path.join(TEST_DIRECTORY, "/test_torrent_rss.xml")
+        self.file = os.path.join(TEST_DIRECTORY, "test_torrent_rss.xml")
         channel = get_channel()
         movie = MockMovie("somethingorother", 2014, "Feature Film")
         self.matches = [Match(movie, t) for t in channel.items]
