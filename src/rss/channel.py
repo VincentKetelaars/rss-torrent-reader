@@ -8,6 +8,7 @@ import re
 from src.logger import get_logger
 from src.general.constants import RESOLUTION_720, RESOLUTION_1080,\
     RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO, RESOLUTION_DVDRIP
+from src.general.functions import string_to_size
 logger = get_logger(__name__)
 
 class Channel(object):
@@ -38,6 +39,7 @@ class Item(object):
         self._series = False
         self._resolution = RESOLUTION_ZERO
         self._episode = (0, 0)
+        self._size = self.get_size()
         self._film_title = None
         self._film_year = 0
         self._parse_title() # Determines resolution by claim
@@ -53,11 +55,14 @@ class Item(object):
             f = self.title + ".torrent"
         return f
     
-    def size(self):
+    def get_size(self):
         s = self.torrent.get("contentLength") if self.torrent is not None else None
         if s is None:
             s = self.enclosure.get("length")
         return int(s) if s is not None else 0
+    
+    def size(self):
+        return self._size
     
     def film_title(self):
         return self._film_title if self._film_title is not None else self.title.replace(".", " ")
@@ -136,6 +141,7 @@ class Item(object):
         
     def _parse_description(self):
         self._update_resolution(self.description)
+        self._update_size(self.description)
                     
     def _update_resolution(self, text):
         resolutions = re.findall("(\d{3,4})[x*](\d{3,4})", text, re.IGNORECASE)
@@ -169,6 +175,13 @@ class Item(object):
             return RESOLUTION_DVDRIP
         else:
             return RESOLUTION_ZERO
+        
+    def _update_size(self, s):
+        size_parse = "\d+\.?\d*\s*[KMGT]B"
+        match = re.search(size_parse, s, re.IGNORECASE)
+        if match:
+            if self._size == 0:
+                self._size = string_to_size(match.group(0))
             
     def __str__(self):
         return self.title

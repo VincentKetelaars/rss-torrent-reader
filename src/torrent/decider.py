@@ -27,8 +27,6 @@ class Decider(object):
         self._allowed_languages = [l for l in allowed_languages if l is not None]
         preferred_subtitles = [self.languages_api.get_language(l) for l in preference.languages]
         self._preferred_subtitles = [l for l in preferred_subtitles if l is not None]
-        logger.debug("ALLOWED: %s", [str(l) for l in self._allowed_languages])
-        logger.debug("PREFERRED: %s", [str(l) for l in self._preferred_subtitles])
         
     def decide(self):
         self.feeds.wait(FEED_WAIT * self.feeds.num_feeds())

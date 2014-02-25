@@ -3,17 +3,12 @@ Created on Jan 19, 2014
 
 @author: Vincent Ketelaars
 '''
-import re
+from src.general.functions import string_to_size
 
 class Preference(object):
     '''
     Container for torrent preferences
     '''
-    
-    KB = 1024
-    MB = KB * 1024
-    GB = MB * 1024
-    TB = GB * 1024
 
     def __init__(self, not_list, allowed_list, pref_list, min_width, min_height, min_movie_size, 
                  max_movie_size, languages, subtitles):
@@ -28,18 +23,4 @@ class Preference(object):
         self.subtitles = subtitles
         
     def parse_size(self, s):
-        s = s.strip()
-        m = re.match("\d+", s)
-        num = 0
-        if m is not None:
-            num = int(m.group(0))
-        mul = 0
-        if s.find("KB") > 0:
-            mul = self.KB
-        elif s.find("MB") > 0:
-            mul = self.MB
-        elif s.find("GB") > 0:
-            mul = self.GB
-        elif s.find("TB") > 0:
-            mul = self.TB
-        return num * mul
+        return string_to_size(s)

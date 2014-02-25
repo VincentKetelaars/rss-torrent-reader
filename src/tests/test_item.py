@@ -9,6 +9,7 @@ from src.tests.test_decider import get_channel
 from src.tests.mock_classes import MockItem
 from src.general.constants import RESOLUTION_HDTV, RESOLUTION_720,\
     RESOLUTION_1080, RESOLUTION_BRRIP, RESOLUTION_DVDRIP, RESOLUTION_ZERO
+from src.general.functions import MB, GB
 
 class TestItem(unittest.TestCase):
 
@@ -213,6 +214,22 @@ class TestItem(unittest.TestCase):
         self.assertEqual(item.film_title(), "Arrow")
         self.assertTrue(item.is_series())
         self.assertEqual(item.resolution(), (1280, 720))
+        
+        description = "Size: 758.09 MB&lt;br /&gt;"
+        item = MockItem("", description)
+        self.assertEqual(item.size(), 758.09 * MB)
+        
+        description= "Size: 1.24 GB&lt;br /&gt;"
+        item = MockItem("", description)
+        self.assertEqual(item.size(), 1.24 * GB)
+        
+        description= "Size: 1.24GB&lt;br /&gt;"
+        item = MockItem("", description)
+        self.assertEqual(item.size(), 1.24 * GB)
+        
+        description= "Size: 1GB&lt;br /&gt;"
+        item = MockItem("", description)
+        self.assertEqual(item.size(), 1 * GB)
 
 if __name__ == "__main__":
     unittest.main()
