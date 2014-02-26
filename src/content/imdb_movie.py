@@ -76,7 +76,7 @@ class IMDBMovie(object):
         return False
     
     def is_downloaded(self):
-        return self.time_downloaded != IMDB_DEFAULT_DATE
+        return self.time_downloaded != datetime(*IMDB_DEFAULT_DATE)
     
     def handled(self, season=0, episode=0):
         if not self.download: # Already marked as downloaded
@@ -135,7 +135,7 @@ class IMDBMovie(object):
             return (1, 0)
         if self.latest_episode == 0: # First episode of the season
             return (self.latest_season, 1)
-        if self.time_downloaded != IMDB_DEFAULT_DATE and self.time_downloaded + timedelta(days=175) < datetime.utcnow(): # Season should be over after half a year
+        if self.time_downloaded != datetime(*IMDB_DEFAULT_DATE) and self.time_downloaded + timedelta(days=175) < datetime.utcnow(): # Season should be over after half a year
             return (self.latest_season + 1, 1)
         # Within two weeks odds are very high that we're in the same season still
         if self.time_downloaded + timedelta(days=15) > datetime.utcnow(): 
@@ -143,7 +143,7 @@ class IMDBMovie(object):
         if random.random() < 0.25: # Allow chance that we're in the next season
             return (self.latest_season + 1, 0)
         # else
-        return (self.latest_season, self.latest_episode + 1) # Default 
+        return (self.latest_season, self.latest_episode + 1) # Default
         
     def search_string(self):
         if self.is_movie():

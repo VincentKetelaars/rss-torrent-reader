@@ -6,9 +6,12 @@ Created on Feb 9, 2014
 import sys
 from random import sample
 from datetime import datetime, timedelta
+from urllib import quote_plus
+
 from src.general.constants import ACTIVE_SERIES_CATEGORIES, ACTIVE_SERIES_SHARE,\
     SEARCH_REPLACE_VALUE
-from urllib import quote_plus
+from src.logger import get_logger
+logger = get_logger(__name__)
 
 class ActiveSearchFeeds(object):
     '''
@@ -56,11 +59,17 @@ class ActiveSearchFeeds(object):
             for i in range(len(ACTIVE_SERIES_CATEGORIES)):
                 categorie = [s for s in dseries if s.time_downloaded < datetime.utcnow() - start_time and
                              s.time_downloaded > datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]]
-                chosen_series += sample(categorie,
-                                        min(len(categorie), int(ACTIVE_SERIES_SHARE[i] * active_feed_params.max_series)))
+                samples = sample(categorie, min(len(categorie), int(ACTIVE_SERIES_SHARE[i] * active_feed_params.max_series)))
+                logger.debug("Chosen %s with %f chance of max %d feeds between %s and %s out of %d in categorie", 
+                             [str(s) for s in samples], ACTIVE_SERIES_SHARE[i], active_feed_params.max_series, 
+                             str(datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]),
+                             str(datetime.utcnow() - start_time), len(categorie))
+                chosen_series += samples
                 start_time = ACTIVE_SERIES_CATEGORIES[i]
             # In case there is room left for more
-            chosen_series += sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
+            samples = sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
+            logger.debug("Had to choose the remainder of series: %s", [str(s) for s in samples])
+            chosen_series += samples
         urls = {}
         for m in chosen_movies + chosen_series:
             for u in active_feed_params.urls:

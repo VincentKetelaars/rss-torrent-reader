@@ -75,5 +75,5 @@ DEFAULT_MAX_SERIES = 5
 # The following values are used to determine which series should be searched for
 # The SHARE values indicate the share of the maximum number of series that may be searched for 
 # that will be used for the corresponding category. First category is from now till CATEGORIES[0] etc.
-ACTIVE_SERIES_CATEGORIES = [timedelta(days=7), timedelta(days=30), timedelta(days=365), timedelta(days=36500)]
+ACTIVE_SERIES_CATEGORIES = [timedelta(days=7), timedelta(days=30), timedelta(days=365), timedelta(days=73000)]
 ACTIVE_SERIES_SHARE = [0, 0.6, 0.2, 0.2]
