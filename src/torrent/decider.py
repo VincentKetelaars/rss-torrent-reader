@@ -22,7 +22,7 @@ class Decider(object):
         self.merger = merger
         self.feeds = feeds
         self.preference = preference
-        self.languages_api = API()
+        self.languages_api = API(encoding="utf-8")
         allowed_languages = [self.languages_api.get_language(l) for l in preference.languages]
         self._allowed_languages = [l for l in allowed_languages if l is not None]
         preferred_subtitles = [self.languages_api.get_language(l) for l in preference.languages]
@@ -47,6 +47,7 @@ class Decider(object):
             for m in movies:
                 if self.match(m, t):
                     if not self.languages_check_out(t): # Check for languages after match (probably less computationally intensive)
+                        logger.debug("This torrent %s does not match because of its language", t.title)
                         continue
                     if m.is_movie():
                         logger.debug("Match %s %s", m.title, t.title)
@@ -153,9 +154,12 @@ class Decider(object):
             for l in self.languages_api.languages.itervalues():
                 if not l in self._allowed_languages:
                     for s in l.languages_en: # Only try english, not french, also no subtitles
-                        if t.find(s.lower()) > 0:
-                            logger.debug("Found %s language", s)
-                            return False
+                        try:
+                            if t.find(s.lower()) > 0:
+                                logger.debug("Found %s language", s)
+                                return False
+                        except UnicodeDecodeError:
+                            logger.exception("%s %s with types %s %s", str(t), str(s), type(t), type(s))
         return True
         
     def compare_torrents(self, t1, t2):

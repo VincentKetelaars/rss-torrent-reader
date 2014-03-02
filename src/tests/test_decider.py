@@ -94,6 +94,14 @@ class TestDecider(unittest.TestCase):
         result = decider.decide()
         self.assertEqual(len(result), 1)
         
+    def test_encoding(self):
+        torrent = u"Rise.Of.The.Guardians.2012.FRENCH.720p.BluRay.AC3.x264-TMB"
+        decider = Decider(MockMerger({"asdf" : MockMovie("Rise Of The Guardians", 2012, "Feature Film")}), 
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), 
+                          Preference([],[],[],0,0,"", "20GB", ["French"], []))
+        result = decider.decide()
+        self.assertEqual(len(result), 1)
+        
 def get_channel():
     content = None
     with open("src/tests/torrents.xml", "r") as f:
