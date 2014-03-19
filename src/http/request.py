@@ -10,7 +10,6 @@ from cookielib import CookieJar
 from collections import OrderedDict
 
 from src.logger import get_logger
-import httplib
 from httplib import IncompleteRead
 logger = get_logger(__name__)
 
@@ -55,7 +54,8 @@ class Request(object):
             except:
                 pass
         
-        logger.info("Request for %s returns content of length %d", self.url, len(content))
+        if content is not None:
+            logger.info("Request for %s returns content of length %d", self.url, len(content))
         return content
     
     def request(self):
