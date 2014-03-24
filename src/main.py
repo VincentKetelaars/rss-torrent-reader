@@ -5,6 +5,7 @@ Created on Oct 20, 2013
 '''
 
 from src.logger import get_logger
+from src.rss.daily_series import DailySeries
 logger = get_logger(__name__)
 
 # Overwrite sys.excepthook to ensure that uncaught exceptions are also logged
@@ -32,7 +33,9 @@ def main():
     movies_from_file = IMDBReadFromFile(movie_file).read()
     series_from_file = IMDBReadFromFile(series_file).read()
     imdb = IMDB(conf.get_imdb_csv_urls())
-    active_feeds = ActiveSearchFeeds(movies_from_file, series_from_file).get_feeds(conf.get_active_feeds())
+    daily = DailySeries()
+    daily.start()
+    active_feeds = ActiveSearchFeeds(movies_from_file, series_from_file, daily).get_feeds(conf.get_active_feeds())
     merge = MergeIMDBCsv(imdb, movies_from_file, series_from_file)
     merge.start()
     feed = FeedHandler(conf.get_torrent_rss_feeds(), active_feeds)

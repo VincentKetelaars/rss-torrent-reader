@@ -22,9 +22,10 @@ class ActiveSearchFeeds(object):
     but will choose older series for 20% as well
     '''
 
-    def __init__(self, movies, series):
+    def __init__(self, movies, series, daily):
         self.movies = movies
         self.series = series
+        self.daily = daily
         
     def _get_most_current_movie(self):
         """
@@ -35,14 +36,8 @@ class ActiveSearchFeeds(object):
             if m.is_downloaded():
                 return m
         return movies[0]
-        
-    def get_feeds(self, active_feed_params):
-        """
-        This method creates urls that will return results for searches on specific movies and series.
-        The movies are chosen such that the only older releases are searched than we have actually downloaded.
-        The series are chosen according to the ACTIVE_SERIES_CATEGORIES, and the respective ACTIVE_SERIES_SHARE weights.
-        @return: {url, film}
-        """
+    
+    def choose_movies(self, active_feed_params):
         chosen_movies = []
         if len(self.movies) > 0:
             most_current = self._get_most_current_movie()        
@@ -52,14 +47,21 @@ class ActiveSearchFeeds(object):
             if len(chosen_movies) < active_feed_params.max_movies: # Fill up as much as possible if needed
                 dmovies = [m for m in self.movies.itervalues() if m.should_download() and m.release > most_current.release]
                 chosen_movies += sample(dmovies, min(active_feed_params.max_movies - len(chosen_movies), len(dmovies)))
-        dseries = [s for s in self.series.itervalues() if s.should_download(sys.maxint, sys.maxint)]
+        return chosen_movies
+    
+    def choose_series(self, active_feed_params):
         chosen_series = []
+        if chosen_series is not None:
+            chosen_series = self.daily_series()
+        logger.debug("We have %d series today, namely %s", len(chosen_series), [str(s) for s in chosen_series])
+        dseries = [s for s in self.series.itervalues() if s.should_download(sys.maxint, sys.maxint)]
         if len(dseries) > 0:
             start_time = timedelta()
             for i in range(len(ACTIVE_SERIES_CATEGORIES)):
                 categorie = [s for s in dseries if s.time_downloaded < datetime.utcnow() - start_time and
                              s.time_downloaded > datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]]
-                samples = sample(categorie, min(len(categorie), int(ACTIVE_SERIES_SHARE[i] * active_feed_params.max_series)))
+                samples = sample(categorie, min(len(categorie), int(ACTIVE_SERIES_SHARE[i] * 
+                                                                (active_feed_params.max_series - len(chosen_series)))))
                 logger.debug("Chosen %s with %f chance of max %d feeds between %s and %s out of %d in categorie", 
                              [str(s) for s in samples], ACTIVE_SERIES_SHARE[i], active_feed_params.max_series, 
                              str(datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]),
@@ -70,8 +72,34 @@ class ActiveSearchFeeds(object):
             samples = sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
             logger.debug("Had to choose the remainder of series: %s", [str(s) for s in samples])
             chosen_series += samples
+        return chosen_series
+    
+    def daily_series(self):
+        self.daily.wait()
+        chosen = []
+        daily_series = self.daily.series()
+        for ds in daily_series:
+            for s in self.series:
+                if s.title == ds.title and s.should_download(ds.season, ds.series):
+                    chosen.append(s)
+                    break
+        return chosen
+        
+    def movie_to_url(self, active_feed_params, movies):
         urls = {}
-        for m in chosen_movies + chosen_series:
+        for m in movies:
             for u in active_feed_params.urls:
                 urls[u.replace(SEARCH_REPLACE_VALUE, quote_plus(m.search_string()))] = m
         return urls
+
+    def get_feeds(self, active_feed_params):
+        """
+        This method creates urls that will return results for searches on specific movies and series.
+        The movies are chosen such that the only older releases are searched than we have actually downloaded.
+        The series are chosen according to the ACTIVE_SERIES_CATEGORIES, and the respective ACTIVE_SERIES_SHARE weights.
+        @return: {url, film}
+        """
+        chosen_movies = self.choose_movies(active_feed_params)
+        chosen_series = self.choose_series(active_feed_params)
+        return self.movie_to_url(active_feed_params, chosen_movies + chosen_series)
+    
