@@ -30,9 +30,12 @@ class RSSCreator(MatchHandler):
     '''
     This class creates a XML file to be used for RSS
     '''
+    
+    NAME = "RSSCreator"
+    PARAMETERS = ["file", "max_torrents", "title", "link", "description"]
 
     def __init__(self, matches, file=None, max_torrents=RSSCREATOR_MAX_TORRENTS, title="", link="", description="", **kwargs):
-        MatchHandler.__init__(self, matches, "RSSCreator", **kwargs)
+        MatchHandler.__init__(self, matches, name=RSSCreator.NAME, **kwargs)
         self.file = file
         self.max_torrents = max_torrents
         self.title = title
@@ -114,3 +117,13 @@ class RSSCreator(MatchHandler):
             logger.exception("")
             return rough_string
         return reparsed.toprettyxml(encoding=encoding)
+    
+    @staticmethod
+    def create_html(file="", max_torrents=0, title="", link="", description="", **kwargs):
+        div = MatchHandler.create_html(name="RSS Creator", class_name="rsscreator_handler", **kwargs)
+        MatchHandler.add_label_input_br(div, "File", 50, "file", file)
+        MatchHandler.add_label_input_br(div, "Max torrents", 50, "max_torrents", max_torrents)
+        MatchHandler.add_label_input_br(div, "Title", 50, "title", title)
+        MatchHandler.add_label_input_br(div, "Link", 50, "link", link)
+        MatchHandler.add_label_input_br(div, "Description", 50, "description", description)
+        return div

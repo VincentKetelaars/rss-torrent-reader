@@ -24,6 +24,7 @@ class Configuration(object):
     def __init__(self, file_):
         self.config = ConfigParser.ConfigParser()
         self.config.read([file_])
+        self.file = file_
         
     def get_torrent_rss_feeds(self):
         return [l[0] for l in self._get_list("torrents", ["feed"], 0)]
@@ -119,3 +120,25 @@ class Configuration(object):
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             logger.debug("We do not have this option %s in section %s", option, section)
         return default
+    
+    def _set_option(self, section, option, value):
+        if not self.config.has_section(section):
+            self.config.add_section(section)
+        self.config.set(section, option, value)
+        
+    def set_option(self, section, option, value):
+        if value is not None:
+            self._set_option(section, option, str(value))
+            
+    def add_to_list(self, section, option, value):
+        options = self.config._get_option(section, option, default=[], is_list=True)
+        options.append(str(value))
+        self.config.set(section, option, ",".join(options))
+        
+    def write(self):
+        try:
+            with open(self.file, "w+") as f:
+                self.config.write(f)
+        except IOError:
+            return False
+        return True

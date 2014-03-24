@@ -26,3 +26,11 @@ def string_to_size(s):
     elif s.find("TB") > 0:
         mul = TB
     return num * mul
+
+def size_to_string(b):
+    i = 0
+    while b > 1024:
+        b = b / 1024
+        i += 1
+    v = ["B","KB", "MB", "GB", "TB"]
+    return "%d %s" % (b, v[i])

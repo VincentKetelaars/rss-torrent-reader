@@ -19,6 +19,8 @@ from src.general.constants import CONF_FILE, DEFAULT_PORT, DEFAULT_HOST,\
     NEWLINE
 from src.content.imdb_read_from_file import IMDBReadFromFile
 from src.logger import get_logger
+from src.torrent.handler_factory import HANDLER_LOOKUP
+from src.general.functions import size_to_string
 logger = get_logger(__name__)
 
 class HTMLCreator(object):
@@ -66,9 +68,13 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     SAVE_SERIES = "series-save"
     SAVE_CONFIGURATION = "conf-save"
     SAVE_CONFIGURATION_FILE = "configuration-file"
+    SHOW_CONFIGURATION_FILE = "configuration-show"
+    ADD_HANDLER = "add-handler"
     CONFIGURATION_FILE_SET_LOCATION_FILE = "src/general/constants.py"
     CONFIGURATION_FILE_SET_LOCATION_ENV = "CONF_FILE = "
     INVALID_RESPONSE = "This is not the page you are looking for"
+    PICS_ADD = "pics/add.png"
+    PICS_REMOVE = "pics/remove.jpg"
     
     def __init__(self, movies_file, series_file, *args):
         self.movies_file = movies_file
@@ -122,11 +128,46 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 message = "Successfully set file location!"
             else:
                 message = "Could not save the changes! Please try again or report the problem."
+        elif do == self.SHOW_CONFIGURATION_FILE:
+            div = self.show_configuration_file(form)
+            if div is not None:
+                return self.wfile.write(json.dumps({"div" : div}))
+            else:
+                message = "Could not show the configuration form!"
+        elif do == self.ADD_HANDLER:
+            div = self.add_handler(form)
+            if div is not None:
+                return self.wfile.write(json.dumps({"div" : div}))
+            else:
+                message = "Could not return appropriate html"
         else:
             logger.debug("Don't know what to do with %s", do)
         
         self.wfile.write(json.dumps({"message" : message}))
         
+    def add_handler(self, form):
+        handler_name = form.get("handler_list", [""])[0]
+        configuration_file = form.get("configuration-file", [""])[0]
+        if handler_name == "" or configuration_file == "":
+            return None
+        created = self._add_handler(handler_name, cfg)    
+        if created is None:
+            return None
+        return ET.tostring(created, method="html")
+        
+    def _add_handler(self, handler_name, cfg):
+        handler = HANDLER_LOOKUP.get(handler_name, None)
+        if handler is None:
+            return None
+        handlers = cfg.get_handlers()
+        essential = None
+        if handler_name in handlers[0]:
+            essential = True
+        elif handler_name in handlers[1]:
+            essential = False
+        created = handler.create_html(essential=essential, **cfg.get_handler(handler_name))
+        return created
+    
     def edit_configuration_file_location(self, form):
         filename = form.get("configuration-file", [""])[0] # It doesn't have to be there
         if os.path.isfile(filename):
@@ -139,6 +180,116 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             logger.debug("New file location for the configuration file: %s", filename)
             return True
         return False
+    
+    def show_configuration_file(self, form):
+        filename = form.get("configuration-file", [""])[0] # It doesn't have to be there
+        if os.path.isfile(filename):
+            div = self._fill_configuration_form(Configuration(filename)) # TODO: Make sure it's an actual configuration file
+            return ET.tostring(div, method="html")
+        return None
+    
+    def _add_configuration_header(self, element, h3_text, p_text):
+        h3 = ET.SubElement(element, "h3")
+        h3.text = h3_text
+        p = ET.SubElement(element, "p")
+        p.text = p_text
+        
+    def _onclick_icon(self, element, add, onclick_text):
+        ET.SubElement(element, "input", attrib={"type" : "image", "src" : self.PICS_ADD if add else self.PICS_REMOVE, 
+                                                "height" : "20", "width" : "20", "onclick" : onclick_text})
+        
+    def _add_label_input_br(self, element, label, size, name, value, explanation=None):
+        elabel = ET.SubElement(element, "label")
+        elabel.text = label
+        ET.SubElement(element, "input", attrib={"type" : "text", "size" : str(size), "name" : name, "value" : str(value)})
+        if explanation is not None:
+            alabel = ET.SubElement(element, "label")
+            alabel.text = explanation
+        ET.SubElement(element, "br")
+        
+    def _fill_configuration_form(self, cfg):
+        div = ET.Element("div", attrib={"id" : "configuration-content"})
+        form = ET.SubElement(div, "form", attrib={"method" : "POST", "id" : "save-form"})
+        
+        # Add torrent feeds
+        torrent_feeds_div = ET.SubElement(form, "div", attrib={"id" : "torrent-feeds"})
+        self._add_configuration_header(torrent_feeds_div, "Torrent Feeds", "List the RSS feeds that you would like to monitor")
+        for f in cfg.get_torrent_rss_feeds():
+            self._onclick_icon(torrent_feeds_div, False, "return remove_input_element(this)")
+            ET.SubElement(torrent_feeds_div, "input", attrib={"type" : "text", "size" : "50", "name" : "feed", "value" : str(f)})
+            ET.SubElement(torrent_feeds_div, "br")
+        self._onclick_icon(torrent_feeds_div, True, "return add_input_element(this, 'feed')")
+        
+        # Add IMDB feeds
+        imdb_feeds_div = ET.SubElement(form, "div", attrib={"id" : "imdb-feeds"})
+        self._add_configuration_header(imdb_feeds_div, "IMDB Feeds", "List the IMDB watchlists that you would like to monitor")
+        for f in cfg.get_imdb_csv_urls():
+            self._onclick_icon(imdb_feeds_div, False, "return remove_imdb_input(this)")
+            ET.SubElement(imdb_feeds_div, "br")
+            self._add_label_input_br(imdb_feeds_div, "URL", 50, "url", f.url)
+            self._add_label_input_br(imdb_feeds_div, "Username", 30, "user", f.username)
+            self._add_label_input_br(imdb_feeds_div, "Password", 30, "pass", f.password)
+        self._onclick_icon(imdb_feeds_div, True, "return add_imdb_input(this)")
+        
+        # Set information storage parameters
+        info_storage_div = ET.SubElement(form, "div", attrib={"id" : "info-storage"})
+        file_paths = cfg.get_imdb_paths()
+        self._add_configuration_header(info_storage_div, "Information Storage", "Determine where the movies and series information will be stored")
+        self._add_label_input_br(info_storage_div, "Movies file", 50, "movies_file", file_paths[0])
+        self._add_label_input_br(info_storage_div, "Series file", 50, "series_file", file_paths[1])
+        
+        # Add active feeds
+        active_feed_div = ET.SubElement(form, "div", attrib={"id" : "active-feeds"})
+        asp = cfg.get_active_feeds()
+        self._add_configuration_header(active_feed_div, "Active feeds", "List feeds that can be used for active searches. Also limit the number of these searches for movies and series.")
+        self._add_label_input_br(active_feed_div, "Maximum movies", 10, "max_movies", asp.max_movies)
+        self._add_label_input_br(active_feed_div, "Maximum series", 10, "max_series", asp.max_series)
+        for u in asp.urls:
+            self._onclick_icon(active_feed_div, False, "return remove_input_element(this)")
+            self._add_label_input_br(active_feed_div, "Search url", 100, "active_url", u)
+        self._onclick_icon(active_feed_div, True, "return add_input_element(this, 'active_url')")
+        
+        # Add preferences
+        preferences_div = ET.SubElement(form, "div", attrib={"id" : "preferences"})
+        self._add_configuration_header(preferences_div, "Preferences", "List your preferences here")
+        preference = cfg.get_torrent_preference()
+        self._add_label_input_br(preferences_div, "Not in Title", 50, "title_not", ", ".join(preference.not_list), explanation="Comma separated list of keywords that you do not want in the torrent's title")
+        self._add_label_input_br(preferences_div, "Allowed in Title", 50, "title_allowed", ", ".join(preference.allowed_list), explanation="Comma separated list of keywords that you allow the torrent title to be obfuscated with")
+        self._add_label_input_br(preferences_div, "Preferred in Title", 50, "title_pref", ", ".join(preference.pref_list), explanation="Comma separated list of keywords that indicate preference in torrent's title")
+        self._add_label_input_br(preferences_div, "Minimum width", 10, "min_width", preference.min_width, explanation="Minimum width for the movie's resolution (pixels)")
+        self._add_label_input_br(preferences_div, "Minimum height", 10, "min_height", preference.min_height, explanation="Minimum height for the movie's resolution (pixels)")
+        self._add_label_input_br(preferences_div, "Minimum movie size", 10, "min_movie_size", size_to_string(preference.min_movie_size), explanation="Minimum size of the movie (e.g. 700MB or 2GB)")
+        self._add_label_input_br(preferences_div, "Maximum movie size", 10, "max_movie_size", size_to_string(preference.max_movie_size), explanation="Maximum size of the movie (e.g. 5GB)")
+        self._add_label_input_br(preferences_div, "Languages", 50, "languages", ", ".join(preference.languages), explanation="Comma separated list of languages (or acronyms) allowed to be spoken")
+        self._add_label_input_br(preferences_div, "Subtitles", 50, "subtitles", ", ".join(preference.subtitles), explanation="Comma separated list of languages that are preferred for subtitles")
+        
+        # Add handlers
+        handler_div = ET.SubElement(form, "div", attrib={"id" : "handlers"})
+        self._add_configuration_header(handler_div,  "Handlers", "List your handlers here. Note that you can use only one of each. Additionally denote it primary or secondary. If you choose neither it will be stored but not used.")
+        selector = ET.SubElement(handler_div, "select", attrib={"id" : "handler_selector", "name" : "handler_list"})
+        ET.SubElement(selector, "option", attrib={"value" : "default", "selected" : "selected"})
+        add_handler_button = ET.SubElement(handler_div, "button", attrib={"type" : "submit", "id" : "handler_adder", 
+                                                                          "name" : "do", "value" : "add-handler"})
+        add_handler_button.text = "Add"
+        for h, v in HANDLER_LOOKUP.iteritems():
+            o = ET.SubElement(selector, "option", attrib={"value" : h})
+            o.text = v.NAME
+            handler = self._add_handler(h, cfg)
+            logger.debug(ET.tostring(handler, method="html"))
+            if handler is not None:
+                handler_div.append(handler)
+        
+        # WebGUI settings
+        gui_div = ET.SubElement(form, "div", attrib={"id" : "webgui"})
+        self._add_configuration_header(gui_div,  "WebGUI", "Set the WebGUI parameters. They will take effect the next time you start.")
+        webgui = cfg.get_webgui_params()
+        self._add_label_input_br(gui_div, "Host", 50, "host", webgui.get("host", ""))
+        self._add_label_input_br(gui_div, "Port", 50, "port", webgui.get("port", ""))
+        
+        conf_save_button = ET.SubElement(div, "button", attrib={"type" : "submit", "class" : "save-button", 
+                                                                          "name" : "do", "value" : "conf-save"})
+        conf_save_button.text = "Save"
+        return div
             
     def save_movies(self, form):
         for m in self.movies.itervalues():
@@ -170,7 +321,38 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def save_configuration(self, form):
         logger.debug(form)
+        configuration_file = form.get("configuration-file", [""])[0]
+        if configuration_file == "" or not os.path.isfile(configuration_file):
+            return False
+        cfg = Configuration(configuration_file)
+        i = 0
+        for f in form.get("feed", []):
+            cfg.set_option("torrents", "feed" + str(i), f)
+            i += 1
+        i = 0
+        for url, user, password in zip(form.get("url", []), form.get("user", []), form.get("pass", [])):
+            cfg.set_option("imdb", "url" + str(i), url)
+            cfg.set_option("imdb", "user" + str(i), user)
+            cfg.set_option("imdb", "pass" + str(i), password)
+            i += 1
+        self._save_configuration(cfg, "storage", ["movies_file", "series_file"], form)
+        self._save_configuration(cfg, "active", ["max_movies", "max_series"], form)
+        i = 0
+        for au in form.get("active_url", []):
+            cfg.set_option("active", "active_url" + str(i), au)
+            i += 1
+        self._save_configuration(cfg, "match", ["title_not", "title_allowed", "title_pref", "min_width", 
+                                           "min_height", "min_movie_size", "max_movie_size"], form)
+        self._save_configuration(cfg, "webgui", ["host", "port"], form)
+        for h, c in HANDLER_LOOKUP.iteritems():
+            if h + "-importance" in form.keys() and not form.get(h + "-importance") == "inactive":
+                cfg.add_to_list("handlers", form.get(h + "-importance"), h)
+                self._save_configuration(cfg, "handler_" + h, c.PARAMETERS, form)
+        return cfg.write()           
         
+    def _save_configuration(self, cfg, section, options, form):
+        for o in options:
+            cfg.set_option(section, o, form.get(o, [None])[0])
         
     def write_to_file(self, movies, file_):
         self.lock.acquire()
@@ -290,8 +472,12 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         html_body = root.find("body")
         file_form = html_body.find("form")
         input_file = file_form.find("input")
+        # Set input file
         input_file.set("value", configuration_file)
-        
+        conf_form_div = self._fill_configuration_form(cfg)
+        conf_content = html_body.find("div")
+        html_body.remove(conf_content)
+        html_body.append(conf_form_div)
         return ET.tostring(root, method="html")
         
     def get_configuration_file_location(self):

@@ -8,7 +8,7 @@
 	<p>This page allows you to setup the configuration file to your wishes.
 		First determine the configuration file you wish to use, and set <b>Use</b>. To show what the configuration file entails, press <b>Show</b>.</p>
 	<form method="POST" id="configuration-file-form">
-		<input type="text" size="50" name="configuration-file"></input>
+		<input type="text" id="configuration-file-input" size="50" name="configuration-file"></input>
 		<button type="submit" id="configuration-show-button" name="do" value="configuration-show">Show</button>
 		<button type="submit" id="configuration-file-button" name="do" value="configuration-file">Use</button>
 	</form>
@@ -37,7 +37,7 @@
 			<p>Maximum series: <input type="text" size="50" name="max_series"></input></p>
 			<input type="image" src="pics/add.png" onclick="return add_input_element(this, 'active_url')" width="20" height="20"></input>
 		</div>
-		<div>
+		<div id="preferences">
 			<h3>Preferences</h3>
 			<p>List your preferences here</p>
 			<p>Not in Title:<input type="text" size="30" name="title_not"></input>Comma separated list of keywords that you do not want in the torrent's title</p>
@@ -49,6 +49,17 @@
 			<p>Maximum movie size<input type="text" size="10" name="max_movie_size"></input>Maximum size of the movie (e.g. 5GB)</p>
 			<p>Languages<input type="text" size="30" name="languages"></input>Comma separated list of languages (or acronyms) allowed to be spoken</p>
 			<p>Subtitles<input type="text" size="30" name="subtitles"></input>Comma separated list of languages that are preferred for subtitles</p>
+		</div>
+		<div id="handlers">
+			<h3>Handlers</h3>
+			<p>List your handlers here</p>
+			<select id="handler_selector" name="handler_list">
+				<option value="default" selected="selected"></option>
+				<option value="email">Email</option>
+				<option value="rsscreator">RSS Creator</option>
+				<option value="downloader">Downloader</option>
+			</select>
+			<button type="submit" id="handler_adder" name="do" value="add-handler">Add</button>
 		</div>
 		</form>
 		<button type="submit" class="save-button" name="do" value="conf-save">Save</button>

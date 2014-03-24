@@ -11,8 +11,7 @@ Once all of this is finished, torrents are matched with movies and series. If su
 ### TODO
 
 - Handlers that directly interact with Bittorrent programs to start downloads.
-- Handlers for other communication methods than email.
-- Filter torrents on language indicators
+- Handlers for other communication methods than email
 
 ### INSTALL
 
@@ -32,5 +31,5 @@ There is nothing to install, but:
 ###RUN
 
 - *run_once.sh* will run the program once
-- *run_webserver.sh* will start a webgui you can use to choose which movies / series should be downloaded.
+- *run_webserver.sh* will start a webgui you can use to choose which movies / series should be downloaded, or to set up the configuration.
 - *set_periodic_run.sh* takes one argument, which represents the period in hours the program should run.

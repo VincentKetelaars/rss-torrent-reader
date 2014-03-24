@@ -27,10 +27,6 @@ from src.content.imdb_read_from_file import IMDBReadFromFile
 from src.rss.active_search_feeds import ActiveSearchFeeds
 
 def main():
-#     app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-#     frame = wx.Frame(None, wx.ID_ANY, TITLE_MAIN) # A Frame is a top-level window.
-#     frame.Show(True)     # Show the frame.
-#     app.MainLoop()
     conf = Configuration(CONF_FILE)
     movie_file, series_file = conf.get_imdb_paths()
     movies_from_file = IMDBReadFromFile(movie_file).read()
