@@ -19,7 +19,7 @@ class DailySeries(Thread):
 
     def __init__(self):
         Thread.__init__(self, name="DailySeries")
-        self.results = []
+        self.results = {}
         self.event = Event()
         
     def run(self):
@@ -32,8 +32,12 @@ class DailySeries(Thread):
         return (serie["Name"]["text"], int(serie["Season"]["text"]), int(serie["Episode"]["text"]))
         
     def series(self):
+        if len(self.results.items()) == 0:
+            return []
         series = self.results["results"]["Series"]
-        return [Movie(*self.serie_to_content(serie)) for serie in series]
+        series_info = [Movie(*self.serie_to_content(serie)) for serie in series]
+        logger.info("Today %d series have a new episode", len(series_info))
+        return series_info
     
     def wait(self, timeout=DAILY_WAIT):
         self.event.wait(timeout)

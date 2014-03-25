@@ -38,7 +38,7 @@ NEWLINE = "\r\n"
 """
 WAIT TIMES
 """
-DAILY_WAIT = 5.0 # Seconds
+DAILY_WAIT = 30.0 # Seconds
 HANDLER_WAIT = 30.0 # Seconds per match
 FEED_WAIT = 30.0 # Seconds per url
 IMDB_WAIT = 300.0 # Seconds

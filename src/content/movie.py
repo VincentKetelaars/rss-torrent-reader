@@ -13,3 +13,6 @@ class Movie(object):
         self.title = title
         self.season = season
         self.episode = episode
+        
+    def __str__(self):
+        return "%s %d %d" % (self.title, self.season, self.episode)

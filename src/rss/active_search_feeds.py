@@ -77,10 +77,9 @@ class ActiveSearchFeeds(object):
     def daily_series(self):
         self.daily.wait()
         chosen = []
-        daily_series = self.daily.series()
-        for ds in daily_series:
-            for s in self.series:
-                if s.title == ds.title and s.should_download(ds.season, ds.series):
+        for ds in self.daily.series():
+            for s in self.series.itervalues():
+                if s.title == ds.title and s.should_download(ds.season, ds.episode):
                     chosen.append(s)
                     break
         return chosen
