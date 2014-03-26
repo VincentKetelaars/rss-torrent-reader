@@ -33,7 +33,7 @@ class Decider(object):
         self.merger.wait(MERGER_WAIT)
         logger.info("Start deciding")
         self.results = {}
-        movies = [m for m in self.merger.movies().itervalues() if m.should_download(sys.maxint, sys.maxint) ]
+        movies = [m for m in self.merger.movies().itervalues() if m.download]
         for t in self.feeds.passive_torrents():
             self.movie_matcher(t, movies)
         for c, movie in self.feeds.active_channels():
@@ -165,17 +165,11 @@ class Decider(object):
     def compare_torrents(self, t1, t2):
         """
         This function is intended to compare two torrents for the same movie/series,
-        and return the best. For series this means, first establish if it is the same episode.
-        Older episodes have precedence obviously!
+        and return the best. 
         The comparison is first done on the preference list from the config file.
         If that does not result in a choice, a comparison is made based on the resolution.
         @return: the better of the two torrents, defaults to the first
         """
-        if t1.is_series() and t1.episode() != t2.episode():
-            if t1.episode() < t2.episode():
-                return t1
-            else:
-                return t2
         t1_title = t1.title[len(t1.film_title()):].lower() # Don't use the actual title
         t2_title = t2.title[len(t1.film_title()):].lower() # Don't use the actual title
         for item in self.preference.pref_list:

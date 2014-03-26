@@ -60,7 +60,7 @@ class TestDecider(unittest.TestCase):
         self.assertEqual(len(result), 1)
         
         torrent = "Revolution.2012.S02E13.720p.HDTV.X264-DIMENSION [PublicHD]"
-        decider = Decider(MockMerger({"asdfl" : MockMovie("Revolution", 2012, "TV Series")}), 
+        decider = Decider(MockMerger({"asdfl" : MockMovie("Revolution", 2012, "TV Series", latest_season=2, latest_episode=12)}), 
                           MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), 
                           Preference([],[],[],0,0,"", "20GB", [], []))
         result = decider.decide()

@@ -50,7 +50,7 @@ class TestItem(unittest.TestCase):
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Game Of Thrones")
         self.assertTrue(item.is_series())
-        self.assertEqual(item.episode(), (3,0))
+        self.assertEqual(item.episode(), (4,0))
         self.assertEqual(item.resolution(), RESOLUTION_720)
         
         #title = "Game of Thrones Season 1, 2, 3 Extras BDRip TSV "
@@ -58,7 +58,7 @@ class TestItem(unittest.TestCase):
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Game of Thrones")
         self.assertTrue(item.is_series())
-        self.assertEqual(item.episode(), (1,0))
+        self.assertEqual(item.episode(), (2,0))
         self.assertEqual(item.resolution(), RESOLUTION_BRRIP)
         
         title = "[TORRENT] Opposite Worlds S01E05E06 HDTV x264-FUM[ettv]"
@@ -72,13 +72,13 @@ class TestItem(unittest.TestCase):
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "The Walking Dead Extras")
         self.assertTrue(item.is_series())
-        self.assertEqual(item.episode(), (4,0))
+        self.assertEqual(item.episode(), (5,0))
         
         title = "Dexter season 8"
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Dexter")
         self.assertTrue(item.is_series())
-        self.assertEqual(item.episode(), (8,0))        
+        self.assertEqual(item.episode(), (9,0))        
         
         title =  "Terra Nova S01E01-02 XVID Dual Audio"
         item = MockItem(title, "")
@@ -90,13 +90,13 @@ class TestItem(unittest.TestCase):
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "How I Met Your Mother")
         self.assertTrue(item.is_series())
-        self.assertEqual(item.episode(), (8,0))
+        self.assertEqual(item.episode(), (9,0))
         
         title = "Lost The Complete Series Season 1,2,3,4,5,6 + English Subs"
         item = MockItem(title, "")
         self.assertEqual(item.film_title(), "Lost The Complete Series")
         self.assertTrue(item.is_series())
-        self.assertEqual(item.episode(), (6,0))
+        self.assertEqual(item.episode(), (7,0))
         
     def test_parsing_title_movie(self):        
         title = "The Counselor 2013 UNRATED EXTENDED 1080p BluRay AVC DTS HD MA 5 1 PublicHD"

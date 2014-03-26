@@ -111,20 +111,22 @@ class Item(object):
             self._series = True
             index = ndtitle.find(series.group(1).strip())
             self._film_title = ndtitle[0:index].strip()
-            # If it is the entire season we set the episode to 0 and increment the season.
-            # We thus assume that we have the entire season
             season = 0
             if series.group(3) is not None:
                 season = int(series.group(3))
             elif series.group(6) is not None:
                 season = int(series.group(6))
-            elif series.group(10) is not None and DOWNLOAD_SEASON_TORRENTS: # Allow downloading season
-                season = int(series.group(10)) + 1
+            elif series.group(10) is not None:
+                season = int(series.group(10))
             episode = 0
             if series.group(5) is not None: 
                 episode = int(series.group(5))
             elif series.group(7) is not None:
                 episode = int(series.group(7))
+            # If episode is still 0, and the season is larger than 0, we are dealing with an entire season
+            # We increment the season to show that we download the entire season
+            if episode == 0 and season > 0:
+                season += 1
             self._episode = (season, episode)
         elif movies:
             self._series = False
