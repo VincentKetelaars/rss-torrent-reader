@@ -78,3 +78,8 @@ DEFAULT_MAX_SERIES = 5
 # that will be used for the corresponding category. First category is from now till CATEGORIES[0] etc.
 ACTIVE_SERIES_CATEGORIES = [timedelta(days=7), timedelta(8), timedelta(days=30), timedelta(days=365), timedelta(days=73000)]
 ACTIVE_SERIES_SHARE = [0, 0.2, 0.4, 0.2, 0.2]
+
+"""
+DOWNLOAD CHOICES
+"""
+DOWNLOAD_SEASON_TORRENTS = True # Note that you risk downloading torrents that do not have all episode of the season

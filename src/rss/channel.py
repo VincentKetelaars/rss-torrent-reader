@@ -7,7 +7,8 @@ import re
 
 from src.logger import get_logger
 from src.general.constants import RESOLUTION_720, RESOLUTION_1080,\
-    RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO, RESOLUTION_DVDRIP
+    RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO, RESOLUTION_DVDRIP,\
+    DOWNLOAD_SEASON_TORRENTS
 from src.general.functions import string_to_size
 logger = get_logger(__name__)
 
@@ -110,14 +111,15 @@ class Item(object):
             self._series = True
             index = ndtitle.find(series.group(1).strip())
             self._film_title = ndtitle[0:index].strip()
-            # If it is only season, we set the episode to 0, because you can't know how much of the season is in there
+            # If it is the entire season we set the episode to 0 and increment the season.
+            # We thus assume that we have the entire season
             season = 0
             if series.group(3) is not None:
                 season = int(series.group(3))
             elif series.group(6) is not None:
                 season = int(series.group(6))
-            elif series.group(10) is not None:
-                season = int(series.group(10))
+            elif series.group(10) is not None and DOWNLOAD_SEASON_TORRENTS: # Allow downloading season
+                season = int(series.group(10)) + 1
             episode = 0
             if series.group(5) is not None: 
                 episode = int(series.group(5))
