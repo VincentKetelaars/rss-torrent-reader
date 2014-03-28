@@ -20,6 +20,7 @@ CONF_FILE = "/home/vincent/Downloads/conf.cfg"
 
 DEFAULT_MOVIES_CSV = "conf/movies.csv"
 DEFAULT_SERIES_CSV = "conf/series.csv"
+DEFAULT_MISSED_CSV = "conf/missed.csv"
 
 """
 IMDB

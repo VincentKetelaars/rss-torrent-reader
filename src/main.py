@@ -29,7 +29,7 @@ from src.rss.active_search_feeds import ActiveSearchFeeds
 
 def main():
     conf = Configuration(CONF_FILE)
-    movie_file, series_file = conf.get_imdb_paths()
+    movie_file, series_file, missed_file = conf.get_imdb_paths()
     movies_from_file = IMDBReadFromFile(movie_file).read()
     series_from_file = IMDBReadFromFile(series_file).read()
     imdb = IMDB(conf.get_imdb_csv_urls())
@@ -44,7 +44,7 @@ def main():
     factory = HandlerFactory(matches, conf)
     factory.start()
     # Write the updated values (ensure that downloaded torrents are assimilated as well)
-    writer = WriteIMDBToCsv(merge.movies(), factory, *conf.get_imdb_paths())
+    writer = WriteIMDBToCsv(merge.movies(), factory, movie_file, series_file)
     writer.start()
     logger.info("We have %d IMDB movies", len(imdb.movies()))
     logger.info("We have %d torrents from %d channels", len(feed.torrents()), len(feed.channels()))

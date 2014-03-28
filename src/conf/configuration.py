@@ -11,7 +11,7 @@ from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
     DEFAULT_MAX_MOVIES, DEFAULT_MAX_SERIES, PREFERENCE_TITLE_NOT,\
     PREFERENCE_TITLE_ALLOWED, PREFERENCE_TITLE_PREF, PREFERENCE_MIN_WIDTH,\
     PREFERENCE_MIN_HEIGHT, PREFERENCE_MIN_MOVIE_SIZE, PREFERENCE_MAX_MOVIE_SIZE,\
-    PREFERENCE_LANGUAGES, PREFERENCE_SUBTITLES
+    PREFERENCE_LANGUAGES, PREFERENCE_SUBTITLES, DEFAULT_MISSED_CSV
 from src.torrent.preference import Preference
 from src.rss.active_search_params import ActiveSearchParameters
 logger = get_logger(__name__)
@@ -37,8 +37,9 @@ class Configuration(object):
     
     def get_imdb_paths(self):
         m = self._get_option("storage", "movies_file", default=DEFAULT_MOVIES_CSV)
-        s = self._get_option("storage", "series_file", default=DEFAULT_SERIES_CSV)        
-        return (m, s)
+        s = self._get_option("storage", "series_file", default=DEFAULT_SERIES_CSV)
+        miss = self._get_option("storage", "missed_file", default=DEFAULT_MISSED_CSV)        
+        return (m, s, miss)
     
     def get_torrent_preference(self):
         not_list = self._get_option("match", "title_not", default=PREFERENCE_TITLE_NOT, is_list=True)

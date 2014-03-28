@@ -12,6 +12,7 @@ Once all of this is finished, torrents are matched with movies and series. If su
 
 - Handlers that directly interact with Bittorrent programs to start downloads.
 - Handlers for other communication methods than email
+- Allow for multiple seasons / episode in one torrent"
 
 ### INSTALL
 

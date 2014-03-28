@@ -64,6 +64,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     MOVIES_PAGE = "/movies.html"
     SERIES_PAGE = "/series.html"
     CONFIGURATION_PAGE = "/configuration.html"
+    MISSED_PAGE = "/missedtorrents.html"
     SAVE_MOVIES = "movie-save"
     SAVE_SERIES = "series-save"
     SAVE_CONFIGURATION = "conf-save"
@@ -237,6 +238,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self._add_configuration_header(info_storage_div, "Information Storage", "Determine where the movies and series information will be stored")
         self._add_label_input_br(info_storage_div, "Movies file", 50, "movies_file", file_paths[0])
         self._add_label_input_br(info_storage_div, "Series file", 50, "series_file", file_paths[1])
+        self._add_label_input_br(info_storage_div, "Missed torrents file", 50, "missed_file", file_paths[2])
         
         # Add active feeds
         active_feed_div = ET.SubElement(form, "div", attrib={"id" : "active-feeds"})
@@ -401,6 +403,9 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif path == self.CONFIGURATION_PAGE:
             body, success = self.content_from_file(path)
             body = self.fill_configuration(body)
+        elif path == self.MISSED_PAGE:
+            body, success = self.content_from_file(path)
+            body = self.fill_missed(body)
         else:
             body, success = self.content_from_file(path)
         
@@ -479,6 +484,9 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         html_body.remove(conf_content)
         html_body.append(conf_form_div)
         return ET.tostring(root, method="html")
+    
+    def fill_missed(self, body):
+        return body
         
     def get_configuration_file_location(self):
         with self.lock:
@@ -488,7 +496,6 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if match:
                 return match.group(1).strip().strip('"')
         return None
-        
     
     def content_from_file(self, path):
         f = self.get_file(path)
@@ -549,7 +556,7 @@ class WebServer(Thread):
 if __name__ == "__main__":
     cfg = Configuration(CONF_FILE)
     params = cfg.get_webgui_params()
-    m, s = cfg.get_imdb_paths()
+    m, s, _ = cfg.get_imdb_paths()
     ws = WebServer(WebHandler, m, s, params.get("host", DEFAULT_HOST), int(params.get("port", DEFAULT_PORT)))
     ws.start()
     
