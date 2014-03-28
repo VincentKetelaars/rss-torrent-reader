@@ -1,1 +1,1 @@
-python -m src.http.webserver
+python -m src.http.webserver $@

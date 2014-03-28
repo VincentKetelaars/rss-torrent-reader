@@ -21,6 +21,8 @@ from src.content.imdb_read_from_file import IMDBReadFromFile
 from src.logger import get_logger
 from src.torrent.handler_factory import HANDLER_LOOKUP
 from src.general.functions import size_to_string
+import webbrowser
+import subprocess
 logger = get_logger(__name__)
 
 class HTMLCreator(object):
@@ -559,6 +561,16 @@ if __name__ == "__main__":
     m, s, _ = cfg.get_imdb_paths()
     ws = WebServer(WebHandler, m, s, params.get("host", DEFAULT_HOST), int(params.get("port", DEFAULT_PORT)))
     ws.start()
+
+    if len(sys.argv) > 1: # supplied with browser
+        browser = sys.argv[1]
+        url = "http://%s:%d%s" % (params.get("host", DEFAULT_HOST), int(params.get("port", DEFAULT_PORT)), WebHandler.MAIN_PAGE)
+        if browser == "chromium":
+            subprocess.call(["chromium-browser", url])
+        elif browser == "firefox":
+            subprocess.call(["firefox", url])
+        else:
+            webbrowser.open(url, new=2)
     
     try:
         raw_input("Press enter to stop\r\n")
