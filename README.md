@@ -1,7 +1,7 @@
 rss-torrent-reader
 ==================
 
-This python project uses rss torrent feeds to find torrents to download base on imdb csv input. The HTML interface allows you to designate movies / series to be downloaded or not. This program has only been tested on Ubuntu 12.04, using python 2.7.
+This python project uses rss torrent feeds to find torrents to download base on imdb csv input. The HTML interface allows you to designate movies / series to be downloaded or not. You will need python 2.7 to run the program. It has successfully been tested on Ubuntu 12.04 and Windows 8.
 
 ### CURRENT
 
