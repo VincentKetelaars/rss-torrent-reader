@@ -105,7 +105,7 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        series = re.search("\s((S(\d{2}\-?))+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?((\d{1,2}),?)+)(\s|$)", ndtitle, re.IGNORECASE)
+        series = re.search("\s((S(\d{2})\-?)+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?((\d{1,2}),?)+)(\s|$)", ndtitle, re.IGNORECASE)
         movies = re.search("\s?(\*?{?\[?\(?(\d{4})\)?\]?}?|720p|1080p|HDTV|dvd(rip)?|brrip)\s?", ndtitle[3:], re.IGNORECASE)
         if series:
             self._series = True

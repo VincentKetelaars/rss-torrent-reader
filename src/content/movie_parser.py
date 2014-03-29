@@ -3,8 +3,8 @@ Created on Jan 11, 2014
 
 @author: Vincent Ketelaars
 '''
+import os
 import locale
-import dateutil
 from datetime import datetime
 
 from src.general.get_parse import GetParse
@@ -60,8 +60,11 @@ class MovieParser(GetParse):
             else:
                 return i
                 
-        locale.setlocale(locale.LC_ALL, "en_US.UTF-8") # FIXME: Not windows compatible
-
+        if os.name == "posix": # Linux
+            locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+        elif os.name == "nt": # Windows
+            locale.setlocale(locale.LC_ALL, "English_United States.1252")
+            
         lines = content.split("\n")
         movies = {}
         for line in lines:
@@ -84,6 +87,7 @@ class MovieParser(GetParse):
                     release_date = datetime.strptime(args[14], "%Y-%m-%d")
                 except:
                     try:
+                        import dateutil
                         release_date = dateutil.parser.parse(args[14])
                     except:
                         pass
