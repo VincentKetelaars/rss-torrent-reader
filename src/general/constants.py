@@ -16,7 +16,7 @@ DEFAULT_PORT = 8080
 """
 CONFIGURATION
 """
-CONF_FILE = "/home/vincent/Downloads/conf.cfg"
+CONF_FILE = "C:\Users\Vincent\Downloads\configuration.cfg"
 
 DEFAULT_MOVIES_CSV = "conf/movies.csv"
 DEFAULT_SERIES_CSV = "conf/series.csv"

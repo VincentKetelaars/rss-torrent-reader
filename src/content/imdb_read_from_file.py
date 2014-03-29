@@ -25,4 +25,4 @@ class IMDBReadFromFile(object):
                 return MovieParser(None).parse(f.read())
         except IOError:
             logger.debug("Reading of %s failed", self.file)
-        return None     
+        return {}     
