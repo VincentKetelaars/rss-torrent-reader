@@ -14,9 +14,9 @@ import json
 from threading import Thread, Event, Lock
 import xml.etree.ElementTree as ET
 
-from src.conf.configuration import Configuration
-from src.general.constants import CONF_FILE, DEFAULT_PORT, DEFAULT_HOST,\
-    NEWLINE
+from src.conf.configuration import Configuration, get_location_from_text_file
+from src.general.constants import DEFAULT_PORT, DEFAULT_HOST,\
+    NEWLINE, CONF_LOCATION_FILE
 from src.content.imdb_read_from_file import IMDBReadFromFile
 from src.logger import get_logger
 from src.torrent.handler_factory import HANDLER_LOOKUP
@@ -73,8 +73,6 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     SAVE_CONFIGURATION_FILE = "configuration-file"
     SHOW_CONFIGURATION_FILE = "configuration-show"
     ADD_HANDLER = "add-handler"
-    CONFIGURATION_FILE_SET_LOCATION_FILE = "src/general/constants.py"
-    CONFIGURATION_FILE_SET_LOCATION_ENV = "CONF_FILE = "
     INVALID_RESPONSE = "This is not the page you are looking for"
     PICS_ADD = "pics/add.png"
     PICS_REMOVE = "pics/remove.jpg"
@@ -175,11 +173,8 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         filename = form.get("configuration-file", [""])[0] # It doesn't have to be there
         if os.path.isfile(filename):
             with self.lock:
-                with open(self.CONFIGURATION_FILE_SET_LOCATION_FILE, "r") as f:
-                    content = f.read()
-                content = re.sub("(" + self.CONFIGURATION_FILE_SET_LOCATION_ENV + ").+(\n)", r'\1"' + filename + r'"\2', content, 1)
-                with open(self.CONFIGURATION_FILE_SET_LOCATION_FILE, "w") as f:
-                    f.write(content)
+                with open(CONF_LOCATION_FILE, "w") as f:
+                    f.write(filename)
             logger.debug("New file location for the configuration file: %s", filename)
             return True
         return False
@@ -471,7 +466,8 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def fill_configuration(self, body, configuration_file=None):
         if configuration_file is None:
-            configuration_file = self.get_configuration_file_location()
+            with self.lock:
+                configuration_file = get_location_from_text_file(CONF_LOCATION_FILE)
         if configuration_file is None:
             return body
         cfg = Configuration(configuration_file)
@@ -489,15 +485,6 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def fill_missed(self, body):
         return body
-        
-    def get_configuration_file_location(self):
-        with self.lock:
-            with open(self.CONFIGURATION_FILE_SET_LOCATION_FILE, "r") as f:
-                content = f.read()
-            match = re.search(self.CONFIGURATION_FILE_SET_LOCATION_ENV + "(.+)\n", content)
-            if match:
-                return match.group(1).strip().strip('"')
-        return None
     
     def content_from_file(self, path):
         f = self.get_file(path)
@@ -556,7 +543,7 @@ class WebServer(Thread):
         self.stop_event.set()
         
 if __name__ == "__main__":
-    cfg = Configuration(CONF_FILE)
+    cfg = Configuration(get_location_from_text_file(CONF_LOCATION_FILE))
     params = cfg.get_webgui_params()
     m, s, _ = cfg.get_imdb_paths()
     ws = WebServer(WebHandler, m, s, params.get("host", DEFAULT_HOST), int(params.get("port", DEFAULT_PORT)))

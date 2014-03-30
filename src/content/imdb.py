@@ -22,6 +22,8 @@ class IMDB(object):
         self._returned = 0
         self.results = []
         self.lock = Lock()
+        if len(self.threads) == 0:
+            self.event.set()
         
     def result_callback(self, csv, result):
         with self.lock:

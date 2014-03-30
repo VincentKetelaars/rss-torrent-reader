@@ -39,5 +39,7 @@ nosetests.xml
 logs/*
 
 # conf
+conf/conf_location.txt
 conf/movies.csv
 conf/series.csv
+conf/missed.csv

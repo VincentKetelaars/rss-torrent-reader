@@ -4,6 +4,7 @@ Created on Dec 24, 2013
 @author: Vincent Ketelaars
 '''
 import ConfigParser
+import os
 
 from src.content.imdb_csv import IMDBCsv
 from src.logger import get_logger
@@ -11,7 +12,8 @@ from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
     DEFAULT_MAX_MOVIES, DEFAULT_MAX_SERIES, PREFERENCE_TITLE_NOT,\
     PREFERENCE_TITLE_ALLOWED, PREFERENCE_TITLE_PREF, PREFERENCE_MIN_WIDTH,\
     PREFERENCE_MIN_HEIGHT, PREFERENCE_MIN_MOVIE_SIZE, PREFERENCE_MAX_MOVIE_SIZE,\
-    PREFERENCE_LANGUAGES, PREFERENCE_SUBTITLES, DEFAULT_MISSED_CSV
+    PREFERENCE_LANGUAGES, PREFERENCE_SUBTITLES, DEFAULT_MISSED_CSV,\
+    CONF_DEFAULT_FILE
 from src.torrent.preference import Preference
 from src.rss.active_search_params import ActiveSearchParameters
 logger = get_logger(__name__)
@@ -143,3 +145,14 @@ class Configuration(object):
         except IOError:
             return False
         return True
+    
+def get_location_from_text_file(filename):
+    location = ""
+    try:
+        with open(filename, "r") as f:
+            location = f.read().strip()
+    except IOError:
+        pass
+    if os.path.isfile(location):
+        return location
+    return CONF_DEFAULT_FILE

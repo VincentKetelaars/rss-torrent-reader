@@ -4,15 +4,16 @@ Created on Feb 3, 2014
 @author: Vincent Ketelaars
 '''
 import unittest
-from src.conf.configuration import Configuration
-from src.general.constants import CONF_FILE
+from src.conf.configuration import Configuration, get_location_from_text_file
+from src.general.constants import CONF_LOCATION_FILE
 
 
 class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.cfg = Configuration(CONF_FILE)
+        cfg_file = get_location_from_text_file(CONF_LOCATION_FILE)
+        self.cfg = Configuration(cfg_file)
 
     def tearDown(self):
         pass

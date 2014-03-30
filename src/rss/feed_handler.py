@@ -29,6 +29,8 @@ class FeedHandler(object):
         self.results = {}
         self._returned = 0
         self.lock = Lock()
+        if len(self.threads) == 0:
+            self.event.set()
 
     def result_callback(self, feed, result):
         with self.lock:
