@@ -28,13 +28,11 @@ class Downloader(MatchHandler):
     def handle_matches(self, matches):
         # Intermediate successes are stored in self.successes
         threads = [(m, Thread(target=self.handle, name="Downloader_" + m.movie.title, args=(m, self.successes))) for m in matches]
-        successes = [] # This is returned to self.successes
         for t in threads:
             t[1].start()
         for t in threads:
             t[1].join() # Wait till they are all done
-            successes.append(t[0])
-        return successes
+        return self.successes # Not pretty, but easy solution
         
     def handle(self, match, successes):
         url = match.torrent.url()

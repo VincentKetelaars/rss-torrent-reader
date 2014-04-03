@@ -67,9 +67,12 @@ class Request(object):
             if response.getcode() == 200:
                 content = response.read()
                 encoding = response.info().get("Content-Encoding")
-                if encoding is not None:
+                if encoding is not None and content is not None and len(content) > 0:
                     if encoding == "gzip":
-                        content = zlib.decompress(content, 16+zlib.MAX_WBITS)
+                        try:
+                            content = zlib.decompress(content, 16+zlib.MAX_WBITS)
+                        except:
+                            logger.exception("Error with content: %s". content)
                     else:
                         logger.warning("Don't know encoding %s", encoding)                        
             else:
