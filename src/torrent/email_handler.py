@@ -18,7 +18,7 @@ class EmailHandler(MatchHandler):
     This class will notify by email
     '''
     
-    NAME = "EmailHandler"
+    NAME = "Email"
     PARAMETERS = ["email_to", "email_from", "smtp_host", "smtp_port", "username", "password"]
 
     def __init__(self, matches, email_to=None, email_from=None, smtp_host=None, smtp_port=None, username=None, password=None, **kwargs):
@@ -73,7 +73,7 @@ class EmailHandler(MatchHandler):
     
     @staticmethod
     def create_html(email_to="", email_from="", smtp_host="", smtp_port=0, username="", password="", **kwargs):
-        div = MatchHandler.create_html(name="Email", class_name="email_handler", **kwargs)        
+        div = MatchHandler.create_html(name=EmailHandler.NAME, class_name="email_handler", **kwargs)        
         MatchHandler.add_label_input_br(div, "Email to", 50, "email_to", email_to)
         MatchHandler.add_label_input_br(div, "Email from", 50, "email_from", email_from)
         MatchHandler.add_label_input_br(div, "SMTP Host", 50, "smtp_host", smtp_host)

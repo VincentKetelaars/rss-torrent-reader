@@ -26,6 +26,8 @@ class Downloader(MatchHandler):
         self.directory = directory
         
     def handle_matches(self, matches):
+        if self.directory is None:
+            return []
         # Intermediate successes are stored in self.successes
         threads = [(m, Thread(target=self.handle, name="Downloader_" + m.movie.title, args=(m, self.successes))) for m in matches]
         for t in threads:
@@ -60,7 +62,7 @@ class Downloader(MatchHandler):
     
     @staticmethod
     def create_html(directory="", **kwargs):
-        div = MatchHandler.create_html(name="Downloader", class_name="download_handler", **kwargs)
+        div = MatchHandler.create_html(name=Downloader.NAME, class_name="download_handler", **kwargs)
         MatchHandler.add_label_input_br(div, "Directory", 50, "directory", directory)
         return div
         

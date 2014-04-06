@@ -97,6 +97,8 @@ class Configuration(object):
             is_list = True
         result = option.strip(' ').strip('"')
         if len(result) == 0:
+            if is_list:
+                return []
             return None
         if is_list:
             temp = []
@@ -134,8 +136,9 @@ class Configuration(object):
             self._set_option(section, option, str(value))
             
     def add_to_list(self, section, option, value):
-        options = self.config._get_option(section, option, default=[], is_list=True)
-        options.append(str(value))
+        options = self._get_option(section, option, default=[], is_list=True)
+        if not str(value) in options:
+            options.append(str(value))
         self.config.set(section, option, ",".join(options))
         
     def write(self):

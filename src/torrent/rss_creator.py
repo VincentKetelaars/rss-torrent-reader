@@ -120,7 +120,7 @@ class RSSCreator(MatchHandler):
     
     @staticmethod
     def create_html(file="", max_torrents=0, title="", link="", description="", **kwargs):
-        div = MatchHandler.create_html(name="RSS Creator", class_name="rsscreator_handler", **kwargs)
+        div = MatchHandler.create_html(name=RSSCreator.NAME, class_name="rsscreator_handler", **kwargs)
         MatchHandler.add_label_input_br(div, "File", 50, "file", file)
         MatchHandler.add_label_input_br(div, "Max torrents", 50, "max_torrents", max_torrents)
         MatchHandler.add_label_input_br(div, "Title", 50, "title", title)

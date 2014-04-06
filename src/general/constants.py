@@ -26,7 +26,7 @@ DEFAULT_MISSED_CSV = "conf/missed.csv"
 """
 IMDB
 """
-MOVIE_TYPES = ["Feature Film", "Video", "TV Movie"]
+MOVIE_TYPES = ["Feature Film", "Video", "TV Movie", "Documentary"]
 SERIES_TYPES = ["TV Series", "Mini-Series"]
 IMDB_TIMESTAMP_FORMAT = "%a %b %d %H:%M:%S %Y"
 IMDB_DEFAULT_YEAR = 1901

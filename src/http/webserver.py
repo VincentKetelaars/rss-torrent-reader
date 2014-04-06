@@ -274,7 +274,6 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             o = ET.SubElement(selector, "option", attrib={"value" : h})
             o.text = v.NAME
             handler = self._add_handler(h, cfg)
-            logger.debug(ET.tostring(handler, method="html"))
             if handler is not None:
                 handler_div.append(handler)
         
@@ -319,7 +318,6 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return self.write_to_file(self.series, self.series_file)
     
     def save_configuration(self, form):
-        logger.debug(form)
         configuration_file = form.get("configuration-file", [""])[0]
         if configuration_file == "" or not os.path.isfile(configuration_file):
             return False
@@ -343,9 +341,11 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self._save_configuration(cfg, "match", ["title_not", "title_allowed", "title_pref", "min_width", 
                                            "min_height", "min_movie_size", "max_movie_size"], form)
         self._save_configuration(cfg, "webgui", ["host", "port"], form)
+        cfg.set_option("handlers", "primary", "")
+        cfg.set_option("handlers", "secondary", "")
         for h, c in HANDLER_LOOKUP.iteritems():
-            if h + "-importance" in form.keys() and not form.get(h + "-importance") == "inactive":
-                cfg.add_to_list("handlers", form.get(h + "-importance"), h)
+            if c.NAME + "-importance" in form.keys() and not form.get(c.NAME + "-importance", [None])[0] == "inactive":
+                cfg.add_to_list("handlers", form.get(c.NAME + "-importance", [None])[0], h)
                 self._save_configuration(cfg, "handler_" + h, c.PARAMETERS, form)
         return cfg.write()           
         
@@ -446,7 +446,6 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             added = s.modified.strftime("%Y-%m-%d %H:%M:%S")
             input_attr = {"type" : 'checkbox', "name" : s.id, "value" : "1", "class" : "checkbox"}
             if s.should_download(sys.maxint, sys.maxint):
-                logger.debug(str(s))
                 input_attr["checked"] = None
             season_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_season", "value" : str(s.latest_season)}
             episode_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_episode", "value" : str(s.latest_episode)}
