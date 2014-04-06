@@ -46,7 +46,7 @@ def main():
     # Write the updated values (ensure that downloaded torrents are assimilated as well)
     writer = WriteIMDBToCsv(merge.movies(), factory, movie_file, series_file)
     writer.start()
-    logger.info("We have %d IMDB movies", len(imdb.movies()))
+    logger.info("We have %d IMDB movies of which %d should be downloaded", len(imdb.movies()), len([m for m in imdb.movies().itervalues() if m.download]))
     logger.info("We have %d torrents from %d channels", len(feed.torrents()), len(feed.channels()))
     logger.info("We have %d matches", len(matches))
     for m in matches:

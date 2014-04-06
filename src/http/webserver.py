@@ -431,7 +431,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         for m in movies:
             added = m.modified.strftime("%Y-%m-%d %H:%M:%S")
             input_attr = {"type" : 'checkbox', "name" : m.id, "value" : "1", "class" : "checkbox"}
-            if m.should_download():
+            if m.download:
                 input_attr["checked"] = None
             tr = c.tr(c.td(c.input(input_attr)) + c.td(m.title) + c.td(str(m.year if m.year != -1 else "????")) + c.td(added))
             trs += tr + NEWLINE
@@ -445,7 +445,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         for s in series:
             added = s.modified.strftime("%Y-%m-%d %H:%M:%S")
             input_attr = {"type" : 'checkbox', "name" : s.id, "value" : "1", "class" : "checkbox"}
-            if s.should_download(sys.maxint, sys.maxint):
+            if s.download:
                 input_attr["checked"] = None
             season_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_season", "value" : str(s.latest_season)}
             episode_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_episode", "value" : str(s.latest_episode)}
