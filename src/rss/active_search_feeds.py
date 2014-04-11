@@ -41,11 +41,11 @@ class ActiveSearchFeeds(object):
         chosen_movies = []
         if len(self.movies) > 0:
             most_current = self._get_most_current_movie()        
-            dmovies = [m for m in self.movies.itervalues() if m.should_download() and 
+            dmovies = [m for m in self.movies.itervalues() if m.download and 
                        (m.release < most_current.release or m.release == datetime.min)]
             chosen_movies = sample(dmovies, min(active_feed_params.max_movies, len(dmovies)))
             if len(chosen_movies) < active_feed_params.max_movies: # Fill up as much as possible if needed
-                dmovies = [m for m in self.movies.itervalues() if m.should_download() and m.release > most_current.release]
+                dmovies = [m for m in self.movies.itervalues() if m.download and m.release > most_current.release]
                 chosen_movies += sample(dmovies, min(active_feed_params.max_movies - len(chosen_movies), len(dmovies)))
         return chosen_movies
     
@@ -54,7 +54,7 @@ class ActiveSearchFeeds(object):
         if chosen_series is not None:
             chosen_series = self.daily_series()
         logger.debug("We have %d series today, namely %s", len(chosen_series), [str(s) for s in chosen_series])
-        dseries = [s for s in self.series.itervalues() if s.should_download(sys.maxint, sys.maxint)]
+        dseries = [s for s in self.series.itervalues() if s.download]
         if len(dseries) > 0:
             start_time = timedelta()
             for i in range(len(ACTIVE_SERIES_CATEGORIES)):
@@ -79,7 +79,7 @@ class ActiveSearchFeeds(object):
         chosen = []
         for ds in self.daily.series():
             for s in self.series.itervalues():
-                if s.title == ds.title and s.should_download(ds.season, ds.episode):
+                if s.title == ds.title and s.is_newer(ds.season, ds.episode):
                     chosen.append(s)
                     break
         return chosen

@@ -76,6 +76,9 @@ class IMDBMovie(object):
         logger.debug("Dealing with unknown film of type %s", self.type)
         return False
     
+    def is_newer(self, season=0, episode=0):
+        return season > self.latest_season or (season == self.latest_season and episode > self.latest_episode)
+    
     def is_downloaded(self):
         return self.time_downloaded != datetime(*IMDB_DEFAULT_DATE)
     

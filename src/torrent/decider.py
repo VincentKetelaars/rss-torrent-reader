@@ -49,6 +49,9 @@ class Decider(object):
                     if not self.languages_check_out(t): # Check for languages after match (probably less computationally intensive)
                         logger.debug("This torrent %s does not match because of its language", t.title)
                         continue
+                    if self.torrent_contains_unwanted_stuff(m, t):
+                        logger.debug("This torrent %s is not appropriate", t.title)
+                        continue
                     if m.is_movie():
                         logger.debug("Match %s %s", m.title, t.title)
                     elif m.is_series():
@@ -68,7 +71,7 @@ class Decider(object):
         
         # Ensure that none of the option in not list are present
         for n in self.preference.not_list:
-            if ttitle.find(n.lower()) >= 0:
+            if ttitle.find(" " + n.lower() + " ") >= 0: # These signatures should be separate
                 logger.debug("%s contains the unwanted signature %s", torrent.title, n)
                 return False
         
@@ -97,7 +100,7 @@ class Decider(object):
             return False
         
         match, rank = self._match_titles(movie.title, torrent.film_title())        
-        if match and rank == 0:            
+        if match and rank == 0:
             return True
         
         if not match: # Only partial matches continue
@@ -195,3 +198,15 @@ class Decider(object):
                     if t2_title.find(p.lower()) > 0:
                         return t2
         return t1 # We have to default to something
+    
+    def torrent_contains_unwanted_stuff(self, movie, torrent):
+        rtitle = re.sub(movie.title, "", torrent.title.lower())
+        if len(rtitle) == len(torrent.title): # Apparently can't be found
+            rtitle = rtitle[len(movie.title):] # Assume name starts at the beginning, and is not considerably shortened
+        
+        for n in self.preference.not_list:
+            if rtitle.find(n.lower()) >= 0: # Find something in the remainder of the title
+                logger.debug("%s contains the unwanted signature %s", torrent.title, n)
+                return True
+            
+        return False # Found nothing

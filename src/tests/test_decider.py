@@ -27,8 +27,31 @@ class TestDecider(unittest.TestCase):
         p = Preference(not_list, [], [], 0, 0,"200MB", "20GB", [], [])
         decider = Decider(MockMerger(self.movies), MockTorrentFeed({"" : self.channel}), p)
         result = decider.decide()
-        
         self.assertEqual(len(result), 0)
+        
+        torrent = "Captain America The Winter Soldier 2014 720p HDCAM V2 x264 Pimp4003"
+        not_list = ["cam"]
+        p = Preference(not_list, [], [], 0, 0,"200MB", "20GB", [], [])
+        decider = Decider(MockMerger({"asdf" : MockMovie("Captain America: The Winter Soldier", 2014, "Feature Film")}), 
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), p)
+        result = decider.decide()
+        self.assertEqual(len(result), 0)
+        
+        torrent = "Suits S03E03 720p HDTV x264 EVOLVE"
+        not_list = ["ts"]
+        p = Preference(not_list, [], [], 0, 0,"200MB", "20GB", [], [])
+        decider = Decider(MockMerger({"asdf" : MockMovie("Suits", 2012, "TV Series", latest_season=3, latest_episode=2)}), 
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), p)
+        result = decider.decide()
+        self.assertEqual(len(result), 1)
+        
+        torrent = "Need For Speed 2014 HDCAM 720p BY MTorrent"
+        not_list = ["cam"]
+        p = Preference(not_list, [], [], 0, 0,"0MB", "20GB", [], [])
+        decider = Decider(MockMerger({"asdf" : MockMovie("Need for Speed", 2014, "Feature Film")}), 
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), p)
+        result = decider.decide()
+        self.assertEqual(len(result), 0)        
         
     def test_resolution(self):
         p = Preference([], [], [], 1920, 1080,"200MB", "20GB", [], [])
