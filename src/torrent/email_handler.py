@@ -5,7 +5,6 @@ Created on Feb 3, 2014
 '''
 import smtplib
 from email.mime.text import MIMEText
-import xml.etree.ElementTree as ET
 
 from src.torrent.match_handler import MatchHandler
 from src.logger import get_logger
@@ -62,7 +61,10 @@ class EmailHandler(MatchHandler):
             logger.exception("Failed to send email to %s", self.email_to)
             return []
         finally:
-            smtp.quit()
+            try:
+                smtp.quit()
+            except:
+                pass
         return matches
     
     def _email_content(self, match):

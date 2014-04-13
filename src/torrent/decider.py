@@ -85,6 +85,12 @@ class Decider(object):
             if torrent.size() < self.preference.min_movie_size or torrent.size() > self.preference.max_movie_size:
                 logger.debug("%s does not have the required size but %dMB", torrent.title, torrent.size() / 1024 / 1024)
                 return False
+        
+        for n in self.preference.not_in_desc:
+            if torrent.description.find(" " + n.lower() + " ") >= 0:
+                logger.debug("Description of %s has unwanted signature %s", torrent.title, n)
+                return False
+        
         return True
         
     def match(self, movie, torrent):

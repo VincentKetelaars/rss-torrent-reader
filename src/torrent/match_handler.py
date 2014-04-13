@@ -3,8 +3,9 @@ Created on Jan 19, 2014
 
 @author: Vincent Ketelaars
 '''
+from src.http.elementtree import add_label_input_br, create_div, _add_element,\
+    add_break, add_option, add_select, add_input
 from threading import Thread, Event
-import xml.etree.ElementTree as ET
 
 class MatchHandler(Thread):
     '''
@@ -58,31 +59,24 @@ class MatchHandler(Thread):
     def create_html(name=None, class_name=None, essential=None):
         if name is None or class_name is None:
             return None        
-        div = ET.Element("div", attrib={"class" : class_name})
-        title = ET.SubElement(div, "h4")
-        title.text = name
-        ET.SubElement(title, "input", attrib={"type" : "image", "src" : "pics/remove.jpg", "height" : "20", "width" : "20", 
-                                              "onclick" : "return remove_handler(this)"})
-        select = ET.SubElement(div, "select", attrib={"name" : name + "-importance"})
-        ET.SubElement(select, "option", attrib={"value" : "inactive"}) # No text
-        primary = ET.SubElement(select, "option", attrib={"value" : "primary"})
+        div = create_div({"class" : class_name})
+        title = _add_element(div, "h4", text=name)
+        add_input(title, {"type" : "image", "src" : "pics/remove.jpg", "height" : "20", "width" : "20", 
+                          "onclick" : "return remove_handler(this)"})
+        select = add_select(div, {"name" : name + "-importance"})
+        add_option(select, {"value" : "inactive"}) # No text
+        primary = add_option(select, {"value" : "primary"})
         primary.text = "primary"
-        secondary = ET.SubElement(select, "option", attrib={"value" : "secondary"})
+        secondary = add_option(select, {"value" : "secondary"})
         secondary.text = "secondary"
         if essential is not None:
             if essential:
                 primary.attrib["selected"] = "selected"
             else:
                 secondary.attrib["selected"] = "selected"
-        ET.SubElement(div, "br")
+        add_break(div)
         return div
     
     @staticmethod
     def add_label_input_br(element, label, size, name, value, explanation=None):
-        elabel = ET.SubElement(element, "label")
-        elabel.text = label
-        ET.SubElement(element, "input", attrib={"type" : "text", "size" : str(size), "name" : name, "value" : str(value)})
-        if explanation is not None:
-            alabel = ET.SubElement(element, "label")
-            alabel.text = explanation
-        ET.SubElement(element, "br")
+        return add_label_input_br(element, label, size, name, value, explanation)

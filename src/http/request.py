@@ -38,34 +38,36 @@ class Request(object):
                          HTTPRedirectHandler(), HTTPCookieProcessor(cj))
             params = urlencode(form)
             response = opener.open(IMDBLOGIN, params)
-            
-            # cookies automatically sent
-            response2 = opener.open(self.url)
-            if response2.getcode() == 200:
-                content = response2.read()
-            else:
-                logger.debug("Got code %d and %s for %s", response2.getcode(), response2.read(), self.url)
+            content = self._request(opener, self.url)
         except:
-            logger.exception("Can't retrieve CSV page %s", self.url)
+            logger.exception("Can't retrieve %s", IMDBLOGIN)
         finally:
             try: # response, or response2 might not exist
                 response.close()
-                response2.close()
             except:
                 pass
-        
+            
         if content is not None:
             logger.info("Request for %s returns content of length %d", self.url, len(content))
         return content
     
     def request(self):
+        opener = build_opener(HTTPHandler(), HTTPErrorProcessor(), HTTPRedirectHandler(), HTTPSHandler())
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')] # Spoof User agent
+        return self._request(opener, self.url)
+    
+    def _request(self, opener, url):
         content = None
+        content_type = None
         try:
-            opener = build_opener(HTTPHandler(), HTTPErrorProcessor(), HTTPRedirectHandler(), HTTPSHandler())
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')] # Spoof User agent
-            response = opener.open(self.url)
+            response = opener.open(url)
             if response.getcode() == 200:
                 content = response.read()
+                try:
+                    content_type = response.info().get("Content-Type").split('charset=')[-1]
+                except:
+                    logger.exception("Can't obtain charset, resorting to default")
+                    content_type = "utf-8"
                 encoding = response.info().get("Content-Encoding")
                 if encoding is not None and content is not None and len(content) > 0:
                     if encoding == "gzip":
@@ -76,17 +78,24 @@ class Request(object):
                     else:
                         logger.warning("Don't know encoding %s", encoding)                        
             else:
-                logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), self.url)
+                logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), url)
         except IncompleteRead as e: # Probably the servers fault
             content = e.partial # Let's hope it's not encoded
             logger.debug("We've got an IncompleteRead, partial content of length %d", len(content))
         except:
             # TODO: Retry in some cases..
-            logger.exception("Can't retrieve request %s", self.url)
+            logger.exception("Can't retrieve request %s", url)
         finally:
             try:
                 response.close()
             except:
                 pass
+        
+        logger.debug("Content from %s has charset %s", url, content_type)
+        # For now we use the utf-8 encoded python strings
+#         try:
+#             content = content.decode(content_type)
+#         except:
+#             logger.exception("Decoding failed")
             
         return content

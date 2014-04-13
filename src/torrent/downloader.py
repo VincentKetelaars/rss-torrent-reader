@@ -4,7 +4,6 @@ Created on Jan 19, 2014
 @author: Vincent Ketelaars
 '''
 from os.path import join
-import xml.etree.ElementTree as ET
 
 from src.torrent.match_handler import MatchHandler
 from src.http.request import Request

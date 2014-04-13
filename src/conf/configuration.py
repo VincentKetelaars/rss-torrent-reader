@@ -13,7 +13,7 @@ from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
     PREFERENCE_TITLE_ALLOWED, PREFERENCE_TITLE_PREF, PREFERENCE_MIN_WIDTH,\
     PREFERENCE_MIN_HEIGHT, PREFERENCE_MIN_MOVIE_SIZE, PREFERENCE_MAX_MOVIE_SIZE,\
     PREFERENCE_LANGUAGES, PREFERENCE_SUBTITLES, DEFAULT_MISSED_CSV,\
-    CONF_DEFAULT_FILE
+    CONF_DEFAULT_FILE, PREFERENCE_DESC_NOT
 from src.torrent.preference import Preference
 from src.rss.active_search_params import ActiveSearchParameters
 logger = get_logger(__name__)
@@ -47,13 +47,14 @@ class Configuration(object):
         not_list = self._get_option("match", "title_not", default=PREFERENCE_TITLE_NOT, is_list=True)
         allowed_list = self._get_option("match", "title_allowed", default=PREFERENCE_TITLE_ALLOWED, is_list=True)
         pref_list = self._get_option("match", "title_pref", default=PREFERENCE_TITLE_PREF, is_list=True)
+        not_in_desc = self._get_option("match", "not_in_desc", default=PREFERENCE_DESC_NOT, is_list=True)
         width = self._get_option("match", "min_width", default=PREFERENCE_MIN_WIDTH)
         height = self._get_option("match", "min_height", default=PREFERENCE_MIN_HEIGHT)
         min_movie_size = self._get_option("match", "min_movie_size", default=PREFERENCE_MIN_MOVIE_SIZE)
         max_movie_size = self._get_option("match", "max_movie_size", default=PREFERENCE_MAX_MOVIE_SIZE)
         languages = self._get_option("match", "languages", PREFERENCE_LANGUAGES, is_list=True)
         subtitles = self._get_option("match", "subtitles", PREFERENCE_SUBTITLES, is_list=True)
-        return Preference(not_list, allowed_list, pref_list, width, height, min_movie_size, max_movie_size, languages, subtitles)
+        return Preference(not_list, allowed_list, pref_list, not_in_desc, width, height, min_movie_size, max_movie_size, languages, subtitles)
     
     def get_handler(self, handler):
         return self._get_all_options_as_dictionary("handler_" + handler.lower())
