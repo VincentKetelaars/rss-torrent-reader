@@ -145,7 +145,7 @@ class IMDBMovie(object):
         if self.time_downloaded + timedelta(days=15) > datetime.utcnow(): 
             return (self.latest_season, self.latest_episode + 1)
         if random.random() < 0.25: # Allow chance that we're in the next season
-            return (self.latest_season + 1, 0)
+            return (self.latest_season + 1, 1)
         # else
         return (self.latest_season, self.latest_episode + 1) # Default
         
