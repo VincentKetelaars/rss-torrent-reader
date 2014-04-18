@@ -58,16 +58,17 @@ class Request(object):
     
     def _request(self, opener, url):
         content = None
-        content_type = None
+        charset = "utf-8"
         try:
             response = opener.open(url)
             if response.getcode() == 200:
                 content = response.read()
                 try:
-                    content_type = response.info().get("Content-Type").split('charset=')[-1]
+                    content_type = response.info().get("Content-Type")
+                    if content_type.find("charset"):
+                        charset = content_type.split('charset=')[-1].strip()
                 except:
                     logger.exception("Can't obtain charset, resorting to default")
-                    content_type = "utf-8"
                 encoding = response.info().get("Content-Encoding")
                 if encoding is not None and content is not None and len(content) > 0:
                     if encoding == "gzip":
@@ -91,10 +92,10 @@ class Request(object):
             except:
                 pass
         
-        logger.debug("Content from %s has charset %s", url, content_type)
+        logger.debug("Content from %s has charset %s", url, charset)
         # For now we use the utf-8 encoded python strings
 #         try:
-#             content = content.decode(content_type)
+#             content = content.decode(charset)
 #         except:
 #             logger.exception("Decoding failed")
             
