@@ -60,8 +60,7 @@ class ActiveSearchFeeds(object):
             for i in range(len(ACTIVE_SERIES_CATEGORIES)):
                 categorie = [s for s in dseries if s.time_downloaded < datetime.utcnow() - start_time and
                              s.time_downloaded > datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]]
-                samples = sample(categorie, min(len(categorie), int(ACTIVE_SERIES_SHARE[i] * 
-                                                                (active_feed_params.max_series - len(chosen_series)))))
+                samples = sample(categorie, min(len(categorie), int(round(ACTIVE_SERIES_SHARE[i] * active_feed_params.max_series))))
                 logger.debug("Chosen %s with %f chance of max %d feeds between %s and %s out of %d in categorie", 
                              [str(s) for s in samples], ACTIVE_SERIES_SHARE[i], active_feed_params.max_series, 
                              str(datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]),
