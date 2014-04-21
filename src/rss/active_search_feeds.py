@@ -68,9 +68,10 @@ class ActiveSearchFeeds(object):
                 chosen_series += samples
                 start_time = ACTIVE_SERIES_CATEGORIES[i]
             # In case there is room left for more
-            samples = sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
-            logger.debug("Had to choose the remainder of series: %s", [str(s) for s in samples])
-            chosen_series += samples
+            if active_feed_params.max_series - len(chosen_series) > 0:
+                samples = sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
+                logger.debug("Had to choose the remainder of series: %s", [str(s) for s in samples])
+                chosen_series += samples
         return chosen_series
     
     def daily_series(self):
