@@ -52,7 +52,7 @@ class Item(object):
     
     def filename(self):
         f = self.torrent.get("fileName") if self.torrent is not None else None
-        if f is None:
+        if f is None or f.find("%") > 0: # Percentage signs indicate malformed titles
             f = self.title + ".torrent"
         return f
     
