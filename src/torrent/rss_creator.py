@@ -34,21 +34,30 @@ class RSSCreator(MatchHandler):
     NAME = "RSSCreator"
     PARAMETERS = ["file", "max_torrents", "title", "link", "description"]
 
-    def __init__(self, matches, file=None, max_torrents=RSSCREATOR_MAX_TORRENTS, title="", link="", description="", **kwargs):
+    def __init__(self, matches, movies_file=None, series_file=None, max_torrents=RSSCREATOR_MAX_TORRENTS, title="", link="", description="", **kwargs):
         MatchHandler.__init__(self, matches, name=RSSCreator.NAME, **kwargs)
-        self.file = file
+        self.movies_file = movies_file
+        self.series_file = series_file
         self.max_torrents = max_torrents
         self.title = title
         self.link = link
         self.description = description if description != "" else title
         
     def handle_matches(self, matches):
-        if self.file is None or len(matches) == 0:
+        if len(matches) == 0:
             return []
-        logger.debug("Writing %d matches to %s", len(matches), self.file)
+        handled = []
+        if self.movies_file is not None:
+            handled += self.handle_file([m for m in matches if m.movie.is_movie()], self.movies_file)
+        if self.series_file is not None:
+            handled += self.handle_file([m for m in matches if m.movie.is_series()], self.series_file)
+        return handled
+    
+    def handle_file(self, matches, file):
+        logger.debug("Writing %d matches to %s", len(matches), file)
         ET.register_namespace("torrent", "http://xmlns.ezrss.it/0.1/")
         try:
-            tree = ElementTree(file=self.file)
+            tree = ElementTree(file=file)
         except (IOError, ParseError):
             # rss tag does not exist, file did not exist yet, or was corrupted somehow
             tree = ElementTree()
@@ -76,7 +85,7 @@ class RSSCreator(MatchHandler):
 #         tree.write(self.file, encoding="utf-8", xml_declaration=True)
         pretty_xml = self.prettify_xml(root)
         try:
-            with open(self.file, "wb") as f:
+            with open(file, "wb") as f:
                 f.write(pretty_xml)
         except IOError:
             return []
@@ -119,9 +128,10 @@ class RSSCreator(MatchHandler):
         return reparsed.toprettyxml(encoding=encoding)
     
     @staticmethod
-    def create_html(file="", max_torrents=0, title="", link="", description="", **kwargs):
+    def create_html(movies_file="", series_file="", max_torrents=0, title="", link="", description="", **kwargs):
         div = MatchHandler.create_html(name=RSSCreator.NAME, class_name="rsscreator_handler", **kwargs)
-        MatchHandler.add_label_input_br(div, "File", 50, "file", file)
+        MatchHandler.add_label_input_br(div, "Movies File", 50, "movies_file", movies_file)
+        MatchHandler.add_label_input_br(div, "Series File", 50, "series_file", series_file)
         MatchHandler.add_label_input_br(div, "Max torrents", 50, "max_torrents", max_torrents)
         MatchHandler.add_label_input_br(div, "Title", 50, "title", title)
         MatchHandler.add_label_input_br(div, "Link", 50, "link", link)

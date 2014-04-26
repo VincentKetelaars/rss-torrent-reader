@@ -20,7 +20,8 @@ logger = get_logger(__name__)
 class TestRSSCreator(unittest.TestCase):
 
     def setUp(self):
-        self.file = os.path.join(TEST_DIRECTORY, "test_torrent_rss.xml")
+        self.movies_file = os.path.join(TEST_DIRECTORY, "test_torrent_rss_movies.xml")
+        self.series_file = os.path.join(TEST_DIRECTORY, "test_torrent_rss_series.xml")
         channel = get_channel()
         movie = MockMovie("somethingorother", 2014, "Feature Film")
         self.matches = [Match(movie, t) for t in channel.items]
@@ -29,18 +30,18 @@ class TestRSSCreator(unittest.TestCase):
         self.description = "This is my test"
 
     def tearDown(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
+        if os.path.exists(self.movies_file):
+            os.remove(self.movies_file)
 
     def test_full_file(self):
         max_torrents = 25
         self.assertLess(max_torrents, len(self.matches)) # Needed for the rest of the asserts
-        rsscreator = RSSCreator(self.matches, file=self.file, max_torrents=max_torrents, title=self.title, 
+        rsscreator = RSSCreator(self.matches, movies_file=self.movies_file, series_file=self.series_file, max_torrents=max_torrents, title=self.title, 
                                 link=self.link, description=self.description)
         rsscreator.start()
         rsscreator.wait(HANDLER_WAIT)
-        self.assertTrue(os.path.exists(self.file))
-        et = ElementTree(file=self.file)
+        self.assertTrue(os.path.exists(self.movies_file))
+        et = ElementTree(file=self.movies_file)
         channel = et.find("channel")
         items = channel.findall("item")
         self.assertEqual(len(items), max_torrents)
@@ -51,7 +52,7 @@ class TestRSSCreator(unittest.TestCase):
         
         # Check for CDATA
         content = ""
-        with open(self.file, "r") as f:
+        with open(self.movies_file, "r") as f:
             content = f.read()        
         cdata = re.findall("\<\!\[CDATA\[", content)
         self.assertEqual(len(items) * 2, len(cdata))
@@ -59,15 +60,15 @@ class TestRSSCreator(unittest.TestCase):
     def test_write_read_write(self):
         max_torrents = 25
         number = 10 # Lower than max_torrents / 2
-        rsscreator = RSSCreator(self.matches[:number], file=self.file, max_torrents=max_torrents, title=self.title, 
+        rsscreator = RSSCreator(self.matches[:number], movies_file=self.movies_file, series_file=self.series_file, max_torrents=max_torrents, title=self.title, 
                                 link=self.link, description=self.description)
         rsscreator.start()
         rsscreator.wait(HANDLER_WAIT)
-        rsscreator = RSSCreator(self.matches[number:number * 2], file=self.file, max_torrents=max_torrents, title=self.title, 
+        rsscreator = RSSCreator(self.matches[number:number * 2], movies_file=self.movies_file, series_file=self.series_file, max_torrents=max_torrents, title=self.title, 
                                 link=self.link, description=self.description)
         rsscreator.start()
         rsscreator.wait(HANDLER_WAIT)
-        et = ElementTree(file=self.file)
+        et = ElementTree(file=self.movies_file)
         channel = et.find("channel")
         items = channel.findall("item")
         self.assertEqual(len(items), number * 2)
@@ -79,7 +80,7 @@ class TestRSSCreator(unittest.TestCase):
         
         # Check for CDATA
         content = ""
-        with open(self.file, "r") as f:
+        with open(self.movies_file, "r") as f:
             content = f.read()        
         cdata = re.findall("\<\!\[CDATA\[", content)
         self.assertEqual(len(items) * 2, len(cdata))
