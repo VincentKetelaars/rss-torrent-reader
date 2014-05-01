@@ -144,8 +144,9 @@ class Item(object):
         self._update_resolution(self.title)
         
     def _parse_description(self):
-        self._update_resolution(self.description)
-        self._update_size(self.description)
+        description = self.description.replace(self.title, "") # Any repeats of the torrent shouldn't cloud the parsing
+        self._update_resolution(description)
+        self._update_size(description)
                     
     def _update_resolution(self, text):
         resolutions = re.findall("(\d{3,4})[x*](\d{3,4})", text, re.IGNORECASE)
