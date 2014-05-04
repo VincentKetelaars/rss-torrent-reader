@@ -7,12 +7,13 @@ from threading import Thread, Event
 
 from src.torrent.downloader import Downloader
 from src.torrent.rss_creator import RSSCreator
+from src.torrent.email_handler import EmailHandler
+from src.torrent.execution_handler import ExecutionHandler
 
 from src.logger import get_logger
-from src.torrent.email_handler import EmailHandler
 logger = get_logger(__name__)
 
-HANDLER_LOOKUP = {"downloader" : Downloader, "rsscreator" : RSSCreator, "email" : EmailHandler}
+HANDLER_LOOKUP = {"downloader" : Downloader, "rsscreator" : RSSCreator, "email" : EmailHandler, "executioner" : ExecutionHandler}
 
 class HandlerFactory(Thread):
     '''

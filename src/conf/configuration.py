@@ -16,6 +16,7 @@ from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
     CONF_DEFAULT_FILE, PREFERENCE_DESC_NOT, PREFERENCE_EXCLUDED_EXTENSIONS
 from src.torrent.preference import Preference
 from src.rss.active_search_params import ActiveSearchParameters
+from ConfigParser import NoSectionError
 logger = get_logger(__name__)
 
 class Configuration(object):
@@ -88,8 +89,12 @@ class Configuration(object):
         return l
     
     def _get_all_options_as_dictionary(self, section):
-        l = self.config.items(section)
         d = {}
+        try:
+            l = self.config.items(section)
+        except NoSectionError:
+            logger.debug("Can't get section %s", section)
+            return d
         for i in l:
             d[i[0]] = self._parse_option(i[1])
         return d
@@ -98,6 +103,10 @@ class Configuration(object):
         if option.find(",") > -1 and not (option.startswith('"') or option.endswith('"')):
             is_list = True
         result = option.strip(' ').strip('"')
+        if result.lower() == "false":
+            return False
+        if result.lower() == "true":
+            return True
         if len(result) == 0:
             if is_list:
                 return []

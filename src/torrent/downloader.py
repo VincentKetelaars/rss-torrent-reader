@@ -5,11 +5,11 @@ Created on Jan 19, 2014
 '''
 from os.path import join
 
+from threading import Thread
+
 from src.torrent.match_handler import MatchHandler
 from src.http.request import Request
-
 from src.logger import get_logger
-from threading import Thread
 logger = get_logger(__name__)
 
 class Downloader(MatchHandler):
@@ -28,23 +28,23 @@ class Downloader(MatchHandler):
         if self.directory is None:
             return []
         # Intermediate successes are stored in self.successes
-        threads = [(m, Thread(target=self.handle, name="Downloader_" + m.movie.title, args=(m, self.successes))) for m in matches]
+        threads = [(m, Thread(target=self.handle, name="Downloader_" + m.movie.title, args=(self.directory, m, self.successes))) for m in matches]
         for t in threads:
             t[1].start()
         for t in threads:
             t[1].join() # Wait till they are all done
         return self.successes # Not pretty, but easy solution
         
-    def handle(self, match, successes):
+    def handle(self, directory, match, successes):
         url = match.torrent.url()
         if url is not None:
             filename = match.torrent.filename()
-            path = join(self.directory, filename)
+            path = join(directory, filename)
             logger.debug("Downloading %s to %s", url, path)
             download = Request(url).request()
             
             if download is None:
-                return False
+                return None
             
             if download.startswith("d8:announce"):
                 try:
@@ -52,12 +52,12 @@ class Downloader(MatchHandler):
                         f.write(download)
                     successes.append(match)
                     logger.info("Successfully downloaded %s to %s", url, path)
-                    return True
+                    return path
                 except IOError:
                     logger.error("Could not write to %s", path)
             else:
                 logger.warning("This content does not correspond to a torrent: %s", download[:100])
-        return False
+        return None
     
     @staticmethod
     def create_html(directory="", **kwargs):
