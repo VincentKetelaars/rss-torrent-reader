@@ -17,7 +17,7 @@ class TestPreference(unittest.TestCase):
         pass
 
     def test_parse(self):
-        pref = Preference([], [], [], 0, 0, "", "", [], [])
+        pref = Preference([], [], [], [], 0, 0, "", "", [], [])
         self.assertEqual(pref.min_movie_size, 0)
         self.assertEqual(pref.max_movie_size, 0)
         sizes = "700MB"
@@ -26,7 +26,7 @@ class TestPreference(unittest.TestCase):
         sizes = "5GB"
         size = 5 * GB
         self.assertEqual(pref.parse_size(sizes), size)
-        pref = Preference([], [], [], 0, 0, "234KB", "2313MB", [], [])
+        pref = Preference([], [], [], [], 0, 0, "234KB", "2313MB", [], [])
         self.assertEqual(pref.min_movie_size, 234 * KB)
         self.assertEqual(pref.max_movie_size, 2313 * MB)
 

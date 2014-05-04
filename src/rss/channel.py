@@ -53,7 +53,13 @@ class Item(object):
     def filename(self):
         f = self.torrent.get("fileName") if self.torrent is not None else None
         if f is None or f.find("%") > 0: # Percentage signs indicate malformed titles
-            f = self.title + ".torrent"
+            f = self.title 
+            try:
+                u = f.decode("utf-8")
+                f = u.encode("ascii", "ignore")
+            except:
+                logger.exception("Could not convert %s from utf8 to ascii", self.title)
+            f += ".torrent"
         return f
     
     def get_size(self):

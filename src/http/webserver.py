@@ -24,7 +24,7 @@ import subprocess
 from src.http.elementtree import to_html_string, create_tr_with_tds,\
     add_label_input_br, add_configuration_header, onclick_icon, create_input,\
     fromstring, add_break, create_div, add_form, add_div, add_input, add_select,\
-    add_button, add_option, create_td
+    add_button, add_option
 logger = get_logger(__name__)
 
 class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -164,7 +164,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             onclick_icon(torrent_feeds_div, False, "return remove_input_element(this)")
             add_input(torrent_feeds_div, {"type" : "text", "size" : "50", "name" : "feed", "value" : str(f)})
             add_break(torrent_feeds_div)
-        onclick_icon(torrent_feeds_div, True, "return add_input_element(this, 'feed')")
+        onclick_icon(torrent_feeds_div, True, "return add_input_element(this, '', 'feed')")
         
         # Add IMDB feeds
         imdb_feeds_div = add_div(form, {"id" : "imdb-feeds"})
@@ -194,7 +194,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         for u in asp.urls:
             onclick_icon(active_feed_div, False, "return remove_input_element(this)")
             add_label_input_br(active_feed_div, "Search url", 100, "active_url", u)
-        onclick_icon(active_feed_div, True, "return add_input_element(this, 'active_url')")
+        onclick_icon(active_feed_div, True, "return add_input_element(this, 'Search url', 'active_url')")
         
         # Add preferences
         preferences_div = add_div(form, {"id" : "preferences"})
@@ -210,6 +210,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         add_label_input_br(preferences_div, "Maximum movie size", 10, "max_movie_size", size_to_string(preference.max_movie_size), explanation="Maximum size of the movie (e.g. 5GB)")
         add_label_input_br(preferences_div, "Languages", 50, "languages", ", ".join(preference.languages), explanation="Comma separated list of languages (or acronyms) allowed to be spoken")
         add_label_input_br(preferences_div, "Subtitles", 50, "subtitles", ", ".join(preference.subtitles), explanation="Comma separated list of languages that are preferred for subtitles")
+        add_label_input_br(preferences_div, "Excluded extensions", 50, "excluded_extensions", ", ".join(preference.excluded_extensions), explanation="Comma separated list of extensions that are not allowed")
         
         # Add handlers
         handler_div = add_div(form, {"id" : "handlers"})
@@ -231,7 +232,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         add_configuration_header(gui_div,  "WebGUI", "Set the WebGUI parameters. They will take effect the next time you start.")
         webgui = cfg.get_webgui_params()
         add_label_input_br(gui_div, "Host", 50, "host", webgui.get("host", ""))
-        add_label_input_br(gui_div, "Port", 50, "port", webgui.get("port", ""))
+        add_label_input_br(gui_div, "Port", 10, "port", webgui.get("port", ""))
         
         conf_save_button = add_button(div, {"type" : "submit", "class" : "save-button", 
                                                                           "name" : "do", "value" : "conf-save"})

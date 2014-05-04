@@ -90,7 +90,15 @@ class Decider(object):
             if torrent.description.find(" " + n.lower() + " ") >= 0:
                 logger.debug("Description of %s has unwanted signature %s", torrent.title, n)
                 return False
-        
+            
+        for e in self.preference.excluded_extensions:
+            if ttitle.endswith("." + e):
+                logger.debug("%s suggests unwanted %s extension", ttitle, e.lower())
+                return False
+            if torrent.description.find(" " + e.lower() + " ") >= 0 or torrent.description.find("." + e.lower() + " ") >= 0:
+                logger.debug("Description of %s contains unwanted extension %s", torrent.title, e)
+                return False
+            
         return True
         
     def match(self, movie, torrent):

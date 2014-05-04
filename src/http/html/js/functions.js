@@ -31,7 +31,8 @@ $('.save-button').click(function() {
 	return false;
 });
 
-function add_input_element(me, ename) {
+function add_input_element(me, label, ename) {
+	$(me).parent().append($('<label>' + label + '</label>'));
 	$(me).parent().append($('<input></input>').attr({type : "text", size : 50, name : ename}));
 	$(me).parent().append($('</br>'));
 	$(me).parent().append($('<input></input>').attr({type : "image", height : 20, width : 20, 
@@ -42,6 +43,7 @@ function add_input_element(me, ename) {
 };
 
 function remove_input_element(me) {
+	$(me).next().remove(); // Remove the label
 	$(me).next().remove(); // Remove the input
 	$(me).next().remove(); // Remove </br>
 	$(me).remove(); // Remove titself
