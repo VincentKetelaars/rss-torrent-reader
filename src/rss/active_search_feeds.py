@@ -50,9 +50,7 @@ class ActiveSearchFeeds(object):
         return chosen_movies
     
     def choose_series(self, active_feed_params):
-        chosen_series = []
-        if chosen_series is not None:
-            chosen_series = self.daily_series()
+        chosen_series = self.daily_series()
         logger.debug("We have %d series today, namely %s", len(chosen_series), [str(s) for s in chosen_series])
         dseries = [s for s in self.series.itervalues() if s.download]
         if len(dseries) > 0:
@@ -65,22 +63,22 @@ class ActiveSearchFeeds(object):
                              [str(s) for s in samples], ACTIVE_SERIES_SHARE[i], active_feed_params.max_series, 
                              str(datetime.utcnow() - ACTIVE_SERIES_CATEGORIES[i]),
                              str(datetime.utcnow() - start_time), len(categorie))
-                chosen_series += samples
+                chosen_series.update(samples)
                 start_time = ACTIVE_SERIES_CATEGORIES[i]
-            # In case there is room left for more
-            if active_feed_params.max_series - len(chosen_series) > 0:
-                samples = sample(set(dseries) - set(chosen_series), active_feed_params.max_series - len(chosen_series))
+            # While there is room left for more
+            while active_feed_params.max_series - len(chosen_series) > 0:
+                samples = sample(set(dseries) - chosen_series, active_feed_params.max_series - len(chosen_series))
                 logger.debug("Had to choose the remainder of series: %s", [str(s) for s in samples])
                 chosen_series += samples
-        return chosen_series
+        return list(chosen_series)
     
     def daily_series(self):
         self.daily.wait()
-        chosen = []
+        chosen = set() # Not allowing doubles
         for ds in self.daily.series():
             for s in self.series.itervalues():
-                if s.title == ds.title and s.is_newer(ds.season, ds.episode):
-                    chosen.append(s)
+                if s.title == ds.title and s.is_newer(ds.season, ds.episode): 
+                    chosen.add(s)
                     break
         return chosen
         

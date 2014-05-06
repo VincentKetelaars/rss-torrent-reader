@@ -20,7 +20,7 @@ class ExecutionHandler(MatchHandler):
     '''
     
     NAME="ExecutionHandler"
-    PARAMETERS=["directory", "command"]
+    PARAMETERS=["directory", "command", "delete_when_done"]
     PLACE_HOLDER = "TORRENT"
 
     MAX_TIME_WAIT_FOR_REMOVE = 100 # Seconds
@@ -49,7 +49,7 @@ class ExecutionHandler(MatchHandler):
     def handle(self, directory, command, delete_when_done, match, successes):
         path = Downloader([], None).handle(directory, match, [])
         if path is not None and os.path.isfile(path):
-            command = command.replace(self.PLACE_HOLDER, path)
+            command = command.replace(self.PLACE_HOLDER, '"' + path + '"')
             last_access_time = os.path.getatime(path)
             logger.debug("Executing %s, last accessed %d", command, last_access_time)
             return_code = subprocess.call(command, shell=True)

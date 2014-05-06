@@ -104,6 +104,19 @@ class TestDecider(unittest.TestCase):
         result = decider.decide()
         self.assertEqual(len(result), 0)
         
+        torrent = "24 S01 Season 1 720p WEB-DL H264-HDB [PublicHD]"
+        decider = Decider(MockMerger({"asdfl" : MockMovie("24", -1, SERIES_TYPES[0], latest_season=0, latest_episode=0)}),
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), 
+                          Preference([],["unrated", "extended"],[],[], 0,0,"", "20GB", [], []))
+        result = decider.decide()
+        self.assertEqual(len(result), 1)
+        
+        torrent = "24.S01E01.Day.1_.12_00.A.M..-.1_00.A.M..1080p.WEB-DL.AAC2.0.H264 [PublicHD]"
+        decider = Decider(MockMerger({"asdfl" : MockMovie("24", -1, SERIES_TYPES[0], latest_season=0, latest_episode=0)}),
+                          MockTorrentFeed({"" : MockChannel([MockItem(torrent, "")])}), 
+                          Preference([],["unrated", "extended"],[],[], 0,0,"", "20GB", [], []))
+        result = decider.decide()
+        self.assertEqual(len(result), 1)
         
     def test_languages(self):
         torrent = "Rise.Of.The.Guardians.2012.FRENCH.720p.BluRay.AC3.x264-TMB"

@@ -39,7 +39,7 @@ class IMDBMovie(object):
         self.release = release
         self.url = url
         self.download = download
-        self.latest_season = latest_season
+        self.latest_season = latest_season if latest_season > 0 else 1 # We don't start with zero, but with one
         self.latest_episode = latest_episode
         self.time_downloaded = datetime(*IMDB_DEFAULT_DATE)
         
@@ -98,7 +98,7 @@ class IMDBMovie(object):
         if movie is None:
             return
         self.download = movie.download
-        self.latest_season = movie.latest_season
+        self.latest_season = movie.latest_season if movie.latest_season > 0 else 1
         self.latest_episode = movie.latest_episode
         self.time_downloaded = movie.time_downloaded
         # Anything else that where the old value might be useful?
@@ -138,14 +138,14 @@ class IMDBMovie(object):
         if self.latest_season == 0: # Initial value
             return (1, 0)
         if self.latest_episode == 0: # First episode of the season
-            return (self.latest_season, 1)
+            return (self.latest_season, 0) # Try entire season
         if self.time_downloaded != datetime(*IMDB_DEFAULT_DATE) and self.time_downloaded + timedelta(days=175) < datetime.utcnow(): # Season should be over after half a year
             return (self.latest_season + 1, 1)
         # Within two weeks odds are very high that we're in the same season still
         if self.time_downloaded + timedelta(days=15) > datetime.utcnow(): 
             return (self.latest_season, self.latest_episode + 1)
         if random.random() < 0.25: # Allow chance that we're in the next season
-            return (self.latest_season + 1, 1)
+            return (self.latest_season + 1, 0) # Search just on season
         # else
         return (self.latest_season, self.latest_episode + 1) # Default
         

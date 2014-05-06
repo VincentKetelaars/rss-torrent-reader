@@ -3,8 +3,6 @@ Created on Jan 11, 2014
 
 @author: Vincent Ketelaars
 '''
-import sys
-
 from src.logger import get_logger
 from src.torrent.match import Match
 from src.general.constants import FEED_WAIT, MERGER_WAIT
@@ -53,9 +51,9 @@ class Decider(object):
                         logger.debug("This torrent %s is not appropriate", t.title)
                         continue
                     if m.is_movie():
-                        logger.debug("Match %s %s", m.title, t.title)
+                        logger.debug("Match %s (%s) %s", m.title, m.id, t.title)
                     elif m.is_series():
-                        logger.debug("Match %s %s, episode %s", m.title, t.title, t.episode())
+                        logger.debug("Match %s (%s) %s, episode %s", m.title, m.id, t.title, t.episode())
                         
                     if m.id not in self.results:
                         self.results[m.id] = t
@@ -141,8 +139,8 @@ class Decider(object):
         @rtype: (Boolean, int)
         """
         # Make both lowercase
-        mtitle = mtitle.lower() 
-        ttitle = ttitle.lower()
+        mtitle = mtitle.lower().strip()
+        ttitle = ttitle.lower().strip()
         if mtitle == ttitle:
             return (True, 0)
         p = re.compile("[':,]")
