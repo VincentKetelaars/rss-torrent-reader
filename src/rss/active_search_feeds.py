@@ -77,7 +77,7 @@ class ActiveSearchFeeds(object):
         chosen = set() # Not allowing doubles
         for ds in self.daily.series():
             for s in self.series.itervalues():
-                if s.title == ds.title and s.is_newer(ds.season, ds.episode): 
+                if s.title == ds.title and s.download and s.is_newer(ds.season, ds.episode): 
                     chosen.add(s)
                     break
         return chosen
