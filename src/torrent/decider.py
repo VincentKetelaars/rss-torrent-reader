@@ -185,6 +185,11 @@ class Decider(object):
         If that does not result in a choice, a comparison is made based on the resolution.
         @return: the better of the two torrents, defaults to the first
         """
+        if t1.is_series() and t1.episode() != t2.episode(): # Choose the earliest episode
+            if t1.episode() < t2.episode():
+                return t1
+            else:
+                return t2
         t1_title = t1.title[len(t1.film_title()):].lower() # Don't use the actual title
         t2_title = t2.title[len(t1.film_title()):].lower() # Don't use the actual title
         for item in self.preference.pref_list:
