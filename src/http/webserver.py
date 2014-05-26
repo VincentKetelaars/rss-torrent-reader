@@ -43,6 +43,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     SHOW_CONFIGURATION_FILE = "configuration-show"
     ADD_HANDLER = "add-handler"
     INVALID_RESPONSE = "This is not the page you are looking for"
+    WEB_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
     
     def __init__(self, movies_file, series_file, *args):
         self.movies_file = movies_file
@@ -377,7 +378,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         trs = [create_tr_with_tds(create_input({"type" : "checkbox", "id" : "check-all", "text" : "Download"}), "Movie", "Year", "Added")]
         movies = sorted(self.movies.values(), key=lambda x: x.modified, reverse=True)
         for m in movies:
-            added = m.modified.strftime("%Y-%m-%d %H:%M:%S")
+            added = m.modified.strftime(self.WEB_DATETIME_FORMAT)
             input_attr = {"type" : 'checkbox', "name" : m.id, "value" : "1", "class" : "checkbox"}
             if m.download:
                 input_attr["checked"] = "checked"
@@ -387,17 +388,18 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
     def fill_series(self, body):        
         explanation = "Episodes will be downloaded if they are later than the episode indicated in on this sheet"
-        trs = [create_tr_with_tds("Download", "Season", "Episode", "Series", "Year", "Added")]
+        trs = [create_tr_with_tds("Download", "Season", "Episode", "Series", "Year", "Added","Last download")]
         series = sorted(self.series.values(), key=lambda x: x.modified, reverse=True)
         for s in series:
-            added = s.modified.strftime("%Y-%m-%d %H:%M:%S")
+            added = s.modified.strftime(self.WEB_DATETIME_FORMAT)
+            downloaded = s.time_downloaded.strftime(self.WEB_DATETIME_FORMAT)
             input_attr = {"type" : 'checkbox', "name" : s.id, "value" : "1", "class" : "checkbox"}
             if s.download:
                 input_attr["checked"] = "checked"
             season_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_season", "value" : str(s.latest_season)}
             episode_attr = {"type" : 'text', "size" : "2", "name" : s.id + "_episode", "value" : str(s.latest_episode)}
             tr = create_tr_with_tds(create_input(input_attr), create_input(season_attr), create_input(episode_attr), 
-                                    s.title, str(s.year if s.year != -1 else "????"), added)
+                                    s.title, str(s.year if s.year != -1 else "????"), added, downloaded)
             trs.append(tr)
         return self.fill_films(body, "Series", "series", explanation, trs)
     
