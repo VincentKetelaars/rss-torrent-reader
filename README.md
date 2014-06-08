@@ -24,7 +24,15 @@ git clone --recursive git://github.com/VincentKetelaars/rss-torrent-reader.git
 
 Make sure you add the recursive argument since this project makes use of another.
 
-There is nothing to install, but:
+Because IMDB has introduced captchas, in order to automatically retrieve the imdb watchlist we need to solve these. The [tesseract](https://code.google.com/p/tesseract-ocr/) is open source character recognition software that can read these captchas, albeit with varying results. 
+
+In the *src/general/constants.py* file you can set *TESSERACT_ON* to True or False, indicating whether you would like to use it. In order to use it you will have to install it from the aformentioned website. To enhance the reading process I advice you to also create a new file in the *tessdata/configs/* directory and put its name in the *TESSERACT_CONFIG_FILE* variable. In this file put the following line:
+
+tessedit_char_whitelist abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+
+More information on this optimization [here](http://stackoverflow.com/a/2983295/1444854)
+
+Then:
 - Take care to configure your configuration file 
 - Set the path to that configuration file in *src.general.constants.py* 
 - To run this program periodically you should run *set_periodic_run.sh* with an integer argument indicating that the program should run every so many hours
