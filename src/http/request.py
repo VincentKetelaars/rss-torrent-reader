@@ -74,11 +74,10 @@ class Request(object):
                 captcha_string = captcha.convert_captcha_to_string(pic, directory)
                 logger.debug("Captcha reads %s", captcha_string)
                 form["captcha_answer"] = captcha_string
-                second_try = login(form, opener)
-                if second_try.find("Enter the name of the movie or person above: ") < 0:
+                if login(form, opener).find("Enter the name of the movie or person above: ") < 0:
                     logger.info("Login with captcha worked!")
                 else:
-                    logger.debug("Failed to login with Captcha: %s", second_try)
+                    logger.debug("Failed to login with Captcha")
                     return None
             except:
                 logger.exception("No captcha for us")
