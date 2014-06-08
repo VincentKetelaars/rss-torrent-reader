@@ -62,5 +62,8 @@ class FeedHandler(object):
         return [(c, self.active_feeds.get(u)) for u, c in self.results.iteritems() if u in self.active_feeds.keys()]
     
     def wait(self, timeout):
-        self.event.wait(timeout)
-        
+        try:
+            self.event.wait(timeout)
+        except (KeyboardInterrupt, SystemExit):
+            logger.info("We have %d out of %d" % (len(self._returned), len(self.threads)))
+            raise

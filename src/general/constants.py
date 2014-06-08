@@ -87,3 +87,10 @@ ACTIVE_SERIES_SHARE = [0, 0.2, 0.4, 0.2, 0.2]
 DOWNLOAD CHOICES
 """
 DOWNLOAD_SEASON_TORRENTS = True # Note that you risk downloading torrents that do not have all episode of the season
+
+"""
+TESSERACT
+"""
+TESSERACT_ON = True # Only set to true if you want to use it (Make sure it is installed)
+TESSERACT_FULL_PATH = "/usr/local/bin/tesseract" # Full path to tesseract
+TESSERACT_CONFIG_FILE = "letters" # Config file setup as mentioned here: http://stackoverflow.com/a/2983295/1444854

@@ -58,8 +58,11 @@ class HandlerFactory(Thread):
                     # We collect the set of matches that are handled by all primary handlers
                     if handler.essential:
                         self.handled_matches.intersection_update(handler.handled())
-                    if handler.handled():
+                    if len(handler.handled()) > 0:
                         logger.info("%s handled %s correctly", handler.name, [m.torrent.film_title() for m in handler.handled()])
+                    not_handled = set(self.matches) - set(handler.handled())
+                    if len(not_handled) > 0: # Some didn't go so well
+                        logger.warning("%s did not handle %s correctly", handler.name, [m.torrent.film_title() for m in not_handled])
             self.event.wait(self.LOOP_WAIT)
         self.event.set()
         
@@ -71,10 +74,12 @@ class HandlerFactory(Thread):
         
     def handled(self):
         if all([h.done() for h in self.handler_threads if h.essential]):
+            logger.debug("Handled matches: %s", [m.torrent.film_title() for m in self.handled_matches])
             return list(self.handled_matches)
         # Also if only partially done, check for those
         handled = set(self.matches)
         for handler in self.handler_threads:
             if handler.essential:
                 handled.intersection_update(handler.handled())
+        logger.debug("Partially done, these are handled: %s", [m.torrent.film_title() for m in handled])
         return list(handled)

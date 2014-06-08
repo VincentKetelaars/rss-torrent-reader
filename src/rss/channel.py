@@ -7,8 +7,7 @@ import re
 
 from src.logger import get_logger
 from src.general.constants import RESOLUTION_720, RESOLUTION_1080,\
-    RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO, RESOLUTION_DVDRIP,\
-    DOWNLOAD_SEASON_TORRENTS
+    RESOLUTION_HDTV, RESOLUTION_BRRIP, RESOLUTION_ZERO, RESOLUTION_DVDRIP
 from src.general.functions import string_to_size
 logger = get_logger(__name__)
 

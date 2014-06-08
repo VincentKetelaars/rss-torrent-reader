@@ -3,17 +3,23 @@ Created on Dec 25, 2013
 
 @author: Vincent Ketelaars
 '''
+import tempfile
 import zlib
+import re
+# import ImageEnhance
 from urllib2 import HTTPHandler, HTTPSHandler, HTTPErrorProcessor, HTTPRedirectHandler, HTTPCookieProcessor, build_opener
 from urllib import urlencode
 from cookielib import CookieJar
 from collections import OrderedDict
-
-from src.logger import get_logger
 from httplib import IncompleteRead
+
+from src.content import captcha
+from src.logger import get_logger
+from src.general.constants import TESSERACT_ON
 logger = get_logger(__name__)
 
 IMDBLOGIN = "https://secure.imdb.com/register/login?ref_=nv_usr_lgin_3"
+PRECAPTCHA = "http://pro.imdb.com"
 
 class Request(object):
     '''
@@ -29,36 +35,72 @@ class Request(object):
         if not self.username or not self.password or not "imdb.com" in self.url:
             return None
         
+        
+        def login(form, opener):
+            content = None
+            try:
+                params = urlencode(form)
+                response = opener.open(IMDBLOGIN, params)
+                if response.getcode() != 200:
+                    logger.warning("Did not receive proper response from IMDB %s, code %s", IMDBLOGIN, response.getcode())
+                content = response.read()
+            except:
+                logger.exception("Can't retrieve %s", IMDBLOGIN)
+            finally:
+                try: # response, or response2 might not exist
+                    response.close()
+                except:
+                    pass
+            return content
+
         form = OrderedDict([("49e6c", "378"), ("login", self.username), ("password",  self.password)])
         
-        content = None
-        try:
-            cj = CookieJar()
-            opener = build_opener(HTTPHandler(), HTTPSHandler(), HTTPErrorProcessor(), 
-                         HTTPRedirectHandler(), HTTPCookieProcessor(cj))
-            params = urlencode(form)
-            response = opener.open(IMDBLOGIN, params)
-            content = self._request(opener, self.url)
-        except:
-            logger.exception("Can't retrieve %s", IMDBLOGIN)
-        finally:
-            try: # response, or response2 might not exist
-                response.close()
+        cj = CookieJar()
+        opener = build_opener(HTTPHandler(), HTTPSHandler(), HTTPErrorProcessor(), 
+                     HTTPRedirectHandler(), HTTPCookieProcessor(cj))
+        login_response = login(form, opener)
+        
+        if login_response is None:
+            return None
+        match = re.search('src="(/widget/captcha\?type=stranger&c=\w+)"', login_response)
+        if match: # We have a captcha to deal with
+            captcha_link = PRECAPTCHA + match.group(1)
+            logger.warning("IMDB doesn't trust us, hence the %s link", captcha_link)
+            if not TESSERACT_ON:
+                return None
+            directory = tempfile.gettempdir()
+            try:                 
+                pic = self._request(self._create_opener(), captcha_link)
+                captcha_string = captcha.convert_captcha_to_string(pic, directory)
+                logger.debug("Captcha reads %s", captcha_string)
+                form["captcha_answer"] = captcha_string
+                second_try = login(form, opener)
+                if second_try.find("Enter the name of the movie or person above: ") < 0:
+                    logger.info("Login with captcha worked!")
+                else:
+                    logger.debug("Failed to login with Captcha: %s", second_try)
+                    return None
             except:
-                pass
+                logger.exception("No captcha for us")
+                return None
+                    
+        content = self._request(opener, self.url)
             
         if content is not None:
             logger.info("Request for %s returns content of length %d", self.url, len(content))
         return content
     
-    def request(self):
+    def _create_opener(self):
         opener = build_opener(HTTPHandler(), HTTPErrorProcessor(), HTTPRedirectHandler(), HTTPSHandler())
         opener.addheaders = [('User-agent', 'Mozilla/5.0')] # Spoof User agent
-        return self._request(opener, self.url)
+        return opener
+    
+    def request(self):
+        return self._request(self._create_opener(), self.url)
     
     def _request(self, opener, url):
         content = None
-        charset = "utf-8"
+        charset = None
         try:
             response = opener.open(url)
             if response.getcode() == 200:
@@ -78,7 +120,7 @@ class Request(object):
                             logger.exception("Error with content: %s". content)
                     else:
                         logger.warning("Don't know encoding %s", encoding)                        
-            else:
+            if response.getcode() != 200 or content is None:
                 logger.debug("Got code %d and %s for %s", response.getcode(), response.read(), url)
         except IncompleteRead as e: # Probably the servers fault
             content = e.partial # Let's hope it's not encoded
@@ -92,7 +134,8 @@ class Request(object):
             except:
                 pass
         
-        logger.debug("Content from %s has charset %s", url, charset)
+        if charset is not None:
+            logger.debug("Content from %s has charset %s", url, charset)
         # For now we use the utf-8 encoded python strings
 #         try:
 #             content = content.decode(charset)
