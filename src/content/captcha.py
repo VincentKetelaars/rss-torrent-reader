@@ -75,8 +75,28 @@ def edits1(word):
     inserts    = [a + c + b     for a, b in splits for c in alphabet]
     return set(deletes + transposes + replaces + inserts)
 
-def known_edits3(word):
-    return set(e3 for e1 in edits1(word) for e2 in edits1(e1) for e3 in edits1(e2) if e3 in NWORDS)
+def guess_by_characters_and_length(words_dict, word, distance=1, length=0):
+    words = {}
+    for w, count in words_dict.iteritems():
+        if abs(len(word) - len(w)) <= length:
+            for i in range(distance):
+                if word[i] != w[i] or word[-1 - i] != w[-1 - i]:
+                    break
+            else:
+                words[w] = count
+    return words
+
+def guess_iterate(word):
+    i = 1
+    words_dict = NWORDS
+    while True:
+        result = guess_by_characters_and_length(words_dict, word, i, 0)
+        if len(result) == 0:
+            break
+        else:
+            words_dict = result
+        i += 1
+    return set(words_dict)
 
 def known_edits2(word):
     return set(e2 for e1 in edits1(word) for e2 in edits1(e1) if e2 in NWORDS)
@@ -85,5 +105,5 @@ def known(words):
     return set(w for w in words if w in NWORDS)
 
 def correct(word):
-    candidates = known([word]) or known(edits1(word)) or known_edits2(word) or [word]
+    candidates = known([word]) or known(edits1(word)) or known_edits2(word) or guess_iterate(word) or set([word])
     return max(candidates, key=NWORDS.get)
