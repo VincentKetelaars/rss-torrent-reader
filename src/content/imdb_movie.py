@@ -71,10 +71,10 @@ class IMDBMovie(object):
         if self.is_movie():
             return self.download
         if self.is_series():
-            return self.download and ((season == self.latest_season + 1 and self.latest_episode == 0) or # Entire season
+            return self.download and ((season == self.latest_season + 1 and self.latest_episode == 0 and episode == 0) or # Entire season
                                       (season == self.latest_season and episode == self.latest_episode + 1) or # Next episode
-                                      (season == self.latest_season + 1 and self.latest_episode == 1)) # First episode of new season
-        logger.debug("Dealing with unknown film of type %s", self.type)
+                                      (season == self.latest_season + 1 and episode == 1)) # First episode of new season
+        logger.debug("Dealing with unknown film %s of type %s", self.inclusive_title(), self.type)
         return False
     
     def is_newer(self, season=0, episode=0):
@@ -135,7 +135,7 @@ class IMDBMovie(object):
         @return: tuple of season and episode, episode of zero means entire season
         """
         if not self.is_series():
-            return
+            return None
         if self.latest_season == 0: # Initial value
             return (1, 0)
         if self.latest_episode == 0: # First episode of the season
@@ -145,8 +145,11 @@ class IMDBMovie(object):
         # Within two weeks odds are very high that we're in the same season still
         if self.time_downloaded + timedelta(days=15) > datetime.utcnow(): 
             return (self.latest_season, self.latest_episode + 1)
-        if random.random() < 0.25: # Allow chance that we're in the next season
+        chance = random.random()
+        if chance < 0.25: # Allow chance that we're in the next season
             return (self.latest_season + 1, 0) # Search just on season
+        if chance > 0.75: # Not return anything (We don't know)
+            return None
         # else
         return (self.latest_season, self.latest_episode + 1) # Default
         
@@ -154,7 +157,10 @@ class IMDBMovie(object):
         if self.is_movie():
             return self.title
         elif self.is_series():
-            return self.title + " " + self.episode_to_string(*self.predict_next())
+            episode = self.predict_next()
+            if episode is not None:
+                return self.title + " " + self.episode_to_string(*episode)
+            return self.title # Don't know the episode
         else:
             return self.title
     

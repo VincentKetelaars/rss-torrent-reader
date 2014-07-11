@@ -10,6 +10,9 @@ MB = KB * 1024
 GB = MB * 1024
 TB = GB * 1024
 
+"""
+@return number of bytes
+"""
 def string_to_size(s):
     s = s.strip()
     m = re.match("\d+\.?\d*", s)

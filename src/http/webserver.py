@@ -209,6 +209,8 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         add_label_input_br(preferences_div, "Minimum height", 10, "min_height", preference.min_height, explanation="Minimum height for the movie's resolution (pixels)")
         add_label_input_br(preferences_div, "Minimum movie size", 10, "min_movie_size", size_to_string(preference.min_movie_size), explanation="Minimum size of the movie (e.g. 700MB or 2GB)")
         add_label_input_br(preferences_div, "Maximum movie size", 10, "max_movie_size", size_to_string(preference.max_movie_size), explanation="Maximum size of the movie (e.g. 5GB)")
+        add_label_input_br(preferences_div, "Minimum series size", 10, "min_series_size", size_to_string(preference.min_series_size), explanation="Minimum size of the series (e.g. 100MB)")
+        add_label_input_br(preferences_div, "Maximum series size", 10, "max_series_size", size_to_string(preference.max_series_size), explanation="Maximum size of the series (e.g. 5GB)")
         add_label_input_br(preferences_div, "Languages", 50, "languages", ", ".join(preference.languages), explanation="Comma separated list of languages (or acronyms) allowed to be spoken")
         add_label_input_br(preferences_div, "Subtitles", 50, "subtitles", ", ".join(preference.subtitles), explanation="Comma separated list of languages that are preferred for subtitles")
         add_label_input_br(preferences_div, "Excluded extensions", 50, "excluded_extensions", ", ".join(preference.excluded_extensions), explanation="Comma separated list of extensions that are not allowed")
@@ -290,7 +292,8 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             cfg.set_option("active", "active_url" + str(i), au)
             i += 1
         self._save_configuration(cfg, "match", ["title_not", "title_allowed", "title_pref", "not_in_desc", "min_width", 
-                                           "min_height", "min_movie_size", "max_movie_size"], form)
+                                           "min_height", "min_movie_size", "max_movie_size", "min_series_size", "max_series_size",
+                                           "languages", "subtitles", "excluded_extensions"], form)
         self._save_configuration(cfg, "webgui", ["host", "port"], form)
         cfg.set_option("handlers", "primary", "")
         cfg.set_option("handlers", "secondary", "")

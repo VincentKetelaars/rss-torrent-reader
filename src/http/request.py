@@ -134,7 +134,7 @@ class Request(object):
                 pass
         
         if charset is not None:
-            logger.debug("Content from %s has charset %s", url, charset)
+            logger.debug("Content from %s has charset %s and size %d", url, charset, len(content))
         # For now we use the utf-8 encoded python strings
 #         try:
 #             content = content.decode(charset)

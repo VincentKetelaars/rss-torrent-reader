@@ -13,7 +13,8 @@ from src.general.constants import DEFAULT_MOVIES_CSV, DEFAULT_SERIES_CSV,\
     PREFERENCE_TITLE_ALLOWED, PREFERENCE_TITLE_PREF, PREFERENCE_MIN_WIDTH,\
     PREFERENCE_MIN_HEIGHT, PREFERENCE_MIN_MOVIE_SIZE, PREFERENCE_MAX_MOVIE_SIZE,\
     PREFERENCE_LANGUAGES, PREFERENCE_SUBTITLES, DEFAULT_MISSED_CSV,\
-    CONF_DEFAULT_FILE, PREFERENCE_DESC_NOT, PREFERENCE_EXCLUDED_EXTENSIONS
+    CONF_DEFAULT_FILE, PREFERENCE_DESC_NOT, PREFERENCE_EXCLUDED_EXTENSIONS,\
+    PREFERENCE_MIN_SERIES_SIZE, PREFERENCE_MAX_SERIES_SIZE
 from src.torrent.preference import Preference
 from src.rss.active_search_params import ActiveSearchParameters
 from ConfigParser import NoSectionError
@@ -53,10 +54,12 @@ class Configuration(object):
         height = self._get_option("match", "min_height", default=PREFERENCE_MIN_HEIGHT)
         min_movie_size = self._get_option("match", "min_movie_size", default=PREFERENCE_MIN_MOVIE_SIZE)
         max_movie_size = self._get_option("match", "max_movie_size", default=PREFERENCE_MAX_MOVIE_SIZE)
+        min_series_size = self._get_option("match", "min_series_size", default=PREFERENCE_MIN_SERIES_SIZE)
+        max_series_size = self._get_option("match", "max_series_size", default=PREFERENCE_MAX_SERIES_SIZE)
         languages = self._get_option("match", "languages", PREFERENCE_LANGUAGES, is_list=True)
         subtitles = self._get_option("match", "subtitles", PREFERENCE_SUBTITLES, is_list=True)
         excluded_extensions = self._get_option("match", "excluded_extensions", default=PREFERENCE_EXCLUDED_EXTENSIONS, is_list=True)
-        return Preference(not_list, allowed_list, pref_list, not_in_desc, width, height, min_movie_size, max_movie_size, languages, subtitles, excluded_extensions)
+        return Preference(not_list, allowed_list, pref_list, not_in_desc, width, height, min_movie_size, max_movie_size, min_series_size, max_series_size, languages, subtitles, excluded_extensions)
     
     def get_handler(self, handler):
         return self._get_all_options_as_dictionary("handler_" + handler.lower())

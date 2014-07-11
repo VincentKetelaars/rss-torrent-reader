@@ -5,7 +5,8 @@ Created on Jan 11, 2014
 '''
 from src.logger import get_logger
 from src.torrent.match import Match
-from src.general.constants import FEED_WAIT, MERGER_WAIT
+from src.general.constants import FEED_WAIT, MERGER_WAIT,\
+    PREFERENCE_MAX_SERIES_SIZE, PREFERENCE_MIN_SERIES_SIZE
 import re
 from languages.api import API
 logger = get_logger(__name__)
@@ -65,7 +66,7 @@ class Decider(object):
         """
         Determine if the torrent meets the user requirements
         """
-        ttitle = torrent.title.lower()
+        ttitle = torrent.title.lower().strip()
         
         # Ensure that none of the option in not list are present
         for n in self.preference.not_list:
@@ -80,8 +81,11 @@ class Decider(object):
             return False
         
         if torrent.is_movie():
-            if torrent.size() < self.preference.min_movie_size or torrent.size() > self.preference.max_movie_size:
-                logger.debug("%s does not have the required size but %dMB", torrent.title, torrent.size() / 1024 / 1024)
+            if not self.required_size(torrent, self.preference.min_movie_size, self.preference.max_movie_size):
+                return False
+
+        else: # series
+            if not self.required_size(torrent, self.preference.min_series_size, self.preference.max_series_size):
                 return False
         
         for n in self.preference.not_in_desc:
@@ -90,13 +94,19 @@ class Decider(object):
                 return False
             
         for e in self.preference.excluded_extensions:
-            if ttitle.endswith("." + e):
+            if ttitle.endswith("." + e.lower()):
                 logger.debug("%s suggests unwanted %s extension", ttitle, e.lower())
                 return False
             if torrent.description.find(" " + e.lower() + " ") >= 0 or torrent.description.find("." + e.lower() + " ") >= 0:
                 logger.debug("Description of %s contains unwanted extension %s", torrent.title, e)
                 return False
             
+        return True
+    
+    def required_size(self, torrent, minimum, maximum):
+        if torrent.size() < minimum or torrent.size() > maximum:
+            logger.debug("%s does not have the required size but %dMB", torrent.title, torrent.size() / 1024 / 1024)
+            return False
         return True
         
     def match(self, movie, torrent):
