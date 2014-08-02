@@ -5,8 +5,7 @@ Created on Jan 11, 2014
 '''
 from src.logger import get_logger
 from src.torrent.match import Match
-from src.general.constants import FEED_WAIT, MERGER_WAIT,\
-    PREFERENCE_MAX_SERIES_SIZE, PREFERENCE_MIN_SERIES_SIZE
+from src.general.constants import FEED_WAIT
 import re
 from languages.api import API
 logger = get_logger(__name__)
@@ -17,8 +16,8 @@ class Decider(object):
     It matches the torrents with the movies and the results are pairs of compatible torrents and movies.
     '''
 
-    def __init__(self, merger, feeds, preference):
-        self.merger = merger
+    def __init__(self, movies, feeds, preference):
+        self.movies = movies
         self.feeds = feeds
         self.preference = preference
         self.languages_api = API(encoding="utf-8")
@@ -29,17 +28,16 @@ class Decider(object):
         
     def decide(self):
         self.feeds.wait(FEED_WAIT * self.feeds.num_feeds())
-        self.merger.wait(MERGER_WAIT)
         logger.info("Start deciding")
         self.results = {}
-        movies = [m for m in self.merger.movies().itervalues() if m.download]
+        movies = [m for m in self.movies.itervalues() if m.download]
         for t in self.feeds.passive_torrents():
             self.movie_matcher(t, movies)
         for c, movie in self.feeds.active_channels():
             for t in c.items:
                 self.movie_matcher(t, [movie])
                     
-        return [Match(self.merger.movies().get(k), v) for k, v in self.results.iteritems()]
+        return [Match(self.movies.get(k), v) for k, v in self.results.iteritems()]
     
     def movie_matcher(self, t, movies):
         if self.meets_requirements(t):

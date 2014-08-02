@@ -65,5 +65,6 @@ class FeedHandler(object):
         try:
             self.event.wait(timeout)
         except (KeyboardInterrupt, SystemExit):
-            logger.info("We have %d out of %d: %s" % (self._returned, len(self.threads), self.results))
+            logger.info("We have %d out of %d: %s\n\nWe lack %s" % (self._returned, len(self.threads), self.results, 
+                                                                    [t.input for t in self.threads if not t.input in self.results.keys()]))
             raise

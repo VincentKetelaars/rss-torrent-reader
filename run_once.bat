@@ -1,1 +1,1 @@
-python -m src.main
+python -m src.rss_find

@@ -9,7 +9,6 @@ from datetime import datetime
 
 from src.general.get_parse import GetParse
 from src.content.imdb_movie import IMDBMovie
-from src.http.request import Request
 
 from src.logger import get_logger
 from src.general.constants import IMDB_TIMESTAMP_FORMAT, IMDB_DEFAULT_YEAR,\
@@ -112,10 +111,11 @@ class MovieParser(GetParse):
         logger.debug("Returning %d movies", len(movies))
         return movies
         
-    def get(self, csv):
+    def get(self, csv):        
+        from src.http.imdb_request import IMDBRequest
         logger.info("IMDB CSV: %s", csv.url)
         if csv.protected():
-            request = Request(csv.url, username=csv.username, password=csv.password)
+            request = IMDBRequest(csv.url, username=csv.username, password=csv.password)
         else:
-            request = Request(csv.url)
+            request = IMDBRequest(csv.url)
         return request.imdb_csv_request()

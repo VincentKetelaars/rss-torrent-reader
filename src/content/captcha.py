@@ -12,6 +12,7 @@ from PIL import ImageEnhance
 from src.general.constants import TESSERACT_ON
 
 logger = logging.getLogger(__name__)
+logger.debug("I need CAPTCHA as well!")
 
 CAPTCHA_FILENAME = "captcha"
 CAPTCHA_EXT = ".jpg"

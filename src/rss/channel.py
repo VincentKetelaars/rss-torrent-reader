@@ -22,6 +22,9 @@ class Channel(object):
     def add_item(self, item):
         self.items.append(item)
         
+    def __repr__(self):
+        return "<Channel[%s]>" % (self.title,)
+        
 class Item(object):
 
     def __init__(self, item, title, description, category, author, link, guid, pubdate, enclosure, torrent):
