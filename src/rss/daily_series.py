@@ -29,13 +29,24 @@ class DailySeries(Thread):
         self.event.set()
         
     def serie_to_content(self, serie):
-        return (serie["Name"]["text"], int(serie["Season"]["text"]), int(serie["Episode"]["text"]))
+        try:
+            return (serie["Name"]["text"], int(serie["Season"]["text"]), int(serie["Episode"]["text"]))
+        except ValueError:
+            logger.exception("Couldn't parse %s and %s to ints", serie["Season"]["text"], serie["Episode"]["text"])
+        return (serie["Name"]["text"], 0, 0)
         
     def series(self):
         if len(self.results.items()) == 0:
             return []
-        series = self.results["results"]["Series"]
-        series_info = [Movie(*self.serie_to_content(serie)) for serie in series]
+        series_info = []
+        try:
+            series = self.results["results"]["Series"]
+            for serie in series:
+                name, season, episode = self.serie_to_content(serie)
+                if season > 0:
+                    series_info.append(Movie(name, season, episode))
+        except:
+            logger.exception("Error in handling daily series")
         logger.info("Today %d series have a new episode", len(series_info))
         return series_info
     
