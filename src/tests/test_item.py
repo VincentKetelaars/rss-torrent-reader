@@ -98,6 +98,12 @@ class TestItem(unittest.TestCase):
         self.assertTrue(item.is_series())
         self.assertEqual(item.episode(), (7,0))
         
+        title = "dominion.2014.s01e06.1080p.ac3.nl.subs.web.dl.nlu002"
+        item = MockItem(title, "")
+        self.assertEqual(item.film_title(), "dominion")
+        self.assertTrue(item.is_series())
+        self.assertEqual(item.episode(), (1,6))
+        
     def test_parsing_title_movie(self):        
         title = "The Counselor 2013 UNRATED EXTENDED 1080p BluRay AVC DTS HD MA 5 1 PublicHD"
         item = MockItem(title, "")

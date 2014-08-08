@@ -113,8 +113,8 @@ class Item(object):
         Title Episode Episode_title Resolution ....
         """
         ndtitle = self.title.replace(".", " ")
-        series = re.search("\s((S(\d{2})\-?)+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?((\d{1,2}),?)+)(\s|$)", ndtitle, re.IGNORECASE)
-        movies = re.search("\s?(\*?{?\[?\(?(\d{4})\)?\]?}?|720p|1080p|HDTV|dvd(rip)?|brrip)\s?", ndtitle[3:], re.IGNORECASE)
+        series = re.search(r"\s((S(\d{2})\-?)+(E(\d{2}\-?)+)*|(\d{1,2})x(\d{2})|season\s(\d+\-)?((\d{1,2}),?)+)(\s|$)", ndtitle, re.IGNORECASE)
+        movies = re.search(r"\s?(\*?{?\[?\(?(\d{4})\)?\]?}?|720p|1080p|HDTV|dvd(rip)?|brrip)\s?", ndtitle[3:], re.IGNORECASE)
         if series:
             self._series = True
             index = ndtitle.find(series.group(1).strip())
@@ -146,9 +146,14 @@ class Item(object):
         else:
             logger.warning("Can't parse this title: %s", self.title)
         if self._film_title is not None:
-            torrent = re.search("\[?torrent\]?", self._film_title, re.IGNORECASE)
+            torrent = re.search(r"\[?torrent\]?", self._film_title, re.IGNORECASE)
             if torrent:
                 self._film_title = self._film_title.replace(torrent.group(0), "").strip()
+            if len(self._film_title) > 8: # In case it looks like this: "xxx yyyy", so we assume a movie length of at least 3
+                year = re.search(r"(\s\d{4})$", self._film_title)
+                if year:
+                    self._film_year = int(year.group(0))
+                    self._film_title = self._film_title.replace(year.group(0), "").strip()
         self._update_resolution(self.title)
         
     def _parse_description(self):
@@ -157,7 +162,7 @@ class Item(object):
         self._update_size(description)
                     
     def _update_resolution(self, text):
-        resolutions = re.findall("(\d{3,4})[x*](\d{3,4})", text, re.IGNORECASE)
+        resolutions = re.findall(r"(\d{3,4})[x*](\d{3,4})", text, re.IGNORECASE)
         resolution = RESOLUTION_ZERO
         for r in resolutions:
             width = int(r[0])
@@ -168,7 +173,7 @@ class Item(object):
         if resolution != RESOLUTION_ZERO:
             self._resolution = resolution
         if self._resolution == RESOLUTION_ZERO:
-            resolution = re.findall("(720p|1080p|HDTV|B[RD]RIP|BLURAY|dvd(rip)?)", text, re.IGNORECASE)        
+            resolution = re.findall(r"(720p|1080p|HDTV|B[RD]RIP|BLURAY|dvd(rip)?)", text, re.IGNORECASE)        
             for r in resolution: # Could be multiple indicators in the string
                 v = self._get_resolution_from_string(r[0])
                 # Let's trust the torrent with the highest indicator winning
@@ -190,7 +195,7 @@ class Item(object):
             return RESOLUTION_ZERO
         
     def _update_size(self, s):
-        size_parse = "\d+\.?\d*\s*[KMGT]B"
+        size_parse = r"\d+\.?\d*\s*[KMGT]B"
         match = re.search(size_parse, s, re.IGNORECASE)
         if match:
             if self._size <= 50000: # Movies / Series are bigger than this, so any value below this is either in KB or bullshit
