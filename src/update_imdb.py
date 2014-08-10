@@ -22,7 +22,21 @@ from src.content.write_imdb_to_csv import WriteIMDBToCsv
 from src.content.merge_imdb_csv import MergeIMDBCsv
 from src.content.imdb_read_from_file import IMDBReadFromFile
 
-def main():
+def main(args):
+    tries = 1
+    try:
+        tries = int(args[0])
+    except ValueError:
+        logger.warning("The first argument was not an integer, performing task %d time", tries)
+    for i in range(tries):
+        logger.debug("Accessing IMDB, try %d out of %d", i + 1, tries)
+        if try_access_imdb():
+            logger.info("Successfully updated the local file with IMDB watchlist")
+            break
+    else:
+        logger.info("Could not access IMDB watchlist for update")
+
+def try_access_imdb():
     conf = Configuration(get_location_from_text_file(CONF_LOCATION_FILE))
     movie_file, series_file, missed_file = conf.get_imdb_paths()
     movies_from_file = IMDBReadFromFile(movie_file).read()
@@ -31,10 +45,14 @@ def main():
     merge = MergeIMDBCsv(imdb, movies_from_file, series_from_file)
     merge.start()
     merge.wait(MERGER_WAIT)
-    # Write the updated values (ensure that downloaded torrents are assimilated as well)
+    if len(imdb.movies()) == 0:
+        return False
+
+    # Write the updated values
     writer = WriteIMDBToCsv(merge.movies(), movie_file, series_file)
     writer.start()
     logger.info("We have %d IMDB movies of which %d should be downloaded", len(imdb.movies()), len([m for m in imdb.movies().itervalues() if m.download]))
+    return True
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
