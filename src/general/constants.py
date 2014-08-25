@@ -26,7 +26,7 @@ DEFAULT_MISSED_CSV = "conf/missed.csv"
 """
 IMDB
 """
-MOVIE_TYPES = ["Feature Film", "Video", "TV Movie", "Documentary"]
+MOVIE_TYPES = ["Feature Film", "Video", "TV Movie", "Documentary", "Short Film"]
 SERIES_TYPES = ["TV Series", "Mini-Series", "TV Episode"]
 IMDB_TIMESTAMP_FORMAT = "%a %b %d %H:%M:%S %Y"
 IMDB_DEFAULT_YEAR = 1901
@@ -83,7 +83,7 @@ DEFAULT_MAX_SERIES = 5
 # The SHARE values indicate the share of the maximum number of series that may be searched for 
 # that will be used for the corresponding category. First category is from now till CATEGORIES[0] etc.
 ACTIVE_SERIES_CATEGORIES = [timedelta(days=6), timedelta(days=8), timedelta(days=30), timedelta(days=365), timedelta(days=73000)]
-ACTIVE_SERIES_SHARE = [0, 0.2, 0.4, 0.2, 0.2]
+ACTIVE_SERIES_SHARE = [0.2, 0.2, 0.2, 0.2, 0.2]
 
 """
 DOWNLOAD CHOICES
