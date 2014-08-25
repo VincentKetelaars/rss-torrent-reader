@@ -56,10 +56,17 @@ class TorrentRetriever(GetParse):
                 for a in Torrent.ATTRIBUTES:
                     te = i.find("torrent:" + a, namespaces=self.NAMESPACES)
                     if te is not None:
-                        t_dic[a] = te.text
+                        t_dic[a] = self._try_convert_to_int(te.text)
                 channel.add_item(Item(i, t, d, cat, author, l, g, p, en_dic, Torrent(t_dic)))
             return channel
         return None
+    
+    def _try_convert_to_int(self, text):
+        try:
+            return int(text)
+        except ValueError:
+            pass
+        return text
     
     def get(self, feed):
         logger.debug(feed)

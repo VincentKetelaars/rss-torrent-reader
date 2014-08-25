@@ -78,6 +78,11 @@ class Decider(object):
                          torrent.title, self.preference.min_width, self.preference.min_height, width, height)
             return False
         
+        seeders = torrent.peers()[0]
+        if  seeders != -1 and seeders < self.preference.min_seeders: # Ensure a minimal amount of seeders. Unknown values are allowed
+            logger.debug("%s does not have the required number of seeders, %d is less than %d", seeders, self.preference.min_seeders)
+            return False
+        
         if torrent.is_movie():
             if not self.required_size(torrent, self.preference.min_movie_size, self.preference.max_movie_size):
                 return False

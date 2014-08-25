@@ -11,7 +11,7 @@ class Preference(object):
     '''
 
     def __init__(self, not_list=[], allowed_list=[], pref_list=[], not_in_desc=[], min_width=0, min_height=0, min_movie_size="0MB", 
-                 max_movie_size="50GB", min_series_size="0MB", max_series_size="50GB", languages=[], subtitles=[], excluded_extensions=[]):
+                 max_movie_size="50GB", min_series_size="0MB", max_series_size="50GB", languages=[], subtitles=[], excluded_extensions=[], min_seeders=0):
         self.not_list = not_list # Should not be in title
         self.allowed_list = allowed_list # Keywords that are allowed around the title name
         self.pref_list = pref_list # Order of preference in titles
@@ -25,6 +25,7 @@ class Preference(object):
         self.languages = languages
         self.subtitles = subtitles
         self.excluded_extensions = excluded_extensions
+        self.min_seeders = min_seeders
         
     def parse_size(self, s):
         return string_to_size(s)

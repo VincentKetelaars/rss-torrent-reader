@@ -11,5 +11,5 @@ class Torrent(object):
     def __init__(self, dictionary):
         self.dict = dictionary
             
-    def get(self, key):
-        return self.dict.get(key, None)        
+    def get(self, key, default=None):
+        return self.dict.get(key, default)    

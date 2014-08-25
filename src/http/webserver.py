@@ -214,6 +214,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         add_label_input_br(preferences_div, "Languages", 50, "languages", ", ".join(preference.languages), explanation="Comma separated list of languages (or acronyms) allowed to be spoken")
         add_label_input_br(preferences_div, "Subtitles", 50, "subtitles", ", ".join(preference.subtitles), explanation="Comma separated list of languages that are preferred for subtitles")
         add_label_input_br(preferences_div, "Excluded extensions", 50, "excluded_extensions", ", ".join(preference.excluded_extensions), explanation="Comma separated list of extensions that are not allowed")
+        add_label_input_br(preferences_div, "Minimum seeders", 10, "min_seeders", preference.min_seeders, explanation="Minimum number of seeders")
         
         # Add handlers
         handler_div = add_div(form, {"id" : "handlers"})
@@ -293,7 +294,7 @@ class WebHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             i += 1
         self._save_configuration(cfg, "match", ["title_not", "title_allowed", "title_pref", "not_in_desc", "min_width", 
                                            "min_height", "min_movie_size", "max_movie_size", "min_series_size", "max_series_size",
-                                           "languages", "subtitles", "excluded_extensions"], form)
+                                           "languages", "subtitles", "excluded_extensions", "min_seeders"], form)
         self._save_configuration(cfg, "webgui", ["host", "port"], form)
         cfg.set_option("handlers", "primary", "")
         cfg.set_option("handlers", "secondary", "")

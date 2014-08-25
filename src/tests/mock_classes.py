@@ -6,21 +6,9 @@ Created on Jan 19, 2014
 from datetime import datetime
 
 from src.content.imdb_movie import IMDBMovie
-from src.content.merge_imdb_csv import MergeIMDBCsv
 from src.rss.feed_handler import FeedHandler
 from src.rss.channel import Item, Channel
 from src.torrent.match_handler import MatchHandler
-
-class MockMerger(MergeIMDBCsv):
-    
-    def __init__(self, movies):
-        self.m = movies
-        
-    def wait(self, timeout):
-        return
-    
-    def movies(self):
-        return self.m
 
 class MockTorrentFeed(FeedHandler):
 
@@ -53,8 +41,8 @@ class MockTorrent(Item):
     
 class MockItem(Item):
     
-    def __init__(self, title, description):
-        Item.__init__(self, None, title, description, None, None, None, None, None, {}, None)
+    def __init__(self, title, description, torrent=None):
+        Item.__init__(self, None, title, description, None, None, None, None, None, {}, torrent)
         
 class MockChannel(Channel):
     

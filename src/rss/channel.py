@@ -104,6 +104,14 @@ class Item(object):
         """                    
         return self._resolution
     
+    def peers(self):
+        """
+        @return: (seeders, leechers) or (-1, -1)
+        """
+        if self.torrent is None:
+            return (-1, -1)
+        return (self.torrent.get("seeds", -1), self.torrent.get("peers", -1))
+    
     def _parse_title(self):
         """
         Common title structures:
